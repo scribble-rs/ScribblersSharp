@@ -370,6 +370,12 @@ namespace ScribbleRSSharp
         }
 
         /// <summary>
+        /// Send start game (asynchronous)
+        /// </summary>
+        /// <returns>Task</returns>
+        public Task SendStartGameAsync() => SendWebSocketMessageAsync(new GameStartSendGameMessageData());
+
+        /// <summary>
         /// Clear drawing board (asynchronous)
         /// </summary>
         /// <returns>Task</returns>

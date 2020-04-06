@@ -111,6 +111,12 @@ namespace ScribbleRSSharp
         IReadOnlyList<Player> Players { get; }
 
         /// <summary>
+        /// Send start game (asynchronous)
+        /// </summary>
+        /// <returns>Task</returns>
+        Task SendStartGameAsync();
+
+        /// <summary>
         /// Clear drawing board (asynchronous)
         /// </summary>
         /// <returns>Task</returns>
