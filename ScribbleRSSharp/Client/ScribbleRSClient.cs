@@ -14,14 +14,27 @@ using System.Threading.Tasks;
 namespace ScribblersSharp
 {
     /// <summary>
-    /// scribble.rs client
+    /// Scribble.rs client
     /// </summary>
-    public class ScribbleRSClient : IDisposable
+    public class ScribblersClient : IDisposable
     {
+        /// <summary>
+        /// Cookie container
+        /// </summary>
+        private CookieContainer cookieContainer = new CookieContainer();
+
         /// <summary>
         /// HTTP client
         /// </summary>
-        private HttpClient httpClient = new HttpClient();
+        private HttpClient httpClient;
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public ScribblersClient()
+        {
+            httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer });
+        }
 
         /// <summary>
         /// Post HTTP (asynchronous)
@@ -30,9 +43,10 @@ namespace ScribblersSharp
         /// <param name="requestURI">Request URI</param>
         /// <param name="request">Request</param>
         /// <returns>Response if successful, otherwise "null"</returns>
-        private async Task<T> PostHTTPAsync<T>(Uri requestURI, IRequestData<T> request) where T : IResponseData
+        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IRequestData<T> request) where T : IResponseData
         {
-            T ret = default;
+            ResponseWithUserSessionCookie<T> ret = default;
+            string user_session_cookie = string.Empty;
             using (MemoryStream memory_stream = new MemoryStream())
             {
                 await JsonSerializer.SerializeAsync(memory_stream, request);
@@ -43,7 +57,18 @@ namespace ScribblersSharp
                     {
                         if (response.StatusCode == HttpStatusCode.OK)
                         {
-                            ret = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync());
+                            CookieCollection cookie_collection = cookieContainer.GetCookies(requestURI);
+                            if (cookie_collection != null)
+                            {
+                                foreach (Cookie cookie in cookie_collection)
+                                {
+                                    if (cookie.Name == "Usersession")
+                                    {
+                                        user_session_cookie = cookie.Value;
+                                    }
+                                }
+                            }
+                            ret = new ResponseWithUserSessionCookie<T>(await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync()), user_session_cookie);
                         }
                     }
                 }
@@ -79,13 +104,15 @@ namespace ScribblersSharp
             ILobby ret = null;
             Uri http_host_uri = new Uri("https://" + host);
             Uri web_socket_host_uri = new Uri("wss://" + host);
-            EnterLobbyResponseData response = await PostHTTPAsync(new Uri(http_host_uri, "/v1/enterLobby"), new EnterLobbyRequestData(uuid, username));
-            if (response != null)
+            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync(new Uri(http_host_uri, "/v1/enterLobby"), new EnterLobbyRequestData(uuid, username));
+            if (response_with_user_session_cookie.Response != null)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
+                client_web_socket.Options.SetRequestHeader("lobby_id", response_with_user_session_cookie.UserSessionCookie);
                 await client_web_socket.ConnectAsync(web_socket_host_uri, default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
+                    EnterLobbyResponseData response = response_with_user_session_cookie.Response;
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else
@@ -161,13 +188,15 @@ namespace ScribblersSharp
                 }
                 custom_words[index] = custom_word;
             });
-            CreateLobbyResponseData response = await PostHTTPAsync(new Uri(http_host_uri, "/v1/lobby"), new CreateLobbyRequestData(username, language, maximalPlayers, drawingTime, rounds, custom_words, customWordsChance, enableVotekick, clientsPerIPLimit));
-            if (response != null)
+            ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync(new Uri(http_host_uri, "/v1/lobby"), new CreateLobbyRequestData(username, language, maximalPlayers, drawingTime, rounds, custom_words, customWordsChance, enableVotekick, clientsPerIPLimit));
+            if (response_with_user_session_cookie.Response != null)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
+                client_web_socket.Options.SetRequestHeader("lobby_id", response_with_user_session_cookie.UserSessionCookie);
                 await client_web_socket.ConnectAsync(web_socket_host_uri, default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
+                    CreateLobbyResponseData response = response_with_user_session_cookie.Response;
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else
