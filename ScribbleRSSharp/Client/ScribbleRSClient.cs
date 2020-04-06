@@ -1,4 +1,4 @@
-﻿using ScribbleRSSharp.Data;
+﻿using ScribblersSharp.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,9 +9,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 /// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// scribble.rs client

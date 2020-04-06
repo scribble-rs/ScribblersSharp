@@ -1,7 +1,7 @@
 ﻿/// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// Word hint structure

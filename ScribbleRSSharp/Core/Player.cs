@@ -1,9 +1,9 @@
 ﻿using System;
 
 /// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// Player structure

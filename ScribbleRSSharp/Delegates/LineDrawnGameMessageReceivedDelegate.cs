@@ -2,9 +2,9 @@
 using System.Numerics;
 
 /// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// Line drawn game message received delegate

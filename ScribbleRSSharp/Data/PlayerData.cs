@@ -1,11 +1,11 @@
-﻿using ScribbleRSSharp.JSONConverters;
+﻿using ScribblersSharp.JSONConverters;
 using System;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// scribble.rs # data namespace
+/// Scribble.rs ♯ data namespace
 /// </summary>
-namespace ScribbleRSSharp.Data
+namespace ScribblersSharp.Data
 {
     /// <summary>
     /// Player data class

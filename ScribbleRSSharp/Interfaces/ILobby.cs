@@ -6,9 +6,9 @@ using System.Numerics;
 using System.Threading.Tasks;
 
 /// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// Lobby interface

@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 /// <summary>
-/// scribble.rs # JSON converters namespace
+/// Scribble.rs ♯ JSON converters namespace
 /// </summary>
-namespace ScribbleRSSharp.JSONConverters
+namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
     /// Color JSON converter class

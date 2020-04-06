@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
 /// <summary>
-/// scribble.rs # namespace
+/// Scribble.rs ♯ namespace
 /// </summary>
-namespace ScribbleRSSharp
+namespace ScribblersSharp
 {
     /// <summary>
     /// Update word hints game message received delegate

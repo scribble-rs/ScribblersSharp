@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// scribble.rs # data namespace
+/// Scribble.rs ♯ data namespace
 /// </summary>
-namespace ScribbleRSSharp.Data
+namespace ScribblersSharp.Data
 {
     /// <summary>
     /// Enter lobby request data class

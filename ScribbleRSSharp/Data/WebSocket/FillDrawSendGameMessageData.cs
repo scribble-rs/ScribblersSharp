@@ -1,9 +1,9 @@
 ﻿using System.Drawing;
 
 /// <summary>
-/// scribble.rs # data namespace
+/// Scribble.rs ♯ data namespace
 /// </summary>
-namespace ScribbleRSSharp.Data
+namespace ScribblersSharp.Data
 {
     /// <summary>
     /// Fill draw send game message data class

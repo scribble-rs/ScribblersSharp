@@ -1,7 +1,7 @@
 ﻿/// <summary>
-/// scribble.rs # data namespace
+/// Scribble.rs ♯ data namespace
 /// </summary>
-namespace ScribbleRSSharp.Data
+namespace ScribblersSharp.Data
 {
     /// <summary>
     /// Update word hints receive game message data class

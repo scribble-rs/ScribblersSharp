@@ -3,9 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// scribble.rs # JSON converters namespace
+/// Scribble.rs ♯ JSON converters namespace
 /// </summary>
-namespace ScribbleRSSharp.JSONConverters
+namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
     /// Player state JSON converter class
