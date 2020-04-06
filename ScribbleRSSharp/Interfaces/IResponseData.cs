@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-/// <summary>
+﻿/// <summary>
 /// scribble.rs # namespace
 /// </summary>
 namespace ScribbleRSSharp
 {
+    /// <summary>
+    /// Response data interface
+    /// </summary>
     internal interface IResponseData
     {
         // ...

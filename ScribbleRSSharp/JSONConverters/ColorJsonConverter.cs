@@ -10,10 +10,23 @@ using System.Text.RegularExpressions;
 /// </summary>
 namespace ScribbleRSSharp.JSONConverters
 {
-    internal class ColorJsonConverter : JsonConverter<Color>
+    /// <summary>
+    /// Color JSON converter class
+    /// </summary>
+    internal class ColorJSONConverter : JsonConverter<Color>
     {
+        /// <summary>
+        /// Color regular expression
+        /// </summary>
         public static readonly Regex colorRegex = new Regex(@"#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
 
+        /// <summary>
+        /// Read JSON
+        /// </summary>
+        /// <param name="reader">JSON reader</param>
+        /// <param name="typeToConvert">Type to convert</param>
+        /// <param name="options">JSON serializer options</param>
+        /// <returns></returns>
         public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Color ret = Color.Black;
@@ -31,6 +44,12 @@ namespace ScribbleRSSharp.JSONConverters
             return ret;
         }
 
+        /// <summary>
+        /// Write JSON
+        /// </summary>
+        /// <param name="writer">JSON writer</param>
+        /// <param name="value">Value</param>
+        /// <param name="options">JSON serializer options</param>
         public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2"));

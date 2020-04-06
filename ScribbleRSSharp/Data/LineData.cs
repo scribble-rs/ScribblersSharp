@@ -40,7 +40,7 @@ namespace ScribbleRSSharp.Data
         /// Line color
         /// </summary>
         [JsonPropertyName("color")]
-        [JsonConverter(typeof(ColorJsonConverter))]
+        [JsonConverter(typeof(ColorJSONConverter))]
         public Color Color { get; set; }
 
         /// <summary>
