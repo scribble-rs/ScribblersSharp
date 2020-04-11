@@ -13,7 +13,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Player ID
         /// </summary>
-        public uint ID { get; }
+        public string ID { get; }
 
         /// <summary>
         /// Player name
@@ -55,8 +55,12 @@ namespace ScribblersSharp
         /// <param name="lastScore">Player last score</param>
         /// <param name="rank">Player rank</param>
         /// <param name="state">Player state</param>
-        internal Player(uint id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
+        internal Player(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));

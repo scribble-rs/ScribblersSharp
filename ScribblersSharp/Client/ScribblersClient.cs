@@ -1,10 +1,10 @@
 ﻿using ScribblersSharp.Data;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -18,6 +18,16 @@ namespace ScribblersSharp
     /// </summary>
     public class ScribblersClient : IDisposable
     {
+        /// <summary>
+        /// HTTP protocol
+        /// </summary>
+        private static readonly string httpProtocol = "http";
+
+        /// <summary>
+        /// WebSocket protocol
+        /// </summary>
+        private static readonly string webSocketProtocol = "ws";
+
         /// <summary>
         /// Cookie container
         /// </summary>
@@ -39,38 +49,22 @@ namespace ScribblersSharp
         /// <summary>
         /// Post HTTP (asynchronous)
         /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
         /// <param name="requestURI">Request URI</param>
-        /// <param name="request">Request</param>
+        /// <param name="parameters">Parameters</param>
         /// <returns>Response if successful, otherwise "null"</returns>
-        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IRequestData<T> request) where T : IResponseData
+        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IReadOnlyDictionary<string, string> parameters) where T : IResponseData
         {
             ResponseWithUserSessionCookie<T> ret = default;
             string user_session_cookie = string.Empty;
-            using (MemoryStream memory_stream = new MemoryStream())
+            using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, new FormUrlEncodedContent(parameters)))
             {
-                await JsonSerializer.SerializeAsync(memory_stream, request);
-                memory_stream.Seek(0L, SeekOrigin.Begin);
-                using (StreamContent stream_content = new StreamContent(memory_stream))
+                if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, stream_content))
-                    {
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            CookieCollection cookie_collection = cookieContainer.GetCookies(requestURI);
-                            if (cookie_collection != null)
-                            {
-                                foreach (Cookie cookie in cookie_collection)
-                                {
-                                    if (cookie.Name == "Usersession")
-                                    {
-                                        user_session_cookie = cookie.Value;
-                                    }
-                                }
-                            }
-                            ret = new ResponseWithUserSessionCookie<T>(await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync()), user_session_cookie);
-                        }
-                    }
+                    ret = new ResponseWithUserSessionCookie<T>(JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync()), user_session_cookie);
+                }
+                else
+                {
+                    Console.Error.WriteLine(await response.Content.ReadAsStringAsync());
                 }
             }
             return ret;
@@ -80,18 +74,18 @@ namespace ScribblersSharp
         /// Enter lobby (asynchronous)
         /// </summary>
         /// <param name="host">Host</param>
-        /// <param name="uuid">UUID</param>
+        /// <param name="lobbyID">Lobby ID</param>
         /// <param name="username">Username</param>
         /// <returns>Lobby task</returns>
-        public async Task<ILobby> EnterLobbyAsync(string host, string uuid, string username)
+        public async Task<ILobby> EnterLobbyAsync(string host, string lobbyID, string username)
         {
             if (host == null)
             {
                 throw new ArgumentNullException(nameof(host));
             }
-            if (uuid == null)
+            if (lobbyID == null)
             {
-                throw new ArgumentNullException(nameof(uuid));
+                throw new ArgumentNullException(nameof(lobbyID));
             }
             if (username == null)
             {
@@ -102,17 +96,21 @@ namespace ScribblersSharp
                 throw new ArgumentException("Username must be between " + Rules.minimalUsernameLength + " and " + Rules.maximalUsernameLength + " characters.");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri("https://" + host);
-            Uri web_socket_host_uri = new Uri("wss://" + host);
-            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync(new Uri(http_host_uri, "/v1/enterLobby"), new EnterLobbyRequestData(uuid, username));
-            if (response_with_user_session_cookie.Response != null)
+            Uri http_host_uri = new Uri(httpProtocol + "://" + host);
+            Uri web_socket_host_uri = new Uri(webSocketProtocol + "://" + host);
+            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<EnterLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby/player?lobby_id=" + Uri.EscapeUriString(lobbyID)), new Dictionary<string, string>
+            {
+                { "lobby_id", lobbyID },
+                { "username", username }
+            });
+            EnterLobbyResponseData response = response_with_user_session_cookie.Response;
+            if (response != null)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
-                client_web_socket.Options.SetRequestHeader("lobby_id", response_with_user_session_cookie.UserSessionCookie);
-                await client_web_socket.ConnectAsync(web_socket_host_uri, default);
+                client_web_socket.Options.Cookies = cookieContainer;
+                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, "/v1/ws?lobby_id=" + Uri.EscapeUriString(response.LobbyID)), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    EnterLobbyResponseData response = response_with_user_session_cookie.Response;
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else
@@ -176,8 +174,8 @@ namespace ScribblersSharp
                 throw new ArgumentException("Clients per IP limit must be between " + Rules.minimalClientsPerIPLimit + " and " + Rules.maximalClientsPerIPLimit + ".");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri("https://" + host);
-            Uri web_socket_host_uri = new Uri("wss://" + host);
+            Uri http_host_uri = new Uri(httpProtocol + "://" + host);
+            Uri web_socket_host_uri = new Uri(webSocketProtocol + "://" + host);
             string[] custom_words = new string[customWords.Count];
             Parallel.For(0, custom_words.Length, (index) =>
             {
@@ -188,15 +186,41 @@ namespace ScribblersSharp
                 }
                 custom_words[index] = custom_word;
             });
-            ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync(new Uri(http_host_uri, "/v1/lobby"), new CreateLobbyRequestData(username, language, maximalPlayers, drawingTime, rounds, custom_words, customWordsChance, enableVotekick, clientsPerIPLimit));
-            if (response_with_user_session_cookie.Response != null)
+            StringBuilder custom_words_builder = new StringBuilder();
+            bool first = true;
+            foreach (string custom_word in customWords)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    custom_words_builder.Append(",");
+                }
+                custom_words_builder.Append(custom_word);
+            }
+            ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<CreateLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby"), new Dictionary<string, string>
+            {
+                { "username", username },
+                { "language", language.ToString().ToLower() },
+                { "max_players", maximalPlayers.ToString() },
+                { "drawing_time", drawingTime.ToString() },
+                { "rounds", rounds.ToString() },
+                { "custom_words", custom_words_builder.ToString() },
+                { "custom_words_chance", customWordsChance.ToString() },
+                { "enable_votekick", enableVotekick.ToString() },
+                { "clients_per_ip_limit", clientsPerIPLimit.ToString() }
+            });
+            custom_words_builder.Clear();
+            CreateLobbyResponseData response = response_with_user_session_cookie.Response;
+            if (response != null)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
-                client_web_socket.Options.SetRequestHeader("lobby_id", response_with_user_session_cookie.UserSessionCookie);
-                await client_web_socket.ConnectAsync(web_socket_host_uri, default);
+                client_web_socket.Options.Cookies = cookieContainer;
+                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, "/v1/ws?lobby_id=" + Uri.EscapeUriString(response.LobbyID)), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    CreateLobbyResponseData response = response_with_user_session_cookie.Response;
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else

@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// ENter lobby response data class
+    /// Enter lobby response data class
     /// </summary>
     internal class EnterLobbyResponseData : IResponseData
     {

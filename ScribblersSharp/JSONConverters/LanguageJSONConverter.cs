@@ -8,9 +8,9 @@ using System.Text.Json.Serialization;
 namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
-    /// Player state JSON converter class
+    /// Color JSON converter class
     /// </summary>
-    internal class PlayerStateJSONConverter : JsonConverter<EPlayerState>
+    internal class LanguageJSONConverter : JsonConverter<ELanguage>
     {
         /// <summary>
         /// Read JSON
@@ -18,22 +18,22 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="reader">JSON reader</param>
         /// <param name="typeToConvert">Type to convert</param>
         /// <param name="options">JSON serializer options</param>
-        /// <returns>Player state</returns>
-        public override EPlayerState Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        /// <returns>Language</returns>
+        public override ELanguage Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            EPlayerState ret = EPlayerState.Standby;
+            ELanguage ret = ELanguage.English;
             if (reader.TokenType == JsonTokenType.String)
             {
                 switch (reader.GetString())
                 {
-                    case "standby":
-                        ret = EPlayerState.Standby;
+                    case "english":
+                        ret = ELanguage.English;
                         break;
-                    case "drawing":
-                        ret = EPlayerState.Drawing;
+                    case "italian":
+                        ret = ELanguage.Italian;
                         break;
-                    case "guessing":
-                        ret = EPlayerState.Guessing;
+                    case "german":
+                        ret = ELanguage.German;
                         break;
                 }
             }
@@ -46,7 +46,7 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="writer">JSON writer</param>
         /// <param name="value">Value</param>
         /// <param name="options">JSON serializer options</param>
-        public override void Write(Utf8JsonWriter writer, EPlayerState value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, ELanguage value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(value.ToString().ToLower());
         }

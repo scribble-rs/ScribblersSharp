@@ -26,7 +26,7 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="reader">JSON reader</param>
         /// <param name="typeToConvert">Type to convert</param>
         /// <param name="options">JSON serializer options</param>
-        /// <returns></returns>
+        /// <returns>Color</returns>
         public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Color ret = Color.Black;

@@ -14,7 +14,7 @@ namespace ScribblersSharp.Data
         /// Player ID
         /// </summary>
         [JsonPropertyName("playerId")]
-        public uint PlayerID { get; set; }
+        public string PlayerID { get; set; }
 
         /// <summary>
         /// Is player drawing
@@ -38,7 +38,7 @@ namespace ScribblersSharp.Data
         /// Round end time
         /// </summary>
         [JsonPropertyName("roundEndTime")]
-        public ulong RoundEndTime { get; set; }
+        public long RoundEndTime { get; set; }
 
         /// <summary>
         /// Word hints

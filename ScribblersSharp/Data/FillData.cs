@@ -32,6 +32,14 @@ namespace ScribblersSharp.Data
         public Color Color { get; set; }
 
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public FillData()
+        {
+            // ...
+        }
+
+        /// <summary>
         /// COnstructor
         /// </summary>
         /// <param name="x">X</param>

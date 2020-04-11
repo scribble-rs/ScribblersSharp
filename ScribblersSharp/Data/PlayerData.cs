@@ -16,7 +16,7 @@ namespace ScribblersSharp.Data
         /// Player ID
         /// </summary>
         [JsonPropertyName("id")]
-        public uint ID { get; set; }
+        public string ID { get; set; }
 
         /// <summary>
         /// Player name
@@ -56,6 +56,14 @@ namespace ScribblersSharp.Data
         public EPlayerState State { get; set; }
 
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public PlayerData()
+        {
+            // ...
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="id">Player ID</param>
@@ -65,8 +73,12 @@ namespace ScribblersSharp.Data
         /// <param name="lastScore">Last player score</param>
         /// <param name="rank">Player rank</param>
         /// <param name="state">Player state</param>
-        public PlayerData(uint id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
+        public PlayerData(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));

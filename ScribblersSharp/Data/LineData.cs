@@ -50,6 +50,14 @@ namespace ScribblersSharp.Data
         public float LineWidth { get; set; }
 
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public LineData()
+        {
+            // ...
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fromX">Line from X</param>

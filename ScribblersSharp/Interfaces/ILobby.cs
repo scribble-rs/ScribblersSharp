@@ -76,9 +76,29 @@ namespace ScribblersSharp
         WebSocketState WebSocketState { get; }
 
         /// <summary>
+        /// Lobby ID
+        /// </summary>
+        string LobbyID { get; }
+
+        /// <summary>
+        /// Username
+        /// </summary>
+        string Username { get; }
+
+        /// <summary>
+        /// Drawing board base width
+        /// </summary>
+        uint DrawingBoardBaseWidth { get; }
+
+        /// <summary>
+        /// Drawing board base height
+        /// </summary>
+        uint DrawingBoardBaseHeight { get; }
+
+        /// <summary>
         /// Player ID
         /// </summary>
-        uint PlayerID { get; }
+        string PlayerID { get; }
 
         /// <summary>
         /// Is player drawing
@@ -98,7 +118,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Round end time
         /// </summary>
-        ulong RoundEndTime { get; }
+        long RoundEndTime { get; }
 
         /// <summary>
         /// Word hints

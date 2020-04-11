@@ -23,6 +23,14 @@ namespace ScribblersSharp.Data
         public bool Underline { get; set; }
 
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public WordHintData()
+        {
+            // ...
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="character">Character</param>
