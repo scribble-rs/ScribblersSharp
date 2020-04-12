@@ -23,20 +23,17 @@ namespace ScribblersSharp.JSONConverters
         public override EPlayerState ReadJson(JsonReader reader, Type objectType, EPlayerState existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             EPlayerState ret = existingValue;
-            if (reader.TokenType == JsonToken.String)
+            switch (reader.Value.ToString())
             {
-                switch (reader.ReadAsString())
-                {
-                    case "standby":
-                        ret = EPlayerState.Standby;
-                        break;
-                    case "drawing":
-                        ret = EPlayerState.Drawing;
-                        break;
-                    case "guessing":
-                        ret = EPlayerState.Guessing;
-                        break;
-                }
+                case "standby":
+                    ret = EPlayerState.Standby;
+                    break;
+                case "drawing":
+                    ret = EPlayerState.Drawing;
+                    break;
+                case "guessing":
+                    ret = EPlayerState.Guessing;
+                    break;
             }
             return ret;
         }

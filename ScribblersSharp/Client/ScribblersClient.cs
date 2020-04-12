@@ -57,16 +57,25 @@ namespace ScribblersSharp
         {
             ResponseWithUserSessionCookie<T> ret = default;
             string user_session_cookie = string.Empty;
-            using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, new FormUrlEncodedContent(parameters)))
+            try
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, new FormUrlEncodedContent(parameters)))
                 {
-                    ret = new ResponseWithUserSessionCookie<T>(JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync()), user_session_cookie);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        string json = await response.Content.ReadAsStringAsync();
+                        ret = new ResponseWithUserSessionCookie<T>(JsonConvert.DeserializeObject<T>(json), user_session_cookie);
+                    }
+                    else
+                    {
+                        string error = await response.Content.ReadAsStringAsync();
+                        Console.Error.WriteLine(error);
+                    }
                 }
-                else
-                {
-                    Console.Error.WriteLine(await response.Content.ReadAsStringAsync());
-                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
             }
             return ret;
         }

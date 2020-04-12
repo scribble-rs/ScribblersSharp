@@ -23,20 +23,17 @@ namespace ScribblersSharp.JSONConverters
         public override ELanguage ReadJson(JsonReader reader, Type objectType, ELanguage existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             ELanguage ret = existingValue;
-            if (reader.TokenType == JsonToken.String)
+            switch (reader.Value.ToString())
             {
-                switch (reader.ReadAsString())
-                {
-                    case "english":
-                        ret = ELanguage.English;
-                        break;
-                    case "italian":
-                        ret = ELanguage.Italian;
-                        break;
-                    case "german":
-                        ret = ELanguage.German;
-                        break;
-                }
+                case "english":
+                    ret = ELanguage.English;
+                    break;
+                case "italian":
+                    ret = ELanguage.Italian;
+                    break;
+                case "german":
+                    ret = ELanguage.German;
+                    break;
             }
             return ret;
         }

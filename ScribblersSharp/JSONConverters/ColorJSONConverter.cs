@@ -31,15 +31,12 @@ namespace ScribblersSharp.JSONConverters
         public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             Color ret = existingValue;
-            if (reader.TokenType == JsonToken.String)
+            Match match = colorRegex.Match(reader.Value.ToString());
+            if (match.Success)
             {
-                Match match = colorRegex.Match(reader.ReadAsString());
-                if (match.Success)
+                if (match.Groups.Count == 4)
                 {
-                    if (match.Groups.Count == 4)
-                    {
-                        ret = Color.FromArgb(int.Parse(match.Groups[1].Value, NumberStyles.HexNumber), int.Parse(match.Groups[2].Value, NumberStyles.HexNumber), int.Parse(match.Groups[3].Value, NumberStyles.HexNumber));
-                    }
+                    ret = Color.FromArgb(int.Parse(match.Groups[1].Value, NumberStyles.HexNumber), int.Parse(match.Groups[2].Value, NumberStyles.HexNumber), int.Parse(match.Groups[3].Value, NumberStyles.HexNumber));
                 }
             }
             return ret;
