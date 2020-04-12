@@ -1,6 +1,6 @@
-﻿using ScribblersSharp.JSONConverters;
+﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
 using System;
-using System.Text.Json.Serialization;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -10,48 +10,49 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Player data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class PlayerData
     {
         /// <summary>
         /// Player ID
         /// </summary>
-        [JsonPropertyName("id")]
+        [JsonProperty("id")]
         public string ID { get; set; }
 
         /// <summary>
         /// Player name
         /// </summary>
-        [JsonPropertyName("name")]
+        [JsonProperty("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Player score
         /// </summary>
-        [JsonPropertyName("score")]
+        [JsonProperty("score")]
         public uint Score { get; set; }
 
         /// <summary>
         /// Is player connected
         /// </summary>
-        [JsonPropertyName("connected")]
+        [JsonProperty("connected")]
         public bool IsConnected { get; set; }
 
         /// <summary>
         /// Player last score
         /// </summary>
-        [JsonPropertyName("lastScore")]
+        [JsonProperty("lastScore")]
         public uint LastScore { get; set; }
 
         /// <summary>
         /// Player rank
         /// </summary>
-        [JsonPropertyName("rank")]
+        [JsonProperty("rank")]
         public uint Rank { get; set; }
 
         /// <summary>
         /// Player state
         /// </summary>
-        [JsonPropertyName("state")]
+        [JsonProperty("state")]
         [JsonConverter(typeof(PlayerStateJSONConverter))]
         public EPlayerState State { get; set; }
 

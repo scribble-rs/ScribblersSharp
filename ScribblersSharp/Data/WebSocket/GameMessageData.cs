@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -9,12 +9,13 @@ namespace ScribblersSharp.Data
     /// Game message data class
     /// </summary>
     /// <typeparam name="T">Game message data type</typeparam>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class GameMessageData<T> : BaseGameMessageData
     {
         /// <summary>
         /// Game message data
         /// </summary>
-        [JsonPropertyName("data")]
+        [JsonProperty("data")]
         public T Data { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,24 +8,25 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Enter lobby response data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class EnterLobbyResponseData : IResponseData
     {
         /// <summary>
         /// Lobby ID
         /// </summary>
-        [JsonPropertyName("lobbyId")]
+        [JsonProperty("lobbyId")]
         public string LobbyID { get; set; }
 
         /// <summary>
         /// Drawing board base width
         /// </summary>
-        [JsonPropertyName("drawingBoardBaseWidth")]
+        [JsonProperty("drawingBoardBaseWidth")]
         public uint DrawingBoardBaseWidth { get; set; }
 
         /// <summary>
         /// Drawing board base height
         /// </summary>
-        [JsonPropertyName("drawingBoardBaseHeight")]
+        [JsonProperty("drawingBoardBaseHeight")]
         public uint DrawingBoardBaseHeight { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,24 +8,25 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Next turn data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class NextTurnData
     {
         /// <summary>
         /// Round end time
         /// </summary>
-        [JsonPropertyName("roundEndTime")]
+        [JsonProperty("roundEndTime")]
         public ulong RoundEndTime { get; set; }
 
         /// <summary>
         /// Players
         /// </summary>
-        [JsonPropertyName("players")]
+        [JsonProperty("players")]
         public PlayerData[] Players { get; set; }
 
         /// <summary>
         /// Round
         /// </summary>
-        [JsonPropertyName("round")]
+        [JsonProperty("round")]
         public uint Round { get; set; }
     }
 }

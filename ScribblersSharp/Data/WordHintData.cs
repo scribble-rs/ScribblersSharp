@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,18 +8,19 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Word hint data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class WordHintData
     {
         /// <summary>
         /// Character
         /// </summary>
-        [JsonPropertyName("character")]
+        [JsonProperty("character")]
         public char Character { get; set; }
 
         /// <summary>
         /// Underline
         /// </summary>
-        [JsonPropertyName("underline")]
+        [JsonProperty("underline")]
         public bool Underline { get; set; }
 
         /// <summary>

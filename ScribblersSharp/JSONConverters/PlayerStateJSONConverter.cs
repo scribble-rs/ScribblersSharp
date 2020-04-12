@@ -1,6 +1,5 @@
-﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using System;
 
 /// <summary>
 /// Scribble.rs ♯ JSON converters namespace
@@ -16,15 +15,17 @@ namespace ScribblersSharp.JSONConverters
         /// Read JSON
         /// </summary>
         /// <param name="reader">JSON reader</param>
-        /// <param name="typeToConvert">Type to convert</param>
-        /// <param name="options">JSON serializer options</param>
+        /// <param name="objectType">Object type</param>
+        /// <param name="existingValue">Existing value</param>
+        /// <param name="hasExistingValue">Has existing value</param>
+        /// <param name="serializer">JSON serializer</param>
         /// <returns>Player state</returns>
-        public override EPlayerState Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override EPlayerState ReadJson(JsonReader reader, Type objectType, EPlayerState existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            EPlayerState ret = EPlayerState.Standby;
-            if (reader.TokenType == JsonTokenType.String)
+            EPlayerState ret = existingValue;
+            if (reader.TokenType == JsonToken.String)
             {
-                switch (reader.GetString())
+                switch (reader.ReadAsString())
                 {
                     case "standby":
                         ret = EPlayerState.Standby;
@@ -44,11 +45,11 @@ namespace ScribblersSharp.JSONConverters
         /// Write JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
-        /// <param name="value">Value</param>
-        /// <param name="options">JSON serializer options</param>
-        public override void Write(Utf8JsonWriter writer, EPlayerState value, JsonSerializerOptions options)
+        /// <param name="value">Player state value</param>
+        /// <param name="serializer">JSON serializer</param>
+        public override void WriteJson(JsonWriter writer, EPlayerState value, JsonSerializer serializer)
         {
-            writer.WriteStringValue(value.ToString().ToLower());
+            writer.WriteValue(value.ToString().ToLower());
         }
     }
 }

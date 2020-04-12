@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.WebSockets;
-using System.Numerics;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -151,7 +150,7 @@ namespace ScribblersSharp
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
         /// <returns>Task</returns>
-        Task SendDrawCommandAsync(EDrawCommandType type, Vector2 from, Vector2 to, Color color, float lineWidth);
+        Task SendDrawCommandAsync(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
 
         /// <summary>
         /// Send choose word (asynchronous)

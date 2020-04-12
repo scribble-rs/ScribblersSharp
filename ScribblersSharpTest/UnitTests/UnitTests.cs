@@ -98,7 +98,7 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnFillDrawnGameMessageReceived += (position, color) =>
+                lobby.OnFillDrawnGameMessageReceived += (positionX, positionY, color) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
@@ -108,7 +108,7 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnLineDrawnGameMessageReceived += (from, to, color, lineWidth) =>
+                lobby.OnLineDrawnGameMessageReceived += (fromX, fromY, toX, toY, color, lineWidth) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);

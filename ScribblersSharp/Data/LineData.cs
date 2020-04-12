@@ -1,6 +1,6 @@
-﻿using ScribblersSharp.JSONConverters;
+﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
 using System.Drawing;
-using System.Text.Json.Serialization;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -10,43 +10,44 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Line data
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class LineData
     {
         /// <summary>
         /// Line from X
         /// </summary>
-        [JsonPropertyName("fromX")]
+        [JsonProperty("fromX")]
         public float FromX { get; set; }
 
         /// <summary>
         /// Line from Y
         /// </summary>
-        [JsonPropertyName("fromY")]
+        [JsonProperty("fromY")]
         public float FromY { get; set; }
 
         /// <summary>
         /// Line to X
         /// </summary>
-        [JsonPropertyName("toX")]
+        [JsonProperty("toX")]
         public float ToX { get; set; }
 
         /// <summary>
         /// Line to Y
         /// </summary>
-        [JsonPropertyName("toY")]
+        [JsonProperty("toY")]
         public float ToY { get; set; }
 
         /// <summary>
         /// Line color
         /// </summary>
-        [JsonPropertyName("color")]
+        [JsonProperty("color")]
         [JsonConverter(typeof(ColorJSONConverter))]
         public Color Color { get; set; }
 
         /// <summary>
         /// Line width
         /// </summary>
-        [JsonPropertyName("lineWidth")]
+        [JsonProperty("lineWidth")]
         public float LineWidth { get; set; }
 
         /// <summary>

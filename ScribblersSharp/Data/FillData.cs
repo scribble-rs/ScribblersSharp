@@ -1,6 +1,6 @@
-﻿using ScribblersSharp.JSONConverters;
+﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
 using System.Drawing;
-using System.Text.Json.Serialization;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -10,24 +10,25 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Fill data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class FillData
     {
         /// <summary>
         /// Fill X
         /// </summary>
-        [JsonPropertyName("x")]
+        [JsonProperty("x")]
         public float X { get; set; }
 
         /// <summary>
         /// Fill Y
         /// </summary>
-        [JsonPropertyName("y")]
+        [JsonProperty("y")]
         public float Y { get; set; }
 
         /// <summary>
         /// Fill color
         /// </summary>
-        [JsonPropertyName("color")]
+        [JsonProperty("color")]
         [JsonConverter(typeof(ColorJSONConverter))]
         public Color Color { get; set; }
 

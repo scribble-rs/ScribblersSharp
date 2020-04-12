@@ -1,13 +1,13 @@
-﻿using ScribblersSharp.Data;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ScribblersSharp.Data;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net.WebSockets;
-using System.Numerics;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -209,13 +209,13 @@ namespace ScribblersSharp
                                     {
                                         memory_stream.Seek(0L, SeekOrigin.Begin);
                                         string json = reader.ReadToEnd();
-                                        BaseGameMessageData base_game_message = JsonSerializer.Deserialize<BaseGameMessageData>(json);
+                                        BaseGameMessageData base_game_message = JsonConvert.DeserializeObject<BaseGameMessageData>(json);
                                         if (base_game_message != null)
                                         {
                                             switch (base_game_message.Type)
                                             {
                                                 case "ready":
-                                                    ReadyReceiveGameMessageData ready_game_message = JsonSerializer.Deserialize<ReadyReceiveGameMessageData>(json);
+                                                    ReadyReceiveGameMessageData ready_game_message = JsonConvert.DeserializeObject<ReadyReceiveGameMessageData>(json);
                                                     if (ready_game_message != null)
                                                     {
                                                         ReadyData ready_data = ready_game_message.Data;
@@ -247,30 +247,35 @@ namespace ScribblersSharp
                                                             players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
                                                         });
                                                         List<DrawCommand> draw_commands = new List<DrawCommand>();
-                                                        JsonDocument json_document = JsonDocument.Parse(json);
-                                                        JsonElement json_element = json_document.RootElement;
-                                                        if (json_element.TryGetProperty("data", out json_element))
+                                                        JObject json_object = JObject.Parse(json);
+                                                        if (json_object.ContainsKey("data"))
                                                         {
-                                                            if (json_element.TryGetProperty("currentDrawing", out json_element))
+                                                            if (json_object["data"] is JObject json_data_object)
                                                             {
-                                                                foreach (JsonElement draw_command_json_element in json_element.EnumerateArray())
+                                                                if (json_data_object.ContainsKey("currentDrawing"))
                                                                 {
-                                                                    if (draw_command_json_element.ValueKind == JsonValueKind.Object)
+                                                                    if (json_data_object["currentDrawing"] is JArray json_draw_commands)
                                                                     {
-                                                                        if (draw_command_json_element.TryGetProperty("lineWidth", out _))
+                                                                        foreach (JToken json_token in json_draw_commands)
                                                                         {
-                                                                            LineData line_data = JsonSerializer.Deserialize<LineData>(draw_command_json_element.GetRawText());
-                                                                            if (line_data != null)
+                                                                            if (json_token is JObject json_draw_command)
                                                                             {
-                                                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Line, new Vector2(line_data.FromX, line_data.FromY), new Vector2(line_data.ToX, line_data.ToY), line_data.Color, line_data.LineWidth));
-                                                                            }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            FillData fill_data = JsonSerializer.Deserialize<FillData>(draw_command_json_element.GetRawText());
-                                                                            if (fill_data != null)
-                                                                            {
-                                                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, new Vector2(fill_data.X, fill_data.Y), Vector2.Zero, fill_data.Color, 0.0f));
+                                                                                if (json_draw_command.ContainsKey("lineWidth"))
+                                                                                {
+                                                                                    LineData line_data = json_draw_command.ToObject<LineData>();
+                                                                                    if (line_data != null)
+                                                                                    {
+                                                                                        draw_commands.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                                                                    }
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    FillData fill_data = json_draw_command.ToObject<FillData>();
+                                                                                    if (fill_data != null)
+                                                                                    {
+                                                                                        draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                                                                    }
+                                                                                }
                                                                             }
                                                                         }
                                                                     }
@@ -283,7 +288,7 @@ namespace ScribblersSharp
                                                     }
                                                     break;
                                                 case "next-turn":
-                                                    NextTurnReceiveGameMessageData next_turn_game_message = JsonSerializer.Deserialize<NextTurnReceiveGameMessageData>(json);
+                                                    NextTurnReceiveGameMessageData next_turn_game_message = JsonConvert.DeserializeObject<NextTurnReceiveGameMessageData>(json);
                                                     if (next_turn_game_message != null)
                                                     {
                                                         NextTurnData next_turn_data = next_turn_game_message.Data;
@@ -300,7 +305,7 @@ namespace ScribblersSharp
                                                     }
                                                     break;
                                                 case "update-players":
-                                                    UpdatePlayersReceiveGameMessageData update_players_game_message = JsonSerializer.Deserialize<UpdatePlayersReceiveGameMessageData>(json);
+                                                    UpdatePlayersReceiveGameMessageData update_players_game_message = JsonConvert.DeserializeObject<UpdatePlayersReceiveGameMessageData>(json);
                                                     if (update_players_game_message != null)
                                                     {
                                                         PlayerData[] player_array_data = update_players_game_message.Data;
@@ -317,7 +322,7 @@ namespace ScribblersSharp
                                                     }
                                                     break;
                                                 case "update-wordhint":
-                                                    UpdateWordHintsReceiveGameMessageData update_word_hints_game_message = JsonSerializer.Deserialize<UpdateWordHintsReceiveGameMessageData>(json);
+                                                    UpdateWordHintsReceiveGameMessageData update_word_hints_game_message = JsonConvert.DeserializeObject<UpdateWordHintsReceiveGameMessageData>(json);
                                                     if (update_word_hints_game_message != null)
                                                     {
                                                         WordHintData[] word_hint_array_data = update_word_hints_game_message.Data;
@@ -334,49 +339,49 @@ namespace ScribblersSharp
                                                     }
                                                     break;
                                                 case "message":
-                                                    GuessingChatMessageReceiveGameMessageData guessing_chat_message_game_message = JsonSerializer.Deserialize<GuessingChatMessageReceiveGameMessageData>(json);
+                                                    GuessingChatMessageReceiveGameMessageData guessing_chat_message_game_message = JsonConvert.DeserializeObject<GuessingChatMessageReceiveGameMessageData>(json);
                                                     if (guessing_chat_message_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(guessing_chat_message_game_message);
                                                     }
                                                     break;
                                                 case "non-guessing-player-message":
-                                                    NonGuessingChatMessageReceiveGameMessageData non_guessing_chat_message_game_message = JsonSerializer.Deserialize<NonGuessingChatMessageReceiveGameMessageData>(json);
+                                                    NonGuessingChatMessageReceiveGameMessageData non_guessing_chat_message_game_message = JsonConvert.DeserializeObject<NonGuessingChatMessageReceiveGameMessageData>(json);
                                                     if (non_guessing_chat_message_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(non_guessing_chat_message_game_message);
                                                     }
                                                     break;
                                                 case "system-message":
-                                                    SystemMessageReceiveGameMessageData system_message_game_message = JsonSerializer.Deserialize<SystemMessageReceiveGameMessageData>(json);
+                                                    SystemMessageReceiveGameMessageData system_message_game_message = JsonConvert.DeserializeObject<SystemMessageReceiveGameMessageData>(json);
                                                     if (system_message_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(system_message_game_message);
                                                     }
                                                     break;
                                                 case "line":
-                                                    LineDrawReceiveGameMessageData line_game_message = JsonSerializer.Deserialize<LineDrawReceiveGameMessageData>(json);
+                                                    LineDrawReceiveGameMessageData line_game_message = JsonConvert.DeserializeObject<LineDrawReceiveGameMessageData>(json);
                                                     if (line_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(line_game_message);
                                                     }
                                                     break;
                                                 case "fill":
-                                                    FillDrawReceiveGameMessageData fill_game_message = JsonSerializer.Deserialize<FillDrawReceiveGameMessageData>(json);
+                                                    FillDrawReceiveGameMessageData fill_game_message = JsonConvert.DeserializeObject<FillDrawReceiveGameMessageData>(json);
                                                     if (fill_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(fill_game_message);
                                                     }
                                                     break;
                                                 case "clear-drawing-board":
-                                                    ClearDrawingBoardReceiveGameMessageData clear_drawing_board_game_message = JsonSerializer.Deserialize<ClearDrawingBoardReceiveGameMessageData>(json);
+                                                    ClearDrawingBoardReceiveGameMessageData clear_drawing_board_game_message = JsonConvert.DeserializeObject<ClearDrawingBoardReceiveGameMessageData>(json);
                                                     if (clear_drawing_board_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(clear_drawing_board_game_message);
                                                     }
                                                     break;
                                                 case "your-turn":
-                                                    YourTurnReceiveGameMessageData your_turn_game_message = JsonSerializer.Deserialize<YourTurnReceiveGameMessageData>(json);
+                                                    YourTurnReceiveGameMessageData your_turn_game_message = JsonConvert.DeserializeObject<YourTurnReceiveGameMessageData>(json);
                                                     if (your_turn_game_message != null)
                                                     {
                                                         receivedGameMessages.Enqueue(your_turn_game_message);
@@ -411,7 +416,7 @@ namespace ScribblersSharp
             Task ret = Task.CompletedTask;
             if (clientWebSocket.State == WebSocketState.Open)
             {
-                ret = clientWebSocket.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(message)), WebSocketMessageType.Text, true, default);
+                ret = clientWebSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message))), WebSocketMessageType.Text, true, default);
             }
             return ret;
         }
@@ -432,21 +437,23 @@ namespace ScribblersSharp
         /// Send draw command (asynchronous)
         /// </summary>
         /// <param name="type">Draw command type</param>
-        /// <param name="from">Draw from</param>
-        /// <param name="to">Draw to</param>
+        /// <param name="fromX">Draw from X</param>
+        /// <param name="fromY">Draw from Y</param>
+        /// <param name="toX">Draw to X</param>
+        /// <param name="toY">Draw to Y</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
         /// <returns>Task</returns>
-        public Task SendDrawCommandAsync(EDrawCommandType type, Vector2 from, Vector2 to, Color color, float lineWidth)
+        public Task SendDrawCommandAsync(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
         {
             Task ret = Task.CompletedTask;
             switch (type)
             {
                 case EDrawCommandType.Fill:
-                    ret = SendWebSocketMessageAsync(new FillDrawSendGameMessageData(from.X, from.Y, color));
+                    ret = SendWebSocketMessageAsync(new FillDrawSendGameMessageData(fromX, fromY, color));
                     break;
                 case EDrawCommandType.Line:
-                    ret = SendWebSocketMessageAsync(new LineDrawSendGameMessageData(from.X, from.Y, to.X, to.Y, color, lineWidth));
+                    ret = SendWebSocketMessageAsync(new LineDrawSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
                     break;
             }
             return ret;
@@ -563,14 +570,14 @@ namespace ScribblersSharp
                         if (OnLineDrawnGameMessageReceived != null)
                         {
                             LineData line_data = line_draw_game_message.Data;
-                            OnLineDrawnGameMessageReceived(new Vector2(line_data.FromX, line_data.FromY), new Vector2(line_data.ToX, line_data.ToY), line_data.Color, line_data.LineWidth);
+                            OnLineDrawnGameMessageReceived(line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth);
                         }
                         break;
                     case FillDrawReceiveGameMessageData fill_draw_game_message:
                         if (OnFillDrawnGameMessageReceived != null)
                         {
                             FillData fill_data = fill_draw_game_message.Data;
-                            OnFillDrawnGameMessageReceived(new Vector2(fill_data.X, fill_data.Y), fill_data.Color);
+                            OnFillDrawnGameMessageReceived(fill_data.X, fill_data.Y, fill_data.Color);
                         }
                         break;
                     case ClearDrawingBoardReceiveGameMessageData _:

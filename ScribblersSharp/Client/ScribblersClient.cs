@@ -1,11 +1,11 @@
-﻿using ScribblersSharp.Data;
+﻿using Newtonsoft.Json;
+using ScribblersSharp.Data;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -44,6 +44,7 @@ namespace ScribblersSharp
         public ScribblersClient()
         {
             httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer });
+            httpClient.Timeout = TimeSpan.FromSeconds(3000.0);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace ScribblersSharp
             {
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    ret = new ResponseWithUserSessionCookie<T>(JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync()), user_session_cookie);
+                    ret = new ResponseWithUserSessionCookie<T>(JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync()), user_session_cookie);
                 }
                 else
                 {
@@ -169,7 +170,7 @@ namespace ScribblersSharp
             {
                 throw new ArgumentException("Custom words chance must be between " + Rules.minimalCustomWordsChance + " and " + Rules.maximalCustomWordsChance + ".");
             }
-            if ((clientsPerIPLimit < Rules.minimalClientsPerIPLimit) || (customWordsChance > Rules.maximalClientsPerIPLimit))
+            if ((clientsPerIPLimit < Rules.minimalClientsPerIPLimit) || (clientsPerIPLimit > Rules.maximalClientsPerIPLimit))
             {
                 throw new ArgumentException("Clients per IP limit must be between " + Rules.minimalClientsPerIPLimit + " and " + Rules.maximalClientsPerIPLimit + ".");
             }

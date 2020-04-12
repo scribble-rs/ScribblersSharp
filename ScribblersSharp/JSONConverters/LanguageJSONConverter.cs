@@ -1,6 +1,5 @@
-﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using System;
 
 /// <summary>
 /// Scribble.rs ♯ JSON converters namespace
@@ -16,15 +15,17 @@ namespace ScribblersSharp.JSONConverters
         /// Read JSON
         /// </summary>
         /// <param name="reader">JSON reader</param>
-        /// <param name="typeToConvert">Type to convert</param>
-        /// <param name="options">JSON serializer options</param>
+        /// <param name="objectType">Object type</param>
+        /// <param name="existingValue">Existing value</param>
+        /// <param name="hasExistingValue">Has existing value</param>
+        /// <param name="serializer">JSON serializer</param>
         /// <returns>Language</returns>
-        public override ELanguage Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ELanguage ReadJson(JsonReader reader, Type objectType, ELanguage existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            ELanguage ret = ELanguage.English;
-            if (reader.TokenType == JsonTokenType.String)
+            ELanguage ret = existingValue;
+            if (reader.TokenType == JsonToken.String)
             {
-                switch (reader.GetString())
+                switch (reader.ReadAsString())
                 {
                     case "english":
                         ret = ELanguage.English;
@@ -44,11 +45,11 @@ namespace ScribblersSharp.JSONConverters
         /// Write JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
-        /// <param name="value">Value</param>
-        /// <param name="options">JSON serializer options</param>
-        public override void Write(Utf8JsonWriter writer, ELanguage value, JsonSerializerOptions options)
+        /// <param name="value">Language value</param>
+        /// <param name="serializer">JSON serializer</param>
+        public override void WriteJson(JsonWriter writer, ELanguage value, JsonSerializer serializer)
         {
-            writer.WriteStringValue(value.ToString().ToLower());
+            writer.WriteValue(value.ToString().ToLower());
         }
     }
 }

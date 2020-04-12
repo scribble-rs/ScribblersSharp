@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Drawing;
 using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 /// <summary>
@@ -24,15 +23,17 @@ namespace ScribblersSharp.JSONConverters
         /// Read JSON
         /// </summary>
         /// <param name="reader">JSON reader</param>
-        /// <param name="typeToConvert">Type to convert</param>
-        /// <param name="options">JSON serializer options</param>
+        /// <param name="objectType">Object type</param>
+        /// <param name="existingValue">Existing value</param>
+        /// <param name="hasExistingValue">Has existing value</param>
+        /// <param name="serializer">JSON serializer</param>
         /// <returns>Color</returns>
-        public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            Color ret = Color.Black;
-            if (reader.TokenType == JsonTokenType.String)
+            Color ret = existingValue;
+            if (reader.TokenType == JsonToken.String)
             {
-                Match match = colorRegex.Match(reader.GetString());
+                Match match = colorRegex.Match(reader.ReadAsString());
                 if (match.Success)
                 {
                     if (match.Groups.Count == 4)
@@ -48,11 +49,11 @@ namespace ScribblersSharp.JSONConverters
         /// Write JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
-        /// <param name="value">Value</param>
-        /// <param name="options">JSON serializer options</param>
-        public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
+        /// <param name="value">Color value</param>
+        /// <param name="serializer">JSON serializer</param>
+        public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
         {
-            writer.WriteStringValue(value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2"));
+            writer.WriteValue(value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2"));
         }
     }
 }

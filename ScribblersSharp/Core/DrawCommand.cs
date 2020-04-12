@@ -17,14 +17,24 @@ namespace ScribblersSharp
         public EDrawCommandType Type { get; }
 
         /// <summary>
-        /// Draw from
+        /// Draw from X
         /// </summary>
-        public Vector2 From { get; }
+        public float FromX { get; }
 
         /// <summary>
-        /// Draw to (used for lines)
+        /// Draw from Y
         /// </summary>
-        public Vector2 To { get; }
+        public float FromY { get; }
+
+        /// <summary>
+        /// Draw to X (used for lines)
+        /// </summary>
+        public float ToX { get; }
+
+        /// <summary>
+        /// Draw to Y (used for lines)
+        /// </summary>
+        public float ToY { get; }
 
         /// <summary>
         /// Draw color
@@ -40,15 +50,19 @@ namespace ScribblersSharp
         /// Constructor
         /// </summary>
         /// <param name="type">Draw command type</param>
-        /// <param name="from">Draw from</param>
-        /// <param name="to">Draw to (used for lines)</param>
+        /// <param name="fromX">Draw from X</param>
+        /// <param name="fromY">Draw from Y</param>
+        /// <param name="toX">Draw to X (used for lines)</param>
+        /// <param name="toY">Draw to Y (used for lines)</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width (used for lines)</param>
-        internal DrawCommand(EDrawCommandType type, Vector2 from, Vector2 to, Color color, float lineWidth)
+        internal DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
         {
             Type = type;
-            From = from;
-            To = to;
+            FromX = fromX;
+            FromY = fromY;
+            ToX = toX;
+            ToY = toY;
             Color = color;
             LineWidth = lineWidth;
         }

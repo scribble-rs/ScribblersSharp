@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using Newtonsoft.Json;
+using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,6 +9,7 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Line send game message data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class LineDrawSendGameMessageData : GameMessageData<LineData>, ISendGameMessageData
     {
         /// <summary>

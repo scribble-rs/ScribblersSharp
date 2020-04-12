@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Numerics;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -9,9 +8,11 @@ namespace ScribblersSharp
     /// <summary>
     /// Line drawn game message received delegate
     /// </summary>
-    /// <param name="from">Line from</param>
-    /// <param name="to">Line to</param>
+    /// <param name="fromX">Line from X</param>
+    /// <param name="fromY">Line from Y</param>
+    /// <param name="toX">Line to X</param>
+    /// <param name="toY">Line to Y</param>
     /// <param name="color">Line color</param>
     /// <param name="lineWidth">Line width</param>
-    public delegate void LineDrawnGameMessageReceivedDelegate(Vector2 from, Vector2 to, Color color, float lineWidth);
+    public delegate void LineDrawnGameMessageReceivedDelegate(float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
 }

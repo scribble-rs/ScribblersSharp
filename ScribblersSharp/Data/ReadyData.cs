@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,48 +8,49 @@ namespace ScribblersSharp.Data
     /// <summary>
     /// Ready data class
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     internal class ReadyData
     {
         /// <summary>
         /// Player ID
         /// </summary>
-        [JsonPropertyName("playerId")]
+        [JsonProperty("playerId")]
         public string PlayerID { get; set; }
 
         /// <summary>
         /// Is player drawing
         /// </summary>
-        [JsonPropertyName("isDrawing")]
+        [JsonProperty("isDrawing")]
         public bool IsDrawing { get; set; }
 
         /// <summary>
         /// Round
         /// </summary>
-        [JsonPropertyName("round")]
+        [JsonProperty("round")]
         public uint Round { get; set; }
 
         /// <summary>
         /// Maximal rounds
         /// </summary>
-        [JsonPropertyName("maxRound")]
+        [JsonProperty("maxRound")]
         public uint MaximalRounds { get; set; }
 
         /// <summary>
         /// Round end time
         /// </summary>
-        [JsonPropertyName("roundEndTime")]
+        [JsonProperty("roundEndTime")]
         public long RoundEndTime { get; set; }
 
         /// <summary>
         /// Word hints
         /// </summary>
-        [JsonPropertyName("wordHints")]
+        [JsonProperty("wordHints")]
         public WordHintData[] WordHints { get; set; }
 
         /// <summary>
         /// Players
         /// </summary>
-        [JsonPropertyName("players")]
+        [JsonProperty("players")]
         public PlayerData[] Players { get; set; }
 
         /// <summary>
