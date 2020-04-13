@@ -24,6 +24,12 @@ namespace ScribblersSharp.Data
         public bool IsDrawing { get; set; }
 
         /// <summary>
+        /// Owner ID
+        /// </summary>
+        [JsonProperty("ownerId")]
+        public string OwnerID { get; set; }
+
+        /// <summary>
         /// Round
         /// </summary>
         [JsonProperty("round")]

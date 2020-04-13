@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -15,6 +16,7 @@ namespace ScribblersSharp.Data
         /// Character
         /// </summary>
         [JsonProperty("character")]
+        [JsonConverter(typeof(CharacterJSONConverter))]
         public char Character { get; set; }
 
         /// <summary>

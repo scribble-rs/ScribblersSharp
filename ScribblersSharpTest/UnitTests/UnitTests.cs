@@ -123,7 +123,7 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing) =>
+                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, ownerID, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);

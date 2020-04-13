@@ -294,6 +294,7 @@ namespace ScribblersSharp
                                                         if (next_turn_game_message != null)
                                                         {
                                                             NextTurnData next_turn_data = next_turn_game_message.Data;
+                                                            IsPlayerDrawing = false;
                                                             if (players.Length != next_turn_data.Players.Length)
                                                             {
                                                                 players = new Player[next_turn_data.Players.Length];
@@ -386,6 +387,7 @@ namespace ScribblersSharp
                                                         YourTurnReceiveGameMessageData your_turn_game_message = JsonConvert.DeserializeObject<YourTurnReceiveGameMessageData>(json);
                                                         if (your_turn_game_message != null)
                                                         {
+                                                            IsPlayerDrawing = true;
                                                             receivedGameMessages.Enqueue(your_turn_game_message);
                                                         }
                                                         break;
@@ -516,7 +518,7 @@ namespace ScribblersSharp
                                 PlayerData player_data = ready_data.Players[index];
                                 players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
                             });
-                            OnReadyGameMessageReceived(ready_data.PlayerID, ready_data.IsDrawing, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, word_hints, players, ready_data.CurrentDrawing);
+                            OnReadyGameMessageReceived(ready_data.PlayerID, ready_data.IsDrawing, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, word_hints, players, ready_data.CurrentDrawing);
                         }
                         break;
                     case NextTurnReceiveGameMessageData next_turn_game_message:
