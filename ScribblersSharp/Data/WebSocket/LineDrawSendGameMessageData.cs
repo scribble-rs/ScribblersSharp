@@ -21,10 +21,9 @@ namespace ScribblersSharp.Data
         /// <param name="toY">Line to Y</param>
         /// <param name="color">Line color</param>
         /// <param name="lineWidth">Line width</param>
-        public LineDrawSendGameMessageData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
+        public LineDrawSendGameMessageData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) : base("line", new LineData(fromX, fromY, toX, toY, color, lineWidth))
         {
-            Type = "line";
-            Data = new LineData(fromX, fromY, toX, toY, color, lineWidth);
+            // ...
         }
     }
 }

@@ -122,12 +122,12 @@ namespace ScribblersSharp
         /// <summary>
         /// Word hints
         /// </summary>
-        IReadOnlyList<WordHint> WordHints { get; }
+        IReadOnlyList<IWordHint> WordHints { get; }
 
         /// <summary>
         /// Players
         /// </summary>
-        IReadOnlyList<Player> Players { get; }
+        IReadOnlyList<IPlayer> Players { get; }
 
         /// <summary>
         /// Send start game (asynchronous)

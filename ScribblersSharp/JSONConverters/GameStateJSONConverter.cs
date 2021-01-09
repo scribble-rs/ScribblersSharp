@@ -7,9 +7,9 @@ using System;
 namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
-    /// Color JSON converter class
+    /// Player state JSON converter class
     /// </summary>
-    internal class LanguageJSONConverter : JsonConverter<ELanguage>
+    internal class GameStateJSONConverter : JsonConverter<EGameState>
     {
         /// <summary>
         /// Read JSON
@@ -19,15 +19,15 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="existingValue">Existing value</param>
         /// <param name="hasExistingValue">Has existing value</param>
         /// <param name="serializer">JSON serializer</param>
-        /// <returns>Language</returns>
-        public override ELanguage ReadJson(JsonReader reader, Type objectType, ELanguage existingValue, bool hasExistingValue, JsonSerializer serializer)
+        /// <returns>Game state</returns>
+        public override EGameState ReadJson(JsonReader reader, Type objectType, EGameState existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            ELanguage ret = existingValue;
+            EGameState ret = existingValue;
             if (reader.Value is string value)
             {
                 if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
                 {
-                    ret = ELanguage.Unknown;
+                    ret = EGameState.Unknown;
                 }
             }
             return ret;
@@ -37,8 +37,8 @@ namespace ScribblersSharp.JSONConverters
         /// Write JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
-        /// <param name="value">Language value</param>
+        /// <param name="value">Game state value</param>
         /// <param name="serializer">JSON serializer</param>
-        public override void WriteJson(JsonWriter writer, ELanguage value, JsonSerializer serializer) => writer.WriteValue(Naming.LowerFirstCharacter(value.ToString()));
+        public override void WriteJson(JsonWriter writer, EGameState value, JsonSerializer serializer) => writer.WriteValue(Naming.LowerFirstCharacter(value.ToString()));
     }
 }

@@ -9,5 +9,5 @@ namespace ScribblersSharp
     /// Update players game message received delegate
     /// </summary>
     /// <param name="players">Players</param>
-    public delegate void UpdatePlayersGameMessageReceivedDelegate(IReadOnlyList<Player> players);
+    public delegate void UpdatePlayersGameMessageReceivedDelegate(IReadOnlyList<IPlayer> players);
 }

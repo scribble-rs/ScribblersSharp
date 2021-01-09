@@ -4,10 +4,14 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Game message data interface
+    /// AN interface that represents game message data
     /// </summary>
-    internal interface IGameMessageData
+    /// <typeparam name="T">Message data type</typeparam>
+    public interface IGameMessageData<T> : IValidable
     {
-        // ...
+        /// <summary>
+        /// Game message data
+        /// </summary>
+        T Data { get; }
     }
 }

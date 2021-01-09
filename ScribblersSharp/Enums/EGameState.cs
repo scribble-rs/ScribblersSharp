@@ -4,23 +4,28 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Draw command type enumerator
+    /// Game state enumerator
     /// </summary>
-    public enum EDrawCommandType
+    public enum EGameState
     {
         /// <summary>
-        /// Unknown draw command
+        /// Unknown game state
         /// </summary>
         Unknown,
 
         /// <summary>
-        /// Fill draw conmmand type
+        /// Game has not started yet
         /// </summary>
-        Fill,
+        Unstarted,
 
         /// <summary>
-        /// Line draw command type
+        /// Game is over
         /// </summary>
-        Line
+        GameOver,
+
+        /// <summary>
+        /// Game is still going
+        /// </summary>
+        Ongoing
     }
 }

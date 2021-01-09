@@ -29,22 +29,22 @@ namespace ScribblersSharp
         /// <summary>
         /// Received game messages
         /// </summary>
-        private ConcurrentQueue<IReceiveGameMessageData> receivedGameMessages = new ConcurrentQueue<IReceiveGameMessageData>();
+        private readonly ConcurrentQueue<IReceiveGameMessageData> receivedGameMessages = new ConcurrentQueue<IReceiveGameMessageData>();
 
         /// <summary>
         /// Client web socket
         /// </summary>
-        private ClientWebSocket clientWebSocket = new ClientWebSocket();
+        private readonly ClientWebSocket clientWebSocket = new ClientWebSocket();
 
         /// <summary>
         /// Players
         /// </summary>
-        private Player[] players = Array.Empty<Player>();
+        private IPlayer[] players = Array.Empty<IPlayer>();
 
         /// <summary>
         /// Word hints
         /// </summary>
-        private WordHint[] wordHints = Array.Empty<WordHint>();
+        private IWordHint[] wordHints = Array.Empty<IWordHint>();
 
         /// <summary>
         /// Receive buffer
@@ -159,12 +159,12 @@ namespace ScribblersSharp
         /// <summary>
         /// Word hints
         /// </summary>
-        public IReadOnlyList<WordHint> WordHints => wordHints;
+        public IReadOnlyList<IWordHint> WordHints => wordHints;
 
         /// <summary>
         /// Players
         /// </summary>
-        public IReadOnlyList<Player> Players => players;
+        public IReadOnlyList<IPlayer> Players => players;
 
         /// <summary>
         /// Constructor
@@ -174,21 +174,9 @@ namespace ScribblersSharp
         /// <param name="lobbyID">LobbyID</param>
         public Lobby(ClientWebSocket clientWebSocket, string username, string lobbyID, uint drawingBoardBaseWidth, uint drawingBoardBaseHeight)
         {
-            if (clientWebSocket == null)
-            {
-                throw new ArgumentNullException(nameof(clientWebSocket));
-            }
-            if (username == null)
-            {
-                throw new ArgumentNullException(nameof(username));
-            }
-            if (lobbyID == null)
-            {
-                throw new ArgumentNullException(nameof(lobbyID));
-            }
-            this.clientWebSocket = clientWebSocket;
-            Username = username;
-            LobbyID = lobbyID;
+            this.clientWebSocket = clientWebSocket ?? throw new ArgumentNullException(nameof(clientWebSocket));
+            Username = username ?? throw new ArgumentNullException(nameof(username));
+            LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
             DrawingBoardBaseWidth = drawingBoardBaseWidth;
             DrawingBoardBaseHeight = drawingBoardBaseHeight;
             webSocketReceiveThread = new Thread(async () =>
@@ -228,20 +216,23 @@ namespace ScribblersSharp
                                                             RoundEndTime = ready_data.RoundEndTime;
                                                             if (ready_data.WordHints == null)
                                                             {
-                                                                ready_data.WordHints = Array.Empty<WordHintData>();
+                                                                wordHints = Array.Empty<IWordHint>();
                                                             }
-                                                            if (wordHints.Length != ready_data.WordHints.Length)
+                                                            else
                                                             {
-                                                                wordHints = new WordHint[ready_data.WordHints.Length];
+                                                                if (wordHints.Length != ready_data.WordHints.Count)
+                                                                {
+                                                                    wordHints = new IWordHint[ready_data.WordHints.Count];
+                                                                }
+                                                                Parallel.For(0, wordHints.Length, (index) =>
+                                                                {
+                                                                    WordHintData word_hint_data = ready_data.WordHints[index];
+                                                                    wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
+                                                                });
                                                             }
-                                                            Parallel.For(0, wordHints.Length, (index) =>
+                                                            if (players.Length != ready_data.Players.Count)
                                                             {
-                                                                WordHintData word_hint_data = ready_data.WordHints[index];
-                                                                wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                                                            });
-                                                            if (players.Length != ready_data.Players.Length)
-                                                            {
-                                                                players = new Player[ready_data.Players.Length];
+                                                                players = new IPlayer[ready_data.Players.Count];
                                                             }
                                                             Parallel.For(0, players.Length, (index) =>
                                                             {
@@ -284,8 +275,7 @@ namespace ScribblersSharp
                                                                     }
                                                                 }
                                                             }
-                                                            ready_data.CurrentDrawing = draw_commands.ToArray();
-                                                            draw_commands.Clear();
+                                                            ready_data.CurrentDrawing = draw_commands;
                                                             receivedGameMessages.Enqueue(ready_game_message);
                                                         }
                                                         break;
@@ -297,7 +287,7 @@ namespace ScribblersSharp
                                                             IsPlayerDrawing = false;
                                                             if (players.Length != next_turn_data.Players.Length)
                                                             {
-                                                                players = new Player[next_turn_data.Players.Length];
+                                                                players = new IPlayer[next_turn_data.Players.Length];
                                                             }
                                                             Parallel.For(0, players.Length, (index) =>
                                                             {
@@ -314,7 +304,7 @@ namespace ScribblersSharp
                                                             PlayerData[] player_array_data = update_players_game_message.Data;
                                                             if (players.Length != player_array_data.Length)
                                                             {
-                                                                players = new Player[player_array_data.Length];
+                                                                players = new IPlayer[player_array_data.Length];
                                                             }
                                                             Parallel.For(0, players.Length, (index) =>
                                                             {
@@ -331,7 +321,7 @@ namespace ScribblersSharp
                                                             WordHintData[] word_hint_array_data = update_word_hints_game_message.Data;
                                                             if (wordHints.Length != word_hint_array_data.Length)
                                                             {
-                                                                wordHints = new WordHint[word_hint_array_data.Length];
+                                                                wordHints = new IWordHint[word_hint_array_data.Length];
                                                             }
                                                             Parallel.For(0, players.Length, (index) =>
                                                             {
@@ -494,11 +484,10 @@ namespace ScribblersSharp
         /// </summary>
         public void ProcessEvents()
         {
-            IReceiveGameMessageData receive_game_message;
-            while (receivedGameMessages.TryDequeue(out receive_game_message))
+            while (receivedGameMessages.TryDequeue(out IReceiveGameMessageData receive_game_message))
             {
-                WordHint[] word_hints;
-                Player[] players;
+                IWordHint[] word_hints;
+                IPlayer[] players;
                 ChatMessageData chat_message_data;
                 switch (receive_game_message)
                 {
@@ -506,8 +495,9 @@ namespace ScribblersSharp
                         if (OnReadyGameMessageReceived != null)
                         {
                             ReadyData ready_data = ready_receive_game_message.Data;
-                            word_hints = new WordHint[ready_data.WordHints.Length];
-                            players = new Player[ready_data.Players.Length];
+                            word_hints = new IWordHint[ready_data.WordHints.Count];
+                            players = new IPlayer[ready_data.Players.Count];
+                            IDrawCommand[] draw_commands = new IDrawCommand[ready_data.CurrentDrawing.Count];
                             Parallel.For(0, word_hints.Length, (index) =>
                             {
                                 WordHintData word_hint_data = ready_data.WordHints[index];
@@ -518,14 +508,15 @@ namespace ScribblersSharp
                                 PlayerData player_data = ready_data.Players[index];
                                 players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
                             });
-                            OnReadyGameMessageReceived(ready_data.PlayerID, ready_data.IsDrawing, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, word_hints, players, ready_data.CurrentDrawing);
+                            Parallel.For(0, draw_commands.Length, (index) => draw_commands[index] = ready_data.CurrentDrawing[index]);
+                            OnReadyGameMessageReceived(ready_data.PlayerID, ready_data.IsDrawing, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, word_hints, players, draw_commands, ready_data.GameState);
                         }
                         break;
                     case NextTurnReceiveGameMessageData next_turn_game_message:
                         if (OnNextTurnGameMessageReceived != null)
                         {
                             NextTurnData next_turn_data = next_turn_game_message.Data;
-                            players = new Player[next_turn_data.Players.Length];
+                            players = new IPlayer[next_turn_data.Players.Length];
                             Parallel.For(0, players.Length, (index) =>
                             {
                                 PlayerData player_data = next_turn_data.Players[index];
@@ -537,7 +528,7 @@ namespace ScribblersSharp
                     case UpdatePlayersReceiveGameMessageData update_players_game_message:
                         if (OnUpdatePlayersGameMessageReceived != null)
                         {
-                            players = new Player[update_players_game_message.Data.Length];
+                            players = new IPlayer[update_players_game_message.Data.Length];
                             Parallel.For(0, players.Length, (index) =>
                             {
                                 PlayerData player_data = update_players_game_message.Data[index];
@@ -549,7 +540,7 @@ namespace ScribblersSharp
                     case UpdateWordHintsReceiveGameMessageData update_word_hints_game_message:
                         if (OnUpdateWordHintsGameMessageReceived != null)
                         {
-                            word_hints = new WordHint[update_word_hints_game_message.Data.Length];
+                            word_hints = new IWordHint[update_word_hints_game_message.Data.Length];
                             Parallel.For(0, word_hints.Length, (index) =>
                             {
                                 WordHintData word_hint_data = update_word_hints_game_message.Data[index];

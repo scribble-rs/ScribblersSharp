@@ -28,5 +28,10 @@ namespace ScribblersSharp.Data
         /// </summary>
         [JsonProperty("drawingBoardBaseHeight")]
         public uint DrawingBoardBaseHeight { get; set; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid => LobbyID != null;
     }
 }

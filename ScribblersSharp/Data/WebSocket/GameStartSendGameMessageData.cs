@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+
 /// <summary>
 /// Scribble.rs ♯ data namespace
 /// </summary>
@@ -13,9 +14,9 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Default constructor
         /// </summary>
-        public GameStartSendGameMessageData()
+        public GameStartSendGameMessageData() : base("start")
         {
-            Type = "start";
+            // ...
         }
     }
 }

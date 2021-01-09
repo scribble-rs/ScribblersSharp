@@ -22,18 +22,28 @@ namespace ScribblersSharp.JSONConverters
         /// <returns>Player state</returns>
         public override EPlayerState ReadJson(JsonReader reader, Type objectType, EPlayerState existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
+            //EPlayerState ret = existingValue;
+            //if (reader.Value is string value)
+            //{
+            //    if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
+            //    {
+            //        ret = EPlayerState.Unknown;
+            //    }
+            //}
+            //return ret;
+
             EPlayerState ret = existingValue;
-            switch (reader.Value.ToString())
+            if (reader.Value is long value)
             {
-                case "standby":
-                    ret = EPlayerState.Standby;
-                    break;
-                case "drawing":
-                    ret = EPlayerState.Drawing;
-                    break;
-                case "guessing":
-                    ret = EPlayerState.Guessing;
-                    break;
+                try
+                {
+                    ret = (EPlayerState)value;
+                }
+                catch (Exception e)
+                {
+                    ret = EPlayerState.Unknown;
+                    Console.Error.WriteLine(e);
+                }
             }
             return ret;
         }
@@ -44,9 +54,9 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="writer">JSON writer</param>
         /// <param name="value">Player state value</param>
         /// <param name="serializer">JSON serializer</param>
-        public override void WriteJson(JsonWriter writer, EPlayerState value, JsonSerializer serializer)
-        {
-            writer.WriteValue(value.ToString().ToLower());
-        }
+        public override void WriteJson(JsonWriter writer, EPlayerState value, JsonSerializer serializer) =>
+            //writer.WriteValue(Naming.LowerFirstCharacter(value.ToString()));
+            writer.WriteValue((long)value);
+
     }
 }

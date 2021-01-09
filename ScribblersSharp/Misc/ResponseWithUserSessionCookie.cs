@@ -9,7 +9,7 @@ namespace ScribblersSharp
     /// Response with auth cookie
     /// </summary>
     /// <typeparam name="T">Response data type</typeparam>
-    internal struct ResponseWithUserSessionCookie<T> where T : IResponseData
+    internal readonly struct ResponseWithUserSessionCookie<T> : IResponseWithUserSessionCookie<T> where T : IResponseData
     {
         /// <summary>
         /// Response
@@ -22,6 +22,13 @@ namespace ScribblersSharp
         public string UserSessionCookie { get; }
 
         /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (Response != null) &&
+            (UserSessionCookie != null);
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="response">Response</param>
@@ -32,12 +39,12 @@ namespace ScribblersSharp
             {
                 throw new ArgumentNullException(nameof(response));
             }
-            if (userSessionCookie == null)
+            if (!response.IsValid)
             {
-                throw new ArgumentNullException(nameof(userSessionCookie));
+                throw new ArgumentException("Response is not valid.", nameof(response));
             }
             Response = response;
-            UserSessionCookie = userSessionCookie;
+            UserSessionCookie = userSessionCookie ?? throw new ArgumentNullException(nameof(userSessionCookie));
         }
     }
 }

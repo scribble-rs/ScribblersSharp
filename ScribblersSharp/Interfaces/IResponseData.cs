@@ -6,7 +6,7 @@ namespace ScribblersSharp
     /// <summary>
     /// Response data interface
     /// </summary>
-    internal interface IResponseData
+    internal interface IResponseData : IValidable
     {
         // ...
     }

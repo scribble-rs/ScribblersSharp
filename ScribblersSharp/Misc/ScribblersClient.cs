@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Scribble.rs client
+    /// A class that describes a Scribble.rs client
     /// </summary>
-    public class ScribblersClient : IDisposable
+    internal class ScribblersClient : IScribblersClient
     {
         /// <summary>
         /// HTTP protocol
@@ -31,24 +31,33 @@ namespace ScribblersSharp
         /// <summary>
         /// Cookie container
         /// </summary>
-        private CookieContainer cookieContainer = new CookieContainer();
+        private readonly CookieContainer cookieContainer = new CookieContainer();
 
         /// <summary>
         /// HTTP client
         /// </summary>
-        private HttpClient httpClient;
+        private readonly HttpClient httpClient;
 
         /// <summary>
-        /// Default constructor
+        /// Scribble.rs host
         /// </summary>
-        public ScribblersClient()
+        public string Host { get; }
+
+        /// <summary>
+        /// Constructs a Scribble.rs client
+        /// </summary>
+        /// <param name="host">Scribble.rs host</param>
+        public ScribblersClient(string host)
         {
-            httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer });
-            httpClient.Timeout = TimeSpan.FromSeconds(3000.0);
+            Host = host ?? throw new ArgumentNullException(nameof(host));
+            httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer })
+            {
+                Timeout = TimeSpan.FromSeconds(3000.0)
+            };
         }
 
         /// <summary>
-        /// Post HTTP (asynchronous)
+        /// Posts a HTTP request (asynchronous)
         /// </summary>
         /// <param name="requestURI">Request URI</param>
         /// <param name="parameters">Parameters</param>
@@ -81,18 +90,13 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Enter lobby (asynchronous)
+        /// Enters a lobby (asynchronous)
         /// </summary>
-        /// <param name="host">Host</param>
         /// <param name="lobbyID">Lobby ID</param>
         /// <param name="username">Username</param>
         /// <returns>Lobby task</returns>
-        public async Task<ILobby> EnterLobbyAsync(string host, string lobbyID, string username)
+        public async Task<ILobby> EnterLobbyAsync(string lobbyID, string username)
         {
-            if (host == null)
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
             if (lobbyID == null)
             {
                 throw new ArgumentNullException(nameof(lobbyID));
@@ -103,12 +107,12 @@ namespace ScribblersSharp
             }
             if ((username.Length < Rules.minimalUsernameLength) || (username.Length > Rules.maximalUsernameLength))
             {
-                throw new ArgumentException("Username must be between " + Rules.minimalUsernameLength + " and " + Rules.maximalUsernameLength + " characters.");
+                throw new ArgumentException($"Username must be between { Rules.minimalUsernameLength } and { Rules.maximalUsernameLength } characters.");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri(httpProtocol + "://" + host);
-            Uri web_socket_host_uri = new Uri(webSocketProtocol + "://" + host);
-            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<EnterLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby/player?lobby_id=" + Uri.EscapeUriString(lobbyID)), new Dictionary<string, string>
+            Uri http_host_uri = new Uri($"{ httpProtocol }://{ Host }");
+            Uri web_socket_host_uri = new Uri($"{ webSocketProtocol }://{ Host }");
+            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<EnterLobbyResponseData>(new Uri(http_host_uri, $"/v1/lobby/player?lobby_id={ Uri.EscapeUriString(lobbyID) }"), new Dictionary<string, string>
             {
                 { "lobby_id", lobbyID },
                 { "username", username }
@@ -118,7 +122,7 @@ namespace ScribblersSharp
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
                 client_web_socket.Options.Cookies = cookieContainer;
-                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, "/v1/ws?lobby_id=" + Uri.EscapeUriString(response.LobbyID)), default);
+                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
@@ -132,11 +136,11 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Create lobby (asynchronous)
+        /// Creates a new lobby (asynchronous)
         /// </summary>
-        /// <param name="host">Host</param>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
+        /// <param name="isPublic">Is lobby public</param>
         /// <param name="maximalPlayers">Maximal players</param>
         /// <param name="drawingTime">Drawing time</param>
         /// <param name="rounds">Rounds</param>
@@ -145,31 +149,27 @@ namespace ScribblersSharp
         /// <param name="enableVotekick">Enable vote kick</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        public async Task<ILobby> CreateLobbyAsync(string host, string username, ELanguage language, uint maximalPlayers, ulong drawingTime, uint rounds, IReadOnlyList<string> customWords, uint customWordsChance, bool enableVotekick, uint clientsPerIPLimit)
+        public async Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayers, ulong drawingTime, uint rounds, IReadOnlyList<string> customWords, uint customWordsChance, bool enableVotekick, uint clientsPerIPLimit)
         {
-            if (host == null)
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
             if (username == null)
             {
                 throw new ArgumentNullException(nameof(username));
             }
             if ((username.Length < Rules.minimalUsernameLength) || (username.Length > Rules.maximalUsernameLength))
             {
-                throw new ArgumentException("Username must be between " + Rules.minimalUsernameLength + " and " + Rules.maximalUsernameLength + " characters.");
+                throw new ArgumentException($"Username must be between { Rules.minimalUsernameLength } and { Rules.maximalUsernameLength } characters.");
             }
             if ((maximalPlayers < Rules.minimalPlayers) || (maximalPlayers > Rules.maximalPlayers))
             {
-                throw new ArgumentException("There can be only " + Rules.minimalPlayers + " to " + Rules.maximalPlayers + " players in one lobby.");
+                throw new ArgumentException($"There can be only { Rules.minimalPlayers } to { Rules.maximalPlayers } players in one lobby.");
             }
             if ((drawingTime < Rules.minimalDrawingTime) || (drawingTime > Rules.maximalDrawingTime))
             {
-                throw new ArgumentException("Drawing time can only be between " + Rules.minimalDrawingTime + " and " + Rules.maximalDrawingTime + " seconds.");
+                throw new ArgumentException($"Drawing time can only be between { Rules.minimalDrawingTime } and { Rules.maximalDrawingTime } seconds.");
             }
             if ((rounds < Rules.minimalRounds) || (rounds > Rules.maximalRounds))
             {
-                throw new ArgumentException("Only " + Rules.minimalRounds + " to " + Rules.maximalRounds + " rounds can be set in a lobby.");
+                throw new ArgumentException($"Only { Rules.minimalRounds } to { Rules.maximalRounds } rounds can be set in a lobby.");
             }
             if (customWords == null)
             {
@@ -177,24 +177,20 @@ namespace ScribblersSharp
             }
             if ((customWordsChance < Rules.minimalCustomWordsChance) || (customWordsChance > Rules.maximalCustomWordsChance))
             {
-                throw new ArgumentException("Custom words chance must be between " + Rules.minimalCustomWordsChance + " and " + Rules.maximalCustomWordsChance + ".");
+                throw new ArgumentException($"Custom words chance must be between { Rules.minimalCustomWordsChance } and { Rules.maximalCustomWordsChance }.");
             }
             if ((clientsPerIPLimit < Rules.minimalClientsPerIPLimit) || (clientsPerIPLimit > Rules.maximalClientsPerIPLimit))
             {
-                throw new ArgumentException("Clients per IP limit must be between " + Rules.minimalClientsPerIPLimit + " and " + Rules.maximalClientsPerIPLimit + ".");
+                throw new ArgumentException($"Clients per IP limit must be between { Rules.minimalClientsPerIPLimit } and { Rules.maximalClientsPerIPLimit }.");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri(httpProtocol + "://" + host);
-            Uri web_socket_host_uri = new Uri(webSocketProtocol + "://" + host);
+            Uri http_host_uri = new Uri($"{ httpProtocol }://{ Host }");
+            Uri web_socket_host_uri = new Uri($"{ webSocketProtocol }://{ Host }");
             string[] custom_words = new string[customWords.Count];
             Parallel.For(0, custom_words.Length, (index) =>
             {
                 string custom_word = customWords[index];
-                if (custom_word == null)
-                {
-                    throw new ArgumentNullException(nameof(custom_word));
-                }
-                custom_words[index] = custom_word;
+                custom_words[index] = custom_word ?? throw new ArgumentNullException(nameof(custom_word));
             });
             StringBuilder custom_words_builder = new StringBuilder();
             bool first = true;
@@ -214,12 +210,13 @@ namespace ScribblersSharp
             {
                 { "username", username },
                 { "language", language.ToString().ToLower() },
+                { "public", isPublic.ToString().ToLower() },
                 { "max_players", maximalPlayers.ToString() },
                 { "drawing_time", drawingTime.ToString() },
                 { "rounds", rounds.ToString() },
                 { "custom_words", custom_words_builder.ToString() },
                 { "custom_words_chance", customWordsChance.ToString() },
-                { "enable_votekick", enableVotekick.ToString() },
+                { "enable_votekick", enableVotekick.ToString().ToLower() },
                 { "clients_per_ip_limit", clientsPerIPLimit.ToString() }
             });
             custom_words_builder.Clear();
@@ -228,7 +225,7 @@ namespace ScribblersSharp
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
                 client_web_socket.Options.Cookies = cookieContainer;
-                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, "/v1/ws?lobby_id=" + Uri.EscapeUriString(response.LobbyID)), default);
+                await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
                     ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
@@ -242,11 +239,8 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Dispose scribble.rs client
+        /// Dispose Scribble.rs client
         /// </summary>
-        public void Dispose()
-        {
-            httpClient.Dispose();
-        }
+        public void Dispose() => httpClient.Dispose();
     }
 }

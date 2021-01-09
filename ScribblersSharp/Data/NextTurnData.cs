@@ -9,7 +9,7 @@ namespace ScribblersSharp.Data
     /// Next turn data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class NextTurnData
+    internal class NextTurnData : IValidable
     {
         /// <summary>
         /// Round end time
@@ -28,5 +28,10 @@ namespace ScribblersSharp.Data
         /// </summary>
         [JsonProperty("round")]
         public uint Round { get; set; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid => Protection.IsValid(Players);
     }
 }

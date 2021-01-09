@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -16,14 +15,9 @@ namespace ScribblersSharp.Data
         /// Constructor
         /// </summary>
         /// <param name="content">Content</param>
-        public ChatMessageSendGameMessageData(string content)
+        public ChatMessageSendGameMessageData(string content) : base("message", content)
         {
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-            Type = "message";
-            Data = content;
+            // ...
         }
     }
 }

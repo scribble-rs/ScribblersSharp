@@ -41,7 +41,7 @@ namespace ScribblersSharp.Data
         }
 
         /// <summary>
-        /// COnstructor
+        /// Constructor
         /// </summary>
         /// <param name="x">X</param>
         /// <param name="y">Y</param>

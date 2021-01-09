@@ -17,5 +17,6 @@ namespace ScribblersSharp
     /// <param name="wordHints">Word hints</param>
     /// <param name="players">Players</param>
     /// <param name="currentDrawing">Current drawing</param>
-    public delegate void ReadyGameMessageReceivedDelegate(string playerID, bool isDrawing, string ownerID, uint round, uint maximalRounds, long roundEndTime, IReadOnlyList<WordHint> wordHints, IReadOnlyList<Player> players, IReadOnlyList<DrawCommand> currentDrawing);
+    /// <param name="gameState">Game state</param>
+    public delegate void ReadyGameMessageReceivedDelegate(string playerID, bool isDrawing, string ownerID, uint round, uint maximalRounds, long roundEndTime, IReadOnlyList<IWordHint> wordHints, IReadOnlyList<IPlayer> players, IReadOnlyList<IDrawCommand> currentDrawing, EGameState gameState);
 }

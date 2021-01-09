@@ -9,5 +9,5 @@ namespace ScribblersSharp
     /// Update word hints game message received delegate
     /// </summary>
     /// <param name="wordHints">Word hints</param>
-    public delegate void UpdateWordHintsGameMessageReceivedDelegate(IReadOnlyList<WordHint> wordHints);
+    public delegate void UpdateWordHintsGameMessageReceivedDelegate(IReadOnlyList<IWordHint> wordHints);
 }

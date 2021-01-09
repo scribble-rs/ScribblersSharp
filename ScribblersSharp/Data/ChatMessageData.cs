@@ -9,7 +9,7 @@ namespace ScribblersSharp.Data
     /// Chat message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class ChatMessageData
+    internal class ChatMessageData : IValidable
     {
         /// <summary>
         /// Author
@@ -22,5 +22,12 @@ namespace ScribblersSharp.Data
         /// </summary>
         [JsonProperty("content")]
         public string Content { get; set; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (Author != null) &&
+            (Content != null);
     }
 }

@@ -6,7 +6,7 @@ namespace ScribblersSharp
     /// <summary>
     /// Word hint structure
     /// </summary>
-    public struct WordHint
+    internal readonly struct WordHint : IWordHint
     {
         /// <summary>
         /// Character
@@ -23,7 +23,7 @@ namespace ScribblersSharp
         /// </summary>
         /// <param name="character">Character</param>
         /// <param name="underline">Underline</param>
-        internal WordHint(char character, bool underline)
+        public WordHint(char character, bool underline)
         {
             Character = character;
             Underline = underline;

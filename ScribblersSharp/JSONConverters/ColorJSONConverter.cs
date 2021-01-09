@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Drawing;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Scribble.rs ♯ JSON converters namespace
@@ -10,15 +8,10 @@ using System.Text.RegularExpressions;
 namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
-    /// Color JSON converter class
+    /// A class used for convert colors to JSON and vice versa
     /// </summary>
     internal class ColorJSONConverter : JsonConverter<Color>
     {
-        /// <summary>
-        /// Color regular expression
-        /// </summary>
-        public static readonly Regex colorRegex = new Regex(@"#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
-
         /// <summary>
         /// Read JSON
         /// </summary>
@@ -31,12 +24,17 @@ namespace ScribblersSharp.JSONConverters
         public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             Color ret = existingValue;
-            Match match = colorRegex.Match(reader.Value.ToString());
-            if (match.Success)
+            if (reader.Value is string value && (value.Length == 7))
             {
-                if (match.Groups.Count == 4)
+                if
+                (
+                    value[0] == '#' &&
+                    byte.TryParse(value.Substring(1, 2), System.Globalization.NumberStyles.HexNumber, null, out byte red) &&
+                    byte.TryParse(value.Substring(3, 2), System.Globalization.NumberStyles.HexNumber, null, out byte green) &&
+                    byte.TryParse(value.Substring(5, 2), System.Globalization.NumberStyles.HexNumber, null, out byte blue)
+                )
                 {
-                    ret = Color.FromArgb(int.Parse(match.Groups[1].Value, NumberStyles.HexNumber), int.Parse(match.Groups[2].Value, NumberStyles.HexNumber), int.Parse(match.Groups[3].Value, NumberStyles.HexNumber));
+                    ret = Color.FromArgb(0xFF, red, green, blue);
                 }
             }
             return ret;
@@ -46,11 +44,8 @@ namespace ScribblersSharp.JSONConverters
         /// Write JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
-        /// <param name="value">Color value</param>
+        /// <param name="value">Value</param>
         /// <param name="serializer">JSON serializer</param>
-        public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
-        {
-            writer.WriteValue(value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2"));
-        }
+        public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer) => writer.WriteValue($"#{ value.R:X2}{ value.G:X2}{ value.B:X2}");
     }
 }

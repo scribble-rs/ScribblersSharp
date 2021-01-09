@@ -11,7 +11,7 @@ namespace ScribblersSharp.Data
     /// Player data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class PlayerData
+    internal class PlayerData : IValidable
     {
         /// <summary>
         /// Player ID
@@ -57,6 +57,14 @@ namespace ScribblersSharp.Data
         public EPlayerState State { get; set; }
 
         /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (ID != null) &&
+            (Name != null) &&
+            (State != EPlayerState.Unknown);
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public PlayerData()
@@ -76,16 +84,12 @@ namespace ScribblersSharp.Data
         /// <param name="state">Player state</param>
         public PlayerData(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
-            if (id == null)
+            if (state == EPlayerState.Unknown)
             {
-                throw new ArgumentNullException(nameof(id));
+                throw new ArgumentException("Player state is unknown.", nameof(state));
             }
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-            ID = id;
-            Name = name;
+            ID = id ?? throw new ArgumentNullException(nameof(id));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             Score = score;
             IsConnected = isConnected;
             LastScore = lastScore;

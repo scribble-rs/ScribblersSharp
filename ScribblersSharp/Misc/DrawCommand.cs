@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System;
+using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -9,7 +9,7 @@ namespace ScribblersSharp
     /// <summary>
     /// Draw command structure
     /// </summary>
-    public struct DrawCommand
+    internal readonly struct DrawCommand : IDrawCommand
     {
         /// <summary>
         /// Draw command type
@@ -39,12 +39,19 @@ namespace ScribblersSharp
         /// <summary>
         /// Draw color
         /// </summary>
-        public Color Color;
+        public Color Color { get; }
 
         /// <summary>
         /// Line width (used for lines)
         /// </summary>
         public float LineWidth { get; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (Type != EDrawCommandType.Unknown) &&
+            (LineWidth > float.Epsilon);
 
         /// <summary>
         /// Constructor
@@ -56,8 +63,16 @@ namespace ScribblersSharp
         /// <param name="toY">Draw to Y (used for lines)</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width (used for lines)</param>
-        internal DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
+        public DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
         {
+            if (type == EDrawCommandType.Unknown)
+            {
+                throw new ArgumentException("Draw command type is unknown.", nameof(type));
+            }
+            if (lineWidth > float.Epsilon)
+            {
+                throw new ArgumentException("Line width must be a positive non zero value.", nameof(lineWidth));
+            }
             Type = type;
             FromX = fromX;
             FromY = fromY;

@@ -9,6 +9,11 @@ namespace ScribblersSharp
     public enum ELanguage
     {
         /// <summary>
+        /// Unknown language
+        /// </summary>
+        Unknown,
+
+        /// <summary>
         /// English
         /// </summary>
         English,
@@ -21,6 +26,16 @@ namespace ScribblersSharp
         /// <summary>
         /// German
         /// </summary>
-        German
+        German,
+
+        /// <summary>
+        /// French
+        /// </summary>
+        French,
+
+        /// <summary>
+        /// Dutch
+        /// </summary>
+        Dutch
     }
 }

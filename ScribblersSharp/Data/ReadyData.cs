@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
+using System.Collections.Generic;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -9,7 +11,7 @@ namespace ScribblersSharp.Data
     /// Ready data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class ReadyData
+    internal class ReadyData : IValidable
     {
         /// <summary>
         /// Player ID
@@ -51,18 +53,35 @@ namespace ScribblersSharp.Data
         /// Word hints
         /// </summary>
         [JsonProperty("wordHints")]
-        public WordHintData[] WordHints { get; set; }
+        public List<WordHintData> WordHints { get; set; }
 
         /// <summary>
         /// Players
         /// </summary>
         [JsonProperty("players")]
-        public PlayerData[] Players { get; set; }
+        public List<PlayerData> Players { get; set; }
 
         /// <summary>
         /// Current drawing
         /// </summary>
         [JsonIgnore]
-        public DrawCommand[] CurrentDrawing { get; set; }
+        public List<DrawCommand> CurrentDrawing { get; set; }
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        [JsonProperty("state")]
+        [JsonConverter(typeof(GameStateJSONConverter))]
+        public EGameState GameState { get; set; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (PlayerID != null) &&
+            (OwnerID != null) &&
+            Protection.IsValid(WordHints) &&
+            Protection.IsValid(Players) &&
+            (GameState != EGameState.Unknown);
     }
 }

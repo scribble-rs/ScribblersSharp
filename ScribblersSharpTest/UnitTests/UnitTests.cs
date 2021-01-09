@@ -53,20 +53,16 @@ namespace ScribblersSharpTest
             {
                 try
                 {
-                    using (FileStream file_stream = File.OpenRead(configurationPath))
+                    using FileStream file_stream = File.OpenRead(configurationPath);
+                    using StreamReader reader = new StreamReader(file_stream);
+                    ConfigurationData configuration_data = JsonSerializer.Deserialize<ConfigurationData>(reader.ReadToEnd());
+                    if (configuration_data != null)
                     {
-                        using (StreamReader reader = new StreamReader(file_stream))
+                        if (configuration_data.Host != null)
                         {
-                            ConfigurationData configuration_data = JsonSerializer.Deserialize<ConfigurationData>(reader.ReadToEnd());
-                            if (configuration_data != null)
-                            {
-                                if (configuration_data.Host != null)
-                                {
-                                    host = configuration_data.Host;
-                                }
-                                port = configuration_data.Port;
-                            }
+                            host = configuration_data.Host;
                         }
+                        port = configuration_data.Port;
                     }
                 }
                 catch (Exception e)
@@ -74,23 +70,23 @@ namespace ScribblersSharpTest
                     Console.Error.WriteLine(e);
                 }
             }
-            ScribblersClient[] clients = new ScribblersClient[Rules.maximalPlayers];
+            IScribblersClient[] clients = new IScribblersClient[Rules.maximalPlayers];
+            string host_and_port = host + ":" + port;
             for (int index = 0; index < clients.Length; index++)
             {
-                clients[index] = new ScribblersClient();
+                clients[index] = Clients.Create(host_and_port);
             }
-            string host_and_port = host + ":" + port;
             ILobby[] lobbies = new ILobby[clients.Length];
             for (int index = 0; index < clients.Length; index++)
             {
                 ILobby lobby;
                 if (index == 0)
                 {
-                    lobby = clients[0].CreateLobbyAsync(host_and_port, "TestClient_0", ELanguage.English, Rules.maximalPlayers, Rules.maximalDrawingTime, Rules.maximalRounds, Array.Empty<string>(), Rules.minimalCustomWordsChance, false, Rules.maximalClientsPerIPLimit).GetAwaiter().GetResult();
+                    lobby = clients[0].CreateLobbyAsync("TestClient_0", ELanguage.English, true, Rules.maximalPlayers, Rules.maximalDrawingTime, Rules.maximalRounds, Array.Empty<string>(), Rules.minimalCustomWordsChance, false, Rules.maximalClientsPerIPLimit).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    lobby = clients[index].EnterLobbyAsync(host_and_port, lobbies[0].LobbyID, "TestClient_" + index).GetAwaiter().GetResult();
+                    lobby = clients[index].EnterLobbyAsync(lobbies[0].LobbyID, "TestClient_" + index).GetAwaiter().GetResult();
                 }
                 Assert.IsNotNull(lobby);
                 lobby.OnClearDrawingBoardGameMessageReceived += () =>
@@ -123,7 +119,7 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, ownerID, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing) =>
+                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, ownerID, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing, gameState) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);

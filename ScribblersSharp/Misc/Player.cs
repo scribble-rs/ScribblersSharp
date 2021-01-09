@@ -8,7 +8,7 @@ namespace ScribblersSharp
     /// <summary>
     /// Player structure
     /// </summary>
-    public struct Player
+    internal readonly struct Player : IPlayer
     {
         /// <summary>
         /// Player ID
@@ -46,6 +46,14 @@ namespace ScribblersSharp
         public EPlayerState State { get; }
 
         /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid => 
+            (ID != null) &&
+            (Name != null) &&
+            (State != EPlayerState.Unknown);
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="id">Player ID</param>
@@ -55,18 +63,14 @@ namespace ScribblersSharp
         /// <param name="lastScore">Player last score</param>
         /// <param name="rank">Player rank</param>
         /// <param name="state">Player state</param>
-        internal Player(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
+        public Player(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
-            if (id == null)
+            if (state == EPlayerState.Unknown)
             {
-                throw new ArgumentNullException(nameof(id));
+                throw new ArgumentException("Player state is unknown.", nameof(state));
             }
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-            ID = id;
-            Name = name;
+            ID = id ?? throw new ArgumentNullException(nameof(id));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             Score = score;
             IsConnected = isConnected;
             LastScore = lastScore;

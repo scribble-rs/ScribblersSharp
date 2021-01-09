@@ -11,5 +11,5 @@ namespace ScribblersSharp
     /// <param name="players">Players</param>
     /// <param name="round">Round</param>
     /// <param name="roundEndTime">Round end time</param>
-    public delegate void NextTurnGameMessageReceivedDelegate(IReadOnlyList<Player> players, uint round, ulong roundEndTime);
+    public delegate void NextTurnGameMessageReceivedDelegate(IReadOnlyList<IPlayer> players, uint round, ulong roundEndTime);
 }

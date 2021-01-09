@@ -13,9 +13,9 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ClearDrawingBoardSendGameMessageData()
+        public ClearDrawingBoardSendGameMessageData() : base("clear-drawing-board")
         {
-            Type = "clear-drawing-board";
+            // ...
         }
     }
 }
