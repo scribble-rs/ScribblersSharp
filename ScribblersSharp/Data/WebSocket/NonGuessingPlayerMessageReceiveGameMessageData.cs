@@ -5,10 +5,10 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Guessing chat message receive game message data class
+    /// Non-guessing chat message receive game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class GuessingChatMessageReceiveGameMessageData : GameMessageData<ChatMessageData>, IReceiveGameMessageData
+    internal class NonGuessingPlayerMessageReceiveGameMessageData : GameMessageData<ChatMessageData>, IReceiveGameMessageData
     {
         // ...
     }

@@ -7,10 +7,10 @@ using System.Drawing;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Fill draw send game message data class
+    /// Fill send game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class FillDrawSendGameMessageData : GameMessageData<FillData>, ISendGameMessageData
+    internal class FillSendGameMessageData : GameMessageData<FillData>, ISendGameMessageData
     {
         /// <summary>
         /// Constructor
@@ -18,7 +18,7 @@ namespace ScribblersSharp.Data
         /// <param name="x">Fill X</param>
         /// <param name="y">Fill Y</param>
         /// <param name="color">Fill color</param>
-        public FillDrawSendGameMessageData(float x, float y, Color color) : base("fill", new FillData(x, y, color))
+        public FillSendGameMessageData(float x, float y, Color color) : base(Naming.GetSendGameMessageDataNameInKebabCase<FillSendGameMessageData>(), new FillData(x, y, color))
         {
             // ...
         }

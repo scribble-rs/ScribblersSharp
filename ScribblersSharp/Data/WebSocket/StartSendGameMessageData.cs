@@ -9,12 +9,12 @@ namespace ScribblersSharp.Data
     /// Game start send game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class GameStartSendGameMessageData : BaseGameMessageData, ISendGameMessageData
+    internal class StartSendGameMessageData : BaseGameMessageData, ISendGameMessageData
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public GameStartSendGameMessageData() : base("start")
+        public StartSendGameMessageData() : base(Naming.GetSendGameMessageDataNameInKebabCase<StartSendGameMessageData>())
         {
             // ...
         }

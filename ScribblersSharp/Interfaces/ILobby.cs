@@ -130,6 +130,29 @@ namespace ScribblersSharp
         IReadOnlyList<IPlayer> Players { get; }
 
         /// <summary>
+        /// Adds a game message parser
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="onGameMessageParsed">On message parsed</param>
+        /// <param name="onGameMessageParseFailed">On message parse failed</param>
+        /// <returns>Message parser</returns>
+        IGameMessageParser<T> AddMessageParser<T>(GameMessageParsedDelegate<T> onGameMessageParsed, GameMessageParseFailedDelegate<T> onGameMessageParseFailed = null) where T : IReceiveGameMessageData;
+
+        /// <summary>
+        /// Removes the specified game message parser
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="gameMessageParser">Message parser</param>
+        /// <returns>"true" if message parser was successfully removed, otherwise "false"</returns>
+        bool RemoveMessageParser<T>(IGameMessageParser<T> gameMessageParser) where T : IReceiveGameMessageData;
+
+        /// <summary>
+        /// Parses incoming message
+        /// </summary>
+        /// <param name="json">JSON</param>
+        void ParseMessage(string json);
+
+        /// <summary>
         /// Send start game (asynchronous)
         /// </summary>
         /// <returns>Task</returns>

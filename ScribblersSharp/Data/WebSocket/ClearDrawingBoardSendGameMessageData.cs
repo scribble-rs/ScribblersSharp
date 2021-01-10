@@ -13,7 +13,7 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ClearDrawingBoardSendGameMessageData() : base("clear-drawing-board")
+        public ClearDrawingBoardSendGameMessageData() : base(Naming.GetSendGameMessageDataNameInKebabCase<ClearDrawingBoardSendGameMessageData>())
         {
             // ...
         }

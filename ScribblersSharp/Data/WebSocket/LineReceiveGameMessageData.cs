@@ -5,10 +5,10 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Update word hints receive game message data class
+    /// Line draw receive game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class UpdateWordHintsReceiveGameMessageData : GameMessageData<WordHintData[]>, IReceiveGameMessageData
+    internal class LineReceiveGameMessageData : GameMessageData<LineData>, IReceiveGameMessageData
     {
         // ...
     }

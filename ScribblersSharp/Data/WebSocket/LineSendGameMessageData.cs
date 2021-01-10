@@ -10,7 +10,7 @@ namespace ScribblersSharp.Data
     /// Line send game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class LineDrawSendGameMessageData : GameMessageData<LineData>, ISendGameMessageData
+    internal class LineSendGameMessageData : GameMessageData<LineData>, ISendGameMessageData
     {
         /// <summary>
         /// Constructor
@@ -21,7 +21,7 @@ namespace ScribblersSharp.Data
         /// <param name="toY">Line to Y</param>
         /// <param name="color">Line color</param>
         /// <param name="lineWidth">Line width</param>
-        public LineDrawSendGameMessageData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) : base("line", new LineData(fromX, fromY, toX, toY, color, lineWidth))
+        public LineSendGameMessageData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) : base(Naming.GetSendGameMessageDataNameInKebabCase<LineSendGameMessageData>(), new LineData(fromX, fromY, toX, toY, color, lineWidth))
         {
             // ...
         }

@@ -16,12 +16,12 @@ namespace ScribblersSharp.Data
         /// Game message type
         /// </summary>
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string MessageType { get; set; }
 
         /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public virtual bool IsValid => Type != null;
+        public virtual bool IsValid => MessageType != null;
 
         /// <summary>
         /// Constructs game message data for serializers
@@ -35,6 +35,6 @@ namespace ScribblersSharp.Data
         /// Constructs game message data
         /// </summary>
         /// <param name="data">Message data</param>
-        public BaseGameMessageData(string type) => Type = type ?? throw new ArgumentNullException(nameof(type));
+        public BaseGameMessageData(string type) => MessageType = type ?? throw new ArgumentNullException(nameof(type));
     }
 }

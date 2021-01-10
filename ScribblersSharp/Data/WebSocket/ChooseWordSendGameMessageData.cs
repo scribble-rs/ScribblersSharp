@@ -14,7 +14,7 @@ namespace ScribblersSharp.Data
         /// Constructor
         /// </summary>
         /// <param name="index">Choose word index</param>
-        public ChooseWordSendGameMessageData(uint index) : base("choose-word", index)
+        public ChooseWordSendGameMessageData(uint index) : base(Naming.GetSendGameMessageDataNameInKebabCase<ChooseWordSendGameMessageData>(), index)
         {
             // ...
         }

@@ -22,6 +22,11 @@ namespace ScribblersSharp
     internal class Lobby : ILobby
     {
         /// <summary>
+        /// Available game message parsers
+        /// </summary>
+        private readonly Dictionary<string, List<IBaseGameMessageParser>> gameMessageParsers = new Dictionary<string, List<IBaseGameMessageParser>>();
+
+        /// <summary>
         /// WebSocket receive thread
         /// </summary>
         private Thread webSocketReceiveThread;
@@ -107,6 +112,11 @@ namespace ScribblersSharp
         public event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
+        /// This event will be invoked when a non-meaningful game message has been received.
+        /// </summary>
+        public event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
+
+        /// <summary>
         /// WebSocket state
         /// </summary>
         public WebSocketState WebSocketState => clientWebSocket.State;
@@ -179,6 +189,132 @@ namespace ScribblersSharp
             LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
             DrawingBoardBaseWidth = drawingBoardBaseWidth;
             DrawingBoardBaseHeight = drawingBoardBaseHeight;
+            AddMessageParser<ReadyReceiveGameMessageData>((gameMessage, json) =>
+            {
+                ReadyData ready_data = gameMessage.Data;
+                PlayerID = ready_data.PlayerID;
+                IsPlayerDrawing = ready_data.IsDrawing;
+                Round = ready_data.Round;
+                MaximalRounds = ready_data.MaximalRounds;
+                RoundEndTime = ready_data.RoundEndTime;
+                if (ready_data.WordHints == null)
+                {
+                    wordHints = Array.Empty<IWordHint>();
+                }
+                else
+                {
+                    if (wordHints.Length != ready_data.WordHints.Count)
+                    {
+                        wordHints = new IWordHint[ready_data.WordHints.Count];
+                    }
+                    Parallel.For(0, wordHints.Length, (index) =>
+                    {
+                        WordHintData word_hint_data = ready_data.WordHints[index];
+                        wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
+                    });
+                }
+                if (players.Length != ready_data.Players.Count)
+                {
+                    players = new IPlayer[ready_data.Players.Count];
+                }
+                Parallel.For(0, players.Length, (index) =>
+                {
+                    PlayerData player_data = ready_data.Players[index];
+                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
+                });
+                List<DrawCommand> draw_commands = new List<DrawCommand>();
+                JObject json_object = JObject.Parse(json);
+                if (json_object.ContainsKey("data"))
+                {
+                    if (json_object["data"] is JObject json_data_object)
+                    {
+                        if (json_data_object.ContainsKey("currentDrawing"))
+                        {
+                            if (json_data_object["currentDrawing"] is JArray json_draw_commands)
+                            {
+                                foreach (JToken json_token in json_draw_commands)
+                                {
+                                    if (json_token is JObject json_draw_command)
+                                    {
+                                        if (json_draw_command.ContainsKey("lineWidth"))
+                                        {
+                                            LineData line_data = json_draw_command.ToObject<LineData>();
+                                            if (line_data != null)
+                                            {
+                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            FillData fill_data = json_draw_command.ToObject<FillData>();
+                                            if (fill_data != null)
+                                            {
+                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ready_data.CurrentDrawing = draw_commands;
+                receivedGameMessages.Enqueue(gameMessage);
+            }, MessageParseFailedEvent);
+            AddMessageParser<NextTurnReceiveGameMessageData>((gameMessage, json) =>
+            {
+                NextTurnData next_turn_data = gameMessage.Data;
+                IsPlayerDrawing = false;
+                if (players.Length != next_turn_data.Players.Length)
+                {
+                    players = new IPlayer[next_turn_data.Players.Length];
+                }
+                Parallel.For(0, players.Length, (index) =>
+                {
+                    PlayerData player_data = next_turn_data.Players[index];
+                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
+                });
+                receivedGameMessages.Enqueue(gameMessage);
+            }, MessageParseFailedEvent);
+            AddMessageParser<UpdatePlayersReceiveGameMessageData>((gameMessage, json) =>
+            {
+                PlayerData[] player_array_data = gameMessage.Data;
+                if (players.Length != player_array_data.Length)
+                {
+                    players = new IPlayer[player_array_data.Length];
+                }
+                Parallel.For(0, players.Length, (index) =>
+                {
+                    PlayerData player_data = player_array_data[index];
+                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
+                });
+                receivedGameMessages.Enqueue(gameMessage);
+            }, MessageParseFailedEvent);
+            AddMessageParser<UpdateWordhintReceiveGameMessageData>((gameMessage, json) =>
+            {
+                WordHintData[] word_hint_array_data = gameMessage.Data;
+                if (wordHints.Length != word_hint_array_data.Length)
+                {
+                    wordHints = new IWordHint[word_hint_array_data.Length];
+                }
+                Parallel.For(0, players.Length, (index) =>
+                {
+                    WordHintData word_hint_data = word_hint_array_data[index];
+                    wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
+                });
+                receivedGameMessages.Enqueue(gameMessage);
+            }, MessageParseFailedEvent);
+            AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<NonGuessingPlayerMessageReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<SystemMessageReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<LineReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<FillReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<ClearDrawingBoardReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
+            AddMessageParser<YourTurnReceiveGameMessageData>((gameMessage, json) =>
+            {
+                IsPlayerDrawing = true;
+                receivedGameMessages.Enqueue(gameMessage);
+            }, MessageParseFailedEvent);
             webSocketReceiveThread = new Thread(async () =>
             {
                 using (MemoryStream memory_stream = new MemoryStream())
@@ -202,185 +338,12 @@ namespace ScribblersSharp
                                             BaseGameMessageData base_game_message = JsonConvert.DeserializeObject<BaseGameMessageData>(json);
                                             if (base_game_message != null)
                                             {
-                                                switch (base_game_message.Type)
+                                                if (gameMessageParsers.ContainsKey(base_game_message.MessageType))
                                                 {
-                                                    case "ready":
-                                                        ReadyReceiveGameMessageData ready_game_message = JsonConvert.DeserializeObject<ReadyReceiveGameMessageData>(json);
-                                                        if (ready_game_message != null)
-                                                        {
-                                                            ReadyData ready_data = ready_game_message.Data;
-                                                            PlayerID = ready_data.PlayerID;
-                                                            IsPlayerDrawing = ready_data.IsDrawing;
-                                                            Round = ready_data.Round;
-                                                            MaximalRounds = ready_data.MaximalRounds;
-                                                            RoundEndTime = ready_data.RoundEndTime;
-                                                            if (ready_data.WordHints == null)
-                                                            {
-                                                                wordHints = Array.Empty<IWordHint>();
-                                                            }
-                                                            else
-                                                            {
-                                                                if (wordHints.Length != ready_data.WordHints.Count)
-                                                                {
-                                                                    wordHints = new IWordHint[ready_data.WordHints.Count];
-                                                                }
-                                                                Parallel.For(0, wordHints.Length, (index) =>
-                                                                {
-                                                                    WordHintData word_hint_data = ready_data.WordHints[index];
-                                                                    wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                                                                });
-                                                            }
-                                                            if (players.Length != ready_data.Players.Count)
-                                                            {
-                                                                players = new IPlayer[ready_data.Players.Count];
-                                                            }
-                                                            Parallel.For(0, players.Length, (index) =>
-                                                            {
-                                                                PlayerData player_data = ready_data.Players[index];
-                                                                players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                                                            });
-                                                            List<DrawCommand> draw_commands = new List<DrawCommand>();
-                                                            JObject json_object = JObject.Parse(json);
-                                                            if (json_object.ContainsKey("data"))
-                                                            {
-                                                                if (json_object["data"] is JObject json_data_object)
-                                                                {
-                                                                    if (json_data_object.ContainsKey("currentDrawing"))
-                                                                    {
-                                                                        if (json_data_object["currentDrawing"] is JArray json_draw_commands)
-                                                                        {
-                                                                            foreach (JToken json_token in json_draw_commands)
-                                                                            {
-                                                                                if (json_token is JObject json_draw_command)
-                                                                                {
-                                                                                    if (json_draw_command.ContainsKey("lineWidth"))
-                                                                                    {
-                                                                                        LineData line_data = json_draw_command.ToObject<LineData>();
-                                                                                        if (line_data != null)
-                                                                                        {
-                                                                                            draw_commands.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
-                                                                                        }
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                        FillData fill_data = json_draw_command.ToObject<FillData>();
-                                                                                        if (fill_data != null)
-                                                                                        {
-                                                                                            draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                            ready_data.CurrentDrawing = draw_commands;
-                                                            receivedGameMessages.Enqueue(ready_game_message);
-                                                        }
-                                                        break;
-                                                    case "next-turn":
-                                                        NextTurnReceiveGameMessageData next_turn_game_message = JsonConvert.DeserializeObject<NextTurnReceiveGameMessageData>(json);
-                                                        if (next_turn_game_message != null)
-                                                        {
-                                                            NextTurnData next_turn_data = next_turn_game_message.Data;
-                                                            IsPlayerDrawing = false;
-                                                            if (players.Length != next_turn_data.Players.Length)
-                                                            {
-                                                                players = new IPlayer[next_turn_data.Players.Length];
-                                                            }
-                                                            Parallel.For(0, players.Length, (index) =>
-                                                            {
-                                                                PlayerData player_data = next_turn_data.Players[index];
-                                                                players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                                                            });
-                                                            receivedGameMessages.Enqueue(next_turn_game_message);
-                                                        }
-                                                        break;
-                                                    case "update-players":
-                                                        UpdatePlayersReceiveGameMessageData update_players_game_message = JsonConvert.DeserializeObject<UpdatePlayersReceiveGameMessageData>(json);
-                                                        if (update_players_game_message != null)
-                                                        {
-                                                            PlayerData[] player_array_data = update_players_game_message.Data;
-                                                            if (players.Length != player_array_data.Length)
-                                                            {
-                                                                players = new IPlayer[player_array_data.Length];
-                                                            }
-                                                            Parallel.For(0, players.Length, (index) =>
-                                                            {
-                                                                PlayerData player_data = player_array_data[index];
-                                                                players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                                                            });
-                                                            receivedGameMessages.Enqueue(update_players_game_message);
-                                                        }
-                                                        break;
-                                                    case "update-wordhint":
-                                                        UpdateWordHintsReceiveGameMessageData update_word_hints_game_message = JsonConvert.DeserializeObject<UpdateWordHintsReceiveGameMessageData>(json);
-                                                        if (update_word_hints_game_message != null)
-                                                        {
-                                                            WordHintData[] word_hint_array_data = update_word_hints_game_message.Data;
-                                                            if (wordHints.Length != word_hint_array_data.Length)
-                                                            {
-                                                                wordHints = new IWordHint[word_hint_array_data.Length];
-                                                            }
-                                                            Parallel.For(0, players.Length, (index) =>
-                                                            {
-                                                                WordHintData word_hint_data = word_hint_array_data[index];
-                                                                wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                                                            });
-                                                            receivedGameMessages.Enqueue(update_word_hints_game_message);
-                                                        }
-                                                        break;
-                                                    case "message":
-                                                        GuessingChatMessageReceiveGameMessageData guessing_chat_message_game_message = JsonConvert.DeserializeObject<GuessingChatMessageReceiveGameMessageData>(json);
-                                                        if (guessing_chat_message_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(guessing_chat_message_game_message);
-                                                        }
-                                                        break;
-                                                    case "non-guessing-player-message":
-                                                        NonGuessingChatMessageReceiveGameMessageData non_guessing_chat_message_game_message = JsonConvert.DeserializeObject<NonGuessingChatMessageReceiveGameMessageData>(json);
-                                                        if (non_guessing_chat_message_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(non_guessing_chat_message_game_message);
-                                                        }
-                                                        break;
-                                                    case "system-message":
-                                                        SystemMessageReceiveGameMessageData system_message_game_message = JsonConvert.DeserializeObject<SystemMessageReceiveGameMessageData>(json);
-                                                        if (system_message_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(system_message_game_message);
-                                                        }
-                                                        break;
-                                                    case "line":
-                                                        LineDrawReceiveGameMessageData line_game_message = JsonConvert.DeserializeObject<LineDrawReceiveGameMessageData>(json);
-                                                        if (line_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(line_game_message);
-                                                        }
-                                                        break;
-                                                    case "fill":
-                                                        FillDrawReceiveGameMessageData fill_game_message = JsonConvert.DeserializeObject<FillDrawReceiveGameMessageData>(json);
-                                                        if (fill_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(fill_game_message);
-                                                        }
-                                                        break;
-                                                    case "clear-drawing-board":
-                                                        ClearDrawingBoardReceiveGameMessageData clear_drawing_board_game_message = JsonConvert.DeserializeObject<ClearDrawingBoardReceiveGameMessageData>(json);
-                                                        if (clear_drawing_board_game_message != null)
-                                                        {
-                                                            receivedGameMessages.Enqueue(clear_drawing_board_game_message);
-                                                        }
-                                                        break;
-                                                    case "your-turn":
-                                                        YourTurnReceiveGameMessageData your_turn_game_message = JsonConvert.DeserializeObject<YourTurnReceiveGameMessageData>(json);
-                                                        if (your_turn_game_message != null)
-                                                        {
-                                                            IsPlayerDrawing = true;
-                                                            receivedGameMessages.Enqueue(your_turn_game_message);
-                                                        }
-                                                        break;
+                                                    foreach (IBaseGameMessageParser game_message_parser in gameMessageParsers[base_game_message.MessageType])
+                                                    {
+                                                        game_message_parser.ParseMessage(json);
+                                                    }
                                                 }
                                             }
                                         }
@@ -405,6 +368,24 @@ namespace ScribblersSharp
         }
 
         /// <summary>
+        /// Listens to any message parse failed event
+        /// </summary>
+        /// <param name="expectedMessageType">Expected message type</param>
+        /// <param name="message">Message</param>
+        /// <param name="json">JSON</param>
+        private void MessageParseFailedEvent<T>(string expectedMessageType, T message, string json) where T : IBaseGameMessageData
+        {
+            if (message == null)
+            {
+                Console.Error.WriteLine($"Received message is null of expected message type \"{ expectedMessageType }\".{ Environment.NewLine }{ Environment.NewLine }JSON:{ Environment.NewLine }{ json }");
+            }
+            else
+            {
+                Console.Error.WriteLine($"\"Message is invalid. Expected message type: \"{ expectedMessageType }\"; Current message type: { message.MessageType }{ Environment.NewLine }{ Environment.NewLine }JSON:{ Environment.NewLine }{ json }");
+            }
+        }
+
+        /// <summary>
         /// Send WebSocket message (asynchronous)
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
@@ -421,10 +402,86 @@ namespace ScribblersSharp
         }
 
         /// <summary>
+        /// Adds a game message parser
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="onGameMessageParsed">On message parsed</param>
+        /// <param name="onGameMessageParseFailed">On message parse failed</param>
+        /// <returns>Message parser</returns>
+        public IGameMessageParser<T> AddMessageParser<T>(GameMessageParsedDelegate<T> onGameMessageParsed, GameMessageParseFailedDelegate<T> onGameMessageParseFailed = null) where T : IReceiveGameMessageData
+        {
+            IGameMessageParser<T> ret = new GameMessageParser<T>(onGameMessageParsed, onGameMessageParseFailed);
+            List<IBaseGameMessageParser> game_message_parsers;
+            if (gameMessageParsers.ContainsKey(ret.MessageType))
+            {
+                game_message_parsers = gameMessageParsers[ret.MessageType];
+            }
+            else
+            {
+                game_message_parsers = new List<IBaseGameMessageParser>();
+                gameMessageParsers.Add(ret.MessageType, game_message_parsers);
+            }
+            game_message_parsers.Add(ret);
+            return ret;
+        }
+
+        /// <summary>
+        /// Removes the specified game message parser
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="gameMessageParser">Message parser</param>
+        /// <returns>"true" if message parser was successfully removed, otherwise "false"</returns>
+        public bool RemoveMessageParser<T>(IGameMessageParser<T> gameMessageParser) where T : IReceiveGameMessageData
+        {
+            if (gameMessageParser == null)
+            {
+                throw new ArgumentNullException(nameof(gameMessageParser));
+            }
+            bool ret = false;
+            if (gameMessageParsers.ContainsKey(gameMessageParser.MessageType))
+            {
+                List<IBaseGameMessageParser> game_message_parsers = gameMessageParsers[gameMessageParser.MessageType];
+                ret = game_message_parsers.Remove(gameMessageParser);
+                if (ret && (game_message_parsers.Count <= 0))
+                {
+                    gameMessageParsers.Remove(gameMessageParser.MessageType);
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Parses incoming message
+        /// </summary>
+        /// <param name="json">JSON</param>
+        public void ParseMessage(string json)
+        {
+            if (json == null)
+            {
+                throw new ArgumentNullException(nameof(json));
+            }
+            BaseGameMessageData base_game_message_data = JsonConvert.DeserializeObject<BaseGameMessageData>(json);
+            if (base_game_message_data != null)
+            {
+                if (gameMessageParsers.ContainsKey(base_game_message_data.MessageType))
+                {
+                    foreach (IBaseGameMessageParser game_message_parser in gameMessageParsers[base_game_message_data.MessageType])
+                    {
+                        game_message_parser.ParseMessage(json);
+                    }
+                }
+                else
+                {
+                    OnUnknownGameMessageReceived?.Invoke(base_game_message_data, json);
+                }
+            }
+        }
+
+        /// <summary>
         /// Send start game (asynchronous)
         /// </summary>
         /// <returns>Task</returns>
-        public Task SendStartGameAsync() => SendWebSocketMessageAsync(new GameStartSendGameMessageData());
+        public Task SendStartGameAsync() => SendWebSocketMessageAsync(new StartSendGameMessageData());
 
         /// <summary>
         /// Clear drawing board (asynchronous)
@@ -449,10 +506,10 @@ namespace ScribblersSharp
             switch (type)
             {
                 case EDrawCommandType.Fill:
-                    ret = SendWebSocketMessageAsync(new FillDrawSendGameMessageData(fromX, fromY, color));
+                    ret = SendWebSocketMessageAsync(new FillSendGameMessageData(fromX, fromY, color));
                     break;
                 case EDrawCommandType.Line:
-                    ret = SendWebSocketMessageAsync(new LineDrawSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
+                    ret = SendWebSocketMessageAsync(new LineSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
                     break;
             }
             return ret;
@@ -476,7 +533,7 @@ namespace ScribblersSharp
             {
                 throw new ArgumentNullException();
             }
-            return SendWebSocketMessageAsync(new ChatMessageSendGameMessageData(content));
+            return SendWebSocketMessageAsync(new MessageSendGameMessageData(content));
         }
 
         /// <summary>
@@ -537,7 +594,7 @@ namespace ScribblersSharp
                             OnUpdatePlayersGameMessageReceived(players);
                         }
                         break;
-                    case UpdateWordHintsReceiveGameMessageData update_word_hints_game_message:
+                    case UpdateWordhintReceiveGameMessageData update_word_hints_game_message:
                         if (OnUpdateWordHintsGameMessageReceived != null)
                         {
                             word_hints = new IWordHint[update_word_hints_game_message.Data.Length];
@@ -549,14 +606,14 @@ namespace ScribblersSharp
                             OnUpdateWordHintsGameMessageReceived(word_hints);
                         }
                         break;
-                    case GuessingChatMessageReceiveGameMessageData guessing_chat_message_game_message:
+                    case MessageReceiveGameMessageData guessing_chat_message_game_message:
                         if (OnGuessingChatMessageGameMessageReceived != null)
                         {
                             chat_message_data = guessing_chat_message_game_message.Data;
                             OnGuessingChatMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
                         }
                         break;
-                    case NonGuessingChatMessageReceiveGameMessageData non_guessing_chat_message_game_message:
+                    case NonGuessingPlayerMessageReceiveGameMessageData non_guessing_chat_message_game_message:
                         if (OnNonGuessingChatMessageGameMessageReceived != null)
                         {
                             chat_message_data = non_guessing_chat_message_game_message.Data;
@@ -566,14 +623,14 @@ namespace ScribblersSharp
                     case SystemMessageReceiveGameMessageData system_message_game_message:
                         OnSystemMessageGameMessageReceived?.Invoke(system_message_game_message.Data);
                         break;
-                    case LineDrawReceiveGameMessageData line_draw_game_message:
+                    case LineReceiveGameMessageData line_draw_game_message:
                         if (OnLineDrawnGameMessageReceived != null)
                         {
                             LineData line_data = line_draw_game_message.Data;
                             OnLineDrawnGameMessageReceived(line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth);
                         }
                         break;
-                    case FillDrawReceiveGameMessageData fill_draw_game_message:
+                    case FillReceiveGameMessageData fill_draw_game_message:
                         if (OnFillDrawnGameMessageReceived != null)
                         {
                             FillData fill_data = fill_draw_game_message.Data;

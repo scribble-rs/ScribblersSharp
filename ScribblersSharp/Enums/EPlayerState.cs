@@ -11,7 +11,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Unknown player state
         /// </summary>
-        Unknown = -1,
+        Unknown,
 
         /// <summary>
         /// Standby
