@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+
 /// <summary>
 /// Scribble.rs ♯ data namespace
 /// </summary>

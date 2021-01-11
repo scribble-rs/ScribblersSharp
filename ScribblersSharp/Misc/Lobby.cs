@@ -112,6 +112,11 @@ namespace ScribblersSharp
         public event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
+        /// Correct guess game message received event
+        /// </summary>
+        public event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
+
+        /// <summary>
         /// This event will be invoked when a non-meaningful game message has been received.
         /// </summary>
         public event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
@@ -315,6 +320,7 @@ namespace ScribblersSharp
                 IsPlayerDrawing = true;
                 receivedGameMessages.Enqueue(gameMessage);
             }, MessageParseFailedEvent);
+            AddMessageParser<CorrectGuessReceiveGameMessageData>((gameMessage, json) => receivedGameMessages.Enqueue(gameMessage), MessageParseFailedEvent);
             webSocketReceiveThread = new Thread(async () =>
             {
                 using (MemoryStream memory_stream = new MemoryStream())
@@ -641,7 +647,10 @@ namespace ScribblersSharp
                         OnClearDrawingBoardGameMessageReceived?.Invoke();
                         break;
                     case YourTurnReceiveGameMessageData your_turn_game_message:
-                        OnYourTurnGameMessageReceived((string[])(your_turn_game_message.Data.Clone()));
+                        OnYourTurnGameMessageReceived?.Invoke((string[])your_turn_game_message.Data.Clone());
+                        break;
+                    case CorrectGuessReceiveGameMessageData correct_guess_game_message:
+                        OnCorrectGuessGameMessageReceived?.Invoke(correct_guess_game_message.Data);
                         break;
                 }
             }
