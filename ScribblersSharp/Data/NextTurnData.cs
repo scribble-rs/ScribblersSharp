@@ -15,7 +15,7 @@ namespace ScribblersSharp.Data
         /// Round end time
         /// </summary>
         [JsonProperty("roundEndTime")]
-        public ulong RoundEndTime { get; set; }
+        public long RoundEndTime { get; set; }
 
         /// <summary>
         /// Players
@@ -32,6 +32,8 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public bool IsValid => Protection.IsValid(Players);
+        public bool IsValid =>
+            Protection.IsValid(Players) &&
+            Protection.AreUnique(Players, (left, right) => left.ID != right.ID);
     }
 }

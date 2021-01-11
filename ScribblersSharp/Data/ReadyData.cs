@@ -64,18 +64,26 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Game state
         /// </summary>
-        [JsonProperty("state")]
+        [JsonProperty("gameState")]
         [JsonConverter(typeof(GameStateJSONConverter))]
         public EGameState GameState { get; set; }
 
         /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public bool IsValid =>
-            (PlayerID != null) &&
-            (OwnerID != null) &&
-            Protection.IsValid(WordHints) &&
-            Protection.IsValid(Players) &&
-            (GameState != EGameState.Unknown);
+        public bool IsValid
+        {
+            get
+            {
+                bool b1 = (PlayerID != null);
+                bool b2 = (OwnerID != null);
+                bool b3 = (GameState != EGameState.Unknown);
+                bool b4 = Protection.IsValid(Players);
+                bool b5 = Protection.IsContained(Players, (player) => player.ID == PlayerID);
+                bool b6 = Protection.IsContained(Players, (player) => player.ID == OwnerID);
+                bool b7 = Protection.AreUnique(Players, (left, right) => left.ID != right.ID);
+                return b1 && b2 && b3 && b4 && b5 && b6 && b7;
+            }
+        }
     }
 }

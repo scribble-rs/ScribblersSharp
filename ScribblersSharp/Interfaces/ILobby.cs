@@ -95,11 +95,6 @@ namespace ScribblersSharp
         string LobbyID { get; }
 
         /// <summary>
-        /// Username
-        /// </summary>
-        string Username { get; }
-
-        /// <summary>
         /// Drawing board base width
         /// </summary>
         uint DrawingBoardBaseWidth { get; }
@@ -110,14 +105,19 @@ namespace ScribblersSharp
         uint DrawingBoardBaseHeight { get; }
 
         /// <summary>
-        /// Player ID
+        /// My player
         /// </summary>
-        string PlayerID { get; }
+        IPlayer MyPlayer { get; }
 
         /// <summary>
         /// Is player allowed to draw
         /// </summary>
         bool IsPlayerAllowedToDraw { get; }
+
+        /// <summary>
+        /// Lobby owner
+        /// </summary>
+        IPlayer Owner { get; }
 
         /// <summary>
         /// Round
@@ -142,7 +142,17 @@ namespace ScribblersSharp
         /// <summary>
         /// Players
         /// </summary>
-        IReadOnlyList<IPlayer> Players { get; }
+        IReadOnlyDictionary<string, IPlayer> Players { get; }
+
+        /// <summary>
+        /// Current drawing
+        /// </summary>
+        IReadOnlyList<IDrawCommand> CurrentDrawing { get; }
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        EGameState GameState { get; }
 
         /// <summary>
         /// Adds a game message parser

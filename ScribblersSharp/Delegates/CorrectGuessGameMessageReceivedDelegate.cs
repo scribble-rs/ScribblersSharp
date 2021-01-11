@@ -6,5 +6,6 @@ namespace ScribblersSharp
     /// <summary>
     /// "correct-guess" game message received delegate
     /// </summary>
-    public delegate void CorrectGuessGameMessageReceivedDelegate(string playerID);
+    /// <param name="player">Player</param>
+    public delegate void CorrectGuessGameMessageReceivedDelegate(IPlayer player);
 }

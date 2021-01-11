@@ -125,7 +125,7 @@ namespace ScribblersSharp
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
+                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else
                 {
@@ -228,7 +228,7 @@ namespace ScribblersSharp
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, username, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
+                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
                 }
                 else
                 {

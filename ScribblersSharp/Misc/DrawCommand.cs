@@ -51,7 +51,7 @@ namespace ScribblersSharp
         /// </summary>
         public bool IsValid =>
             (Type != EDrawCommandType.Unknown) &&
-            (LineWidth > float.Epsilon);
+            ((Type != EDrawCommandType.Line) || (LineWidth > float.Epsilon));
 
         /// <summary>
         /// Constructor
@@ -69,7 +69,7 @@ namespace ScribblersSharp
             {
                 throw new ArgumentException("Draw command type is unknown.", nameof(type));
             }
-            if (lineWidth > float.Epsilon)
+            if ((type == EDrawCommandType.Line) && (lineWidth <= float.Epsilon))
             {
                 throw new ArgumentException("Line width must be a positive non zero value.", nameof(lineWidth));
             }

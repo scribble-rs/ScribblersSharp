@@ -27,11 +27,6 @@ namespace ScribblersSharp
         private readonly Dictionary<string, List<IBaseGameMessageParser>> gameMessageParsers = new Dictionary<string, List<IBaseGameMessageParser>>();
 
         /// <summary>
-        /// WebSocket receive thread
-        /// </summary>
-        private Thread webSocketReceiveThread;
-
-        /// <summary>
         /// Received game messages
         /// </summary>
         private readonly ConcurrentQueue<string> receivedGameMessages = new ConcurrentQueue<string>();
@@ -44,7 +39,17 @@ namespace ScribblersSharp
         /// <summary>
         /// Players
         /// </summary>
-        private IPlayer[] players = Array.Empty<IPlayer>();
+        private readonly Dictionary<string, IPlayer> players = new Dictionary<string, IPlayer>();
+
+        /// <summary>
+        /// Current drawing
+        /// </summary>
+        private readonly List<IDrawCommand> currentDrawing = new List<IDrawCommand>();
+
+        /// <summary>
+        /// WebSocket receive thread
+        /// </summary>
+        private Thread webSocketReceiveThread;
 
         /// <summary>
         /// Word hints
@@ -137,11 +142,6 @@ namespace ScribblersSharp
         public string LobbyID { get; private set; }
 
         /// <summary>
-        /// Username
-        /// </summary>
-        public string Username { get; private set; }
-
-        /// <summary>
         /// Drawing board base width
         /// </summary>
         public uint DrawingBoardBaseWidth { get; private set; }
@@ -152,14 +152,19 @@ namespace ScribblersSharp
         public uint DrawingBoardBaseHeight { get; private set; }
 
         /// <summary>
-        /// Player ID
+        /// My player
         /// </summary>
-        public string PlayerID { get; private set; } = string.Empty;
+        public IPlayer MyPlayer { get; private set; }
 
         /// <summary>
         /// Is player allowed to draw
         /// </summary>
         public bool IsPlayerAllowedToDraw { get; private set; }
+
+        /// <summary>
+        /// Lobby owner
+        /// </summary>
+        public IPlayer Owner { get; private set; }
 
         /// <summary>
         /// Round
@@ -184,55 +189,60 @@ namespace ScribblersSharp
         /// <summary>
         /// Players
         /// </summary>
-        public IReadOnlyList<IPlayer> Players => players;
+        public IReadOnlyDictionary<string, IPlayer> Players => players;
+
+        /// <summary>
+        /// Current drawing
+        /// </summary>
+        public IReadOnlyList<IDrawCommand> CurrentDrawing => currentDrawing;
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        public EGameState GameState { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="clientWebSocket">Client WebSocket</param>
-        /// <param name="username">Username</param>
         /// <param name="lobbyID">LobbyID</param>
-        public Lobby(ClientWebSocket clientWebSocket, string username, string lobbyID, uint drawingBoardBaseWidth, uint drawingBoardBaseHeight)
+        public Lobby(ClientWebSocket clientWebSocket, string lobbyID, uint drawingBoardBaseWidth, uint drawingBoardBaseHeight)
         {
             this.clientWebSocket = clientWebSocket ?? throw new ArgumentNullException(nameof(clientWebSocket));
-            Username = username ?? throw new ArgumentNullException(nameof(username));
             LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
             DrawingBoardBaseWidth = drawingBoardBaseWidth;
             DrawingBoardBaseHeight = drawingBoardBaseHeight;
             AddMessageParser<ReadyReceiveGameMessageData>((gameMessage, json) =>
             {
-                ReadyData ready_data = gameMessage.Data;
-                PlayerID = ready_data.PlayerID;
-                IsPlayerAllowedToDraw = ready_data.IsPlayerAllowedToDraw;
-                Round = ready_data.Round;
-                MaximalRounds = ready_data.MaximalRounds;
-                RoundEndTime = ready_data.RoundEndTime;
-                if (ready_data.WordHints == null)
+                ReadyData ready = gameMessage.Data;
+                IsPlayerAllowedToDraw = ready.IsPlayerAllowedToDraw;
+                Round = ready.Round;
+                MaximalRounds = ready.MaximalRounds;
+                RoundEndTime = ready.RoundEndTime;
+                if (ready.WordHints == null)
                 {
                     wordHints = Array.Empty<IWordHint>();
                 }
                 else
                 {
-                    if (wordHints.Length != ready_data.WordHints.Count)
+                    if (wordHints.Length != ready.WordHints.Count)
                     {
-                        wordHints = new IWordHint[ready_data.WordHints.Count];
+                        wordHints = new IWordHint[ready.WordHints.Count];
                     }
                     Parallel.For(0, wordHints.Length, (index) =>
                     {
-                        WordHintData word_hint_data = ready_data.WordHints[index];
+                        WordHintData word_hint_data = ready.WordHints[index];
                         wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                     });
                 }
-                if (players.Length != ready_data.Players.Count)
+                players.Clear();
+                foreach (PlayerData player in ready.Players)
                 {
-                    players = new IPlayer[ready_data.Players.Count];
+                    players.Add(player.ID, new Player(player.ID, player.Name, player.Score, player.IsConnected, player.LastScore, player.Rank, player.State));
                 }
-                Parallel.For(0, players.Length, (index) =>
-                {
-                    PlayerData player_data = ready_data.Players[index];
-                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                });
-                List<IDrawCommand> draw_commands = new List<IDrawCommand>();
+                MyPlayer = players[ready.PlayerID];
+                Owner = players[ready.OwnerID];
+                currentDrawing.Clear();
                 JObject json_object = JObject.Parse(json);
                 if (json_object.ContainsKey("data"))
                 {
@@ -251,7 +261,7 @@ namespace ScribblersSharp
                                             LineData line_data = json_draw_command.ToObject<LineData>();
                                             if (line_data != null)
                                             {
-                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                                currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
                                             }
                                         }
                                         else
@@ -259,7 +269,7 @@ namespace ScribblersSharp
                                             FillData fill_data = json_draw_command.ToObject<FillData>();
                                             if (fill_data != null)
                                             {
-                                                draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                                currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
                                             }
                                         }
                                     }
@@ -268,47 +278,52 @@ namespace ScribblersSharp
                         }
                     }
                 }
-                OnReadyGameMessageReceived?.Invoke(ready_data.PlayerID, ready_data.IsPlayerAllowedToDraw, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, wordHints, players, draw_commands, ready_data.GameState);
+                GameState = ready.GameState;
+                OnReadyGameMessageReceived?.Invoke(this);
             }, MessageParseFailedEvent);
             AddMessageParser<NextTurnReceiveGameMessageData>((gameMessage, json) =>
             {
-                NextTurnData next_turn_data = gameMessage.Data;
+                NextTurnData next_turn = gameMessage.Data;
                 IsPlayerAllowedToDraw = false;
-                if (players.Length != next_turn_data.Players.Length)
+                GameState = EGameState.Ongoing;
+                Round = next_turn.Round;
+                RoundEndTime = next_turn.RoundEndTime;
+                players.Clear();
+                foreach (PlayerData player_data in next_turn.Players)
                 {
-                    players = new IPlayer[next_turn_data.Players.Length];
+                    players.Add(player_data.ID, new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State));
                 }
-                Parallel.For(0, players.Length, (index) =>
+                if (Owner != null)
                 {
-                    PlayerData player_data = next_turn_data.Players[index];
-                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                });
-                OnNextTurnGameMessageReceived?.Invoke(players, next_turn_data.Round, next_turn_data.RoundEndTime);
+                    Owner = players.ContainsKey(Owner.ID) ? players[Owner.ID] : null;
+                }
+                currentDrawing.Clear();
+                OnNextTurnGameMessageReceived?.Invoke(this);
             }, MessageParseFailedEvent);
             AddMessageParser<UpdatePlayersReceiveGameMessageData>((gameMessage, json) =>
             {
-                PlayerData[] player_array_data = gameMessage.Data;
-                if (players.Length != player_array_data.Length)
+                players.Clear();
+                foreach (PlayerData player in gameMessage.Data)
                 {
-                    players = new IPlayer[player_array_data.Length];
+                    players.Add(player.ID, new Player(player.ID, player.Name, player.Score, player.IsConnected, player.LastScore, player.Rank, player.State));
                 }
-                Parallel.For(0, players.Length, (index) =>
+                if (Owner != null)
                 {
-                    PlayerData player_data = player_array_data[index];
-                    players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
-                });
+                    Owner = players.ContainsKey(Owner.ID) ? players[Owner.ID] : null;
+                }
                 OnUpdatePlayersGameMessageReceived?.Invoke(players);
             }, MessageParseFailedEvent);
             AddMessageParser<UpdateWordhintReceiveGameMessageData>((gameMessage, json) =>
             {
-                WordHintData[] word_hint_array_data = gameMessage.Data;
-                if (wordHints.Length != word_hint_array_data.Length)
+                GameState = EGameState.Ongoing;
+                WordHintData[] word_hints = gameMessage.Data;
+                if (wordHints.Length != word_hints.Length)
                 {
-                    wordHints = new IWordHint[word_hint_array_data.Length];
+                    wordHints = new IWordHint[word_hints.Length];
                 }
-                Parallel.For(0, players.Length, (index) =>
+                Parallel.For(0, wordHints.Length, (index) =>
                 {
-                    WordHintData word_hint_data = word_hint_array_data[index];
+                    WordHintData word_hint_data = word_hints[index];
                     wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                 });
                 OnUpdateWordhintGameMessageReceived?.Invoke(wordHints);
@@ -316,18 +331,34 @@ namespace ScribblersSharp
             AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => OnMessageGameMessageReceived?.Invoke(gameMessage.Data.Author, gameMessage.Data.Content), MessageParseFailedEvent);
             AddMessageParser<NonGuessingPlayerMessageReceiveGameMessageData>((gameMessage, json) => OnNonGuessingPlayerMessageGameMessageReceived?.Invoke(gameMessage.Data.Author, gameMessage.Data.Content), MessageParseFailedEvent);
             AddMessageParser<SystemMessageReceiveGameMessageData>((gameMessage, json) => OnSystemMessageGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);
-            AddMessageParser<LineReceiveGameMessageData>((gameMessage, json) => OnLineGameMessageReceived?.Invoke(gameMessage.Data.FromX, gameMessage.Data.FromY, gameMessage.Data.ToX, gameMessage.Data.ToY, gameMessage.Data.Color, gameMessage.Data.LineWidth), MessageParseFailedEvent);
-            AddMessageParser<FillReceiveGameMessageData>((gameMessage, json) => OnFillGameMessageReceived(gameMessage.Data.X, gameMessage.Data.Y, gameMessage.Data.Color), MessageParseFailedEvent);
-            AddMessageParser<ClearDrawingBoardReceiveGameMessageData>((gameMessage, json) => OnClearDrawingBoardGameMessageReceived?.Invoke(), MessageParseFailedEvent);
+            AddMessageParser<LineReceiveGameMessageData>((gameMessage, json) =>
+            {
+                LineData line = gameMessage.Data;
+                GameState = EGameState.Ongoing;
+                currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth));
+                OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth);
+            }, MessageParseFailedEvent);
+            AddMessageParser<FillReceiveGameMessageData>((gameMessage, json) =>
+            {
+                FillData fill = gameMessage.Data;
+                currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, fill.Color, 0.0f));
+                OnFillGameMessageReceived(fill.X, fill.Y, fill.Color);
+            }, MessageParseFailedEvent);
+            AddMessageParser<ClearDrawingBoardReceiveGameMessageData>((gameMessage, json) =>
+            {
+                currentDrawing.Clear();
+                OnClearDrawingBoardGameMessageReceived?.Invoke();
+            }, MessageParseFailedEvent);
             AddMessageParser<YourTurnReceiveGameMessageData>((gameMessage, json) =>
             {
                 IsPlayerAllowedToDraw = true;
+                currentDrawing.Clear();
                 OnYourTurnGameMessageReceived?.Invoke((string[])gameMessage.Data.Clone());
             }, MessageParseFailedEvent);
-            AddMessageParser<CorrectGuessReceiveGameMessageData>((gameMessage, json) => OnCorrectGuessGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);
+            AddMessageParser<CorrectGuessReceiveGameMessageData>((gameMessage, json) => OnCorrectGuessGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data) ? players[gameMessage.Data] : null), MessageParseFailedEvent);
             AddMessageParser<DrawingReceiveGameMessageData>((gameMessage, json) =>
             {
-                List<IDrawCommand> draw_commands = new List<IDrawCommand>();
+                currentDrawing.Clear();
                 JObject json_object = JObject.Parse(json);
                 if (json_object.ContainsKey("data"))
                 {
@@ -342,7 +373,7 @@ namespace ScribblersSharp
                                     LineData line_data = json_draw_command.ToObject<LineData>();
                                     if (line_data != null)
                                     {
-                                        draw_commands.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                        currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
                                     }
                                 }
                                 else
@@ -350,14 +381,14 @@ namespace ScribblersSharp
                                     FillData fill_data = json_draw_command.ToObject<FillData>();
                                     if (fill_data != null)
                                     {
-                                        draw_commands.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                        currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
                                     }
                                 }
                             }
                         }
                     }
                 }
-                OnDrawingGameMessageReceived?.Invoke(draw_commands);
+                OnDrawingGameMessageReceived?.Invoke(currentDrawing);
             }, MessageParseFailedEvent);
             webSocketReceiveThread = new Thread(async () =>
             {
@@ -407,7 +438,7 @@ namespace ScribblersSharp
             }
             else
             {
-                Console.Error.WriteLine($"Message is invalid. Expected message type: \"{ expectedMessageType }\"; Current message type: { message.MessageType }{ Environment.NewLine }{ Environment.NewLine }JSON:{ Environment.NewLine }{ json }");
+                Console.Error.WriteLine($"Message is invalid. Expected message type: \"{ expectedMessageType }\"; Current message type: \"{ message.MessageType }\"{ Environment.NewLine }{ Environment.NewLine }JSON:{ Environment.NewLine }{ json }");
             }
         }
 

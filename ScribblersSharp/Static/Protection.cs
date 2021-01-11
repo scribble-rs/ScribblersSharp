@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -37,6 +40,53 @@ namespace ScribblersSharp
                     }
                 }
             }
+            return ret;
+        }
+
+        public static bool IsContained<T>(IEnumerable<T> collection, ContainsDelegate<T> onContains)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+            if (onContains == null)
+            {
+                throw new ArgumentNullException(nameof(onContains));
+            }
+            bool ret = false;
+            Parallel.ForEach(collection, (element, parallelLoopState) =>
+            {
+                if (onContains(element))
+                {
+                    ret = true;
+                    parallelLoopState.Break();
+                }
+            });
+            return ret;
+        }
+
+        public static bool AreUnique<T>(IReadOnlyList<T> collection, AreUniqueDelegate<T> onAreUnique)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+            if (onAreUnique == null)
+            {
+                throw new ArgumentNullException(nameof(onAreUnique));
+            }
+            bool ret = true;
+            Parallel.For(0, collection.Count, (leftIndex, parallelLoopState) =>
+            {
+                for (int right_index = 0; right_index < collection.Count; right_index++)
+                {
+                    if ((leftIndex != right_index) && !onAreUnique(collection[leftIndex], collection[right_index]))
+                    {
+                        ret = false;
+                        parallelLoopState.Break();
+                    }
+                }
+            });
             return ret;
         }
     }

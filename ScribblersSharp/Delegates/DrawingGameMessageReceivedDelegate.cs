@@ -8,5 +8,6 @@ namespace ScribblersSharp
     /// <summary>
     /// "drawing" game message received delegate
     /// </summary>
-    public delegate void DrawingGameMessageReceivedDelegate(IReadOnlyList<IDrawCommand> drawCommands);
+    /// <param name="currentDrawing">Current drawing</param>
+    public delegate void DrawingGameMessageReceivedDelegate(IReadOnlyList<IDrawCommand> currentDrawing);
 }
