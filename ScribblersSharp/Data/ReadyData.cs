@@ -62,12 +62,6 @@ namespace ScribblersSharp.Data
         public List<PlayerData> Players { get; set; }
 
         /// <summary>
-        /// Current drawing
-        /// </summary>
-        [JsonIgnore]
-        public List<DrawCommand> CurrentDrawing { get; set; }
-
-        /// <summary>
         /// Game state
         /// </summary>
         [JsonProperty("state")]

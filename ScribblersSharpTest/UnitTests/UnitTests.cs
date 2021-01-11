@@ -38,7 +38,7 @@ namespace ScribblersSharpTest
         [SetUp]
         public void Setup()
         {
-
+            // ...
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace ScribblersSharpTest
                 };
                 lobbies[index] = lobby;
             }
-            lobbies[0].SendStartGameAsync().GetAwaiter().GetResult();
+            lobbies[0].SendStartGameMessageAsync().GetAwaiter().GetResult();
             bool keep_running = true;
             while (keep_running)
             {

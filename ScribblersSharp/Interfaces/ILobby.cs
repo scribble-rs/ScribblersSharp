@@ -75,6 +75,16 @@ namespace ScribblersSharp
         event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
 
         /// <summary>
+        /// "drawing" game message received event
+        /// </summary>
+        event DrawingGameMessageReceivedDelegate OnDrawingGameMessageReceived;
+
+        /// <summary>
+        /// This event will be invoked when a non-meaningful game message has been received.
+        /// </summary>
+        event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
+
+        /// <summary>
         /// WebSocket state
         /// </summary>
         WebSocketState WebSocketState { get; }
@@ -152,56 +162,80 @@ namespace ScribblersSharp
         bool RemoveMessageParser<T>(IGameMessageParser<T> gameMessageParser) where T : IReceiveGameMessageData;
 
         /// <summary>
-        /// Parses incoming message
-        /// </summary>
-        /// <param name="json">JSON</param>
-        void ParseMessage(string json);
-
-        /// <summary>
-        /// Send start game (asynchronous)
+        /// Sends a "start" game message (asynchronous)
         /// </summary>
         /// <returns>Task</returns>
-        Task SendStartGameAsync();
+        Task SendStartGameMessageAsync();
 
         /// <summary>
-        /// Clear drawing board (asynchronous)
+        /// Sends a "name-change" game message (asynchronous)
+        /// </summary>
+        /// <param name="newUsername">New username</param>
+        /// <returns>Task</returns>
+        Task SendNameChangeGameMessageAsync(string newUsername);
+
+        /// <summary>
+        /// Sends a "request-drawing" game message (asynchronous)
         /// </summary>
         /// <returns>Task</returns>
-        Task SendClearDrawingBoardAsync();
+        Task SendRequestDrawingGameMessageAsync();
 
         /// <summary>
-        /// Send draw command (asynchronous)
+        /// Sends a "clear-drawing-board" game message (asynchronous)
         /// </summary>
-        /// <param name="type">Draw command type</param>
-        /// <param name="from">Draw from</param>
-        /// <param name="to">Draw to</param>
+        /// <returns>Task</returns>
+        Task SendClearDrawingBoardGameMessageAsync();
+
+        /// <summary>
+        /// Sends a "fill" game message (asynchronous)
+        /// </summary>
+        /// <param name="positionX"></param>
+        /// <param name="positionY"></param>
+        /// <param name="color"></param>
+        /// <returns>Task</returns>
+        Task SendFillGameMessageAsync(float positionX, float positionY, Color color);
+
+        /// <summary>
+        /// Sends a "line" game message (asynchronous)
+        /// </summary>
+        /// <param name="fromX">Draw from X</param>
+        /// <param name="fromY">Draw from Y</param>
+        /// <param name="toX">Draw to X</param>
+        /// <param name="toY">Draw to Y</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
         /// <returns>Task</returns>
-        Task SendDrawCommandAsync(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
+        Task SendLineGameMessageAsync(float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
 
         /// <summary>
-        /// Send choose word (asynchronous)
+        /// Sends a "choose-word" game message (asynchronous)
         /// </summary>
         /// <param name="index">Choose word index</param>
         /// <returns>Task</returns>
-        Task SendChooseWordAsync(uint index);
+        Task SendChooseWordGameMessageAsync(uint index);
 
         /// <summary>
-        /// Send chat message (asynchronous)
+        /// Sends a "kick-vote" game message (asynchronous)
+        /// </summary>
+        /// <param name="toKickPlayer">To kick player</param>
+        /// <returns></returns>
+        Task SendKickVoteAsync(IPlayer toKickPlayer);
+
+        /// <summary>
+        /// Sends a "message" game message (asynchronous)
         /// </summary>
         /// <param name="content">Content</param>
         /// <returns>Task</returns>
-        Task SendChatMessageAsync(string content);
+        Task SendMessageGameMessageAsync(string content);
 
         /// <summary>
-        /// Process events synchronously
+        /// Processes events synchronously
         /// </summary>
         void ProcessEvents();
 
         /// <summary>
-        /// Close (asynchronous)
+        /// Closes lobby
         /// </summary>
-        void CloseAsync();
+        void Close();
     }
 }
