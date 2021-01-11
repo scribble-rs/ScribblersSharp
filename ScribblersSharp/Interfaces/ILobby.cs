@@ -115,9 +115,9 @@ namespace ScribblersSharp
         string PlayerID { get; }
 
         /// <summary>
-        /// Is player drawing
+        /// Is player allowed to draw
         /// </summary>
-        bool IsPlayerDrawing { get; }
+        bool IsPlayerAllowedToDraw { get; }
 
         /// <summary>
         /// Round

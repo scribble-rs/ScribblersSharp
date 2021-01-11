@@ -157,9 +157,9 @@ namespace ScribblersSharp
         public string PlayerID { get; private set; } = string.Empty;
 
         /// <summary>
-        /// Is player drawing
+        /// Is player allowed to draw
         /// </summary>
-        public bool IsPlayerDrawing { get; private set; }
+        public bool IsPlayerAllowedToDraw { get; private set; }
 
         /// <summary>
         /// Round
@@ -203,7 +203,7 @@ namespace ScribblersSharp
             {
                 ReadyData ready_data = gameMessage.Data;
                 PlayerID = ready_data.PlayerID;
-                IsPlayerDrawing = ready_data.IsDrawing;
+                IsPlayerAllowedToDraw = ready_data.IsPlayerAllowedToDraw;
                 Round = ready_data.Round;
                 MaximalRounds = ready_data.MaximalRounds;
                 RoundEndTime = ready_data.RoundEndTime;
@@ -268,12 +268,12 @@ namespace ScribblersSharp
                         }
                     }
                 }
-                OnReadyGameMessageReceived?.Invoke(ready_data.PlayerID, ready_data.IsDrawing, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, wordHints, players, draw_commands, ready_data.GameState);
+                OnReadyGameMessageReceived?.Invoke(ready_data.PlayerID, ready_data.IsPlayerAllowedToDraw, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, wordHints, players, draw_commands, ready_data.GameState);
             }, MessageParseFailedEvent);
             AddMessageParser<NextTurnReceiveGameMessageData>((gameMessage, json) =>
             {
                 NextTurnData next_turn_data = gameMessage.Data;
-                IsPlayerDrawing = false;
+                IsPlayerAllowedToDraw = false;
                 if (players.Length != next_turn_data.Players.Length)
                 {
                     players = new IPlayer[next_turn_data.Players.Length];
@@ -321,7 +321,7 @@ namespace ScribblersSharp
             AddMessageParser<ClearDrawingBoardReceiveGameMessageData>((gameMessage, json) => OnClearDrawingBoardGameMessageReceived?.Invoke(), MessageParseFailedEvent);
             AddMessageParser<YourTurnReceiveGameMessageData>((gameMessage, json) =>
             {
-                IsPlayerDrawing = true;
+                IsPlayerAllowedToDraw = true;
                 OnYourTurnGameMessageReceived?.Invoke((string[])gameMessage.Data.Clone());
             }, MessageParseFailedEvent);
             AddMessageParser<CorrectGuessReceiveGameMessageData>((gameMessage, json) => OnCorrectGuessGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);

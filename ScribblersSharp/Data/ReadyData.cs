@@ -20,10 +20,10 @@ namespace ScribblersSharp.Data
         public string PlayerID { get; set; }
 
         /// <summary>
-        /// Is player drawing
+        /// Is player allowed to draw
         /// </summary>
-        [JsonProperty("isDrawing")]
-        public bool IsDrawing { get; set; }
+        [JsonProperty("allowDrawing")]
+        public bool IsPlayerAllowedToDraw { get; set; }
 
         /// <summary>
         /// Owner ID
