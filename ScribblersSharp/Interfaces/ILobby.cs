@@ -15,62 +15,62 @@ namespace ScribblersSharp
     public interface ILobby : IDisposable
     {
         /// <summary>
-        /// Ready game message received event
+        /// "ready" game message received event
         /// </summary>
         event ReadyGameMessageReceivedDelegate OnReadyGameMessageReceived;
 
         /// <summary>
-        /// Next turn game message received event
+        /// "next-turn" game message received event
         /// </summary>
         event NextTurnGameMessageReceivedDelegate OnNextTurnGameMessageReceived;
 
         /// <summary>
-        /// Update players game message received event
+        /// "update-players" game message received event
         /// </summary>
         event UpdatePlayersGameMessageReceivedDelegate OnUpdatePlayersGameMessageReceived;
 
         /// <summary>
-        /// Update word hints game message received event
+        /// "update-wordhint" game message received event
         /// </summary>
-        event UpdateWordHintsGameMessageReceivedDelegate OnUpdateWordHintsGameMessageReceived;
+        event UpdateWordhintGameMessageReceivedDelegate OnUpdateWordhintGameMessageReceived;
 
         /// <summary>
-        /// Guessing chat message game message received event
+        /// "message" game message received event
         /// </summary>
-        event GuessingChatMessageGameMessageReceivedDelegate OnGuessingChatMessageGameMessageReceived;
+        event MessageGameMessageReceivedDelegate OnMessageGameMessageReceived;
 
         /// <summary>
-        /// Non-guessing chat message game message received event
+        /// "non-guessing-player-message" game message received event
         /// </summary>
-        event NonGuessingChatMessageGameMessageReceivedDelegate OnNonGuessingChatMessageGameMessageReceived;
+        event NonGuessingPlayerMessageGameMessageReceivedDelegate OnNonGuessingPlayerMessageGameMessageReceived;
 
         /// <summary>
-        /// System message game message received event
+        /// "system-message" game message received event
         /// </summary>
         event SystemMessageGameMessageReceivedDelegate OnSystemMessageGameMessageReceived;
 
         /// <summary>
-        /// Line drawn game message received event
+        /// "line" game message received event
         /// </summary>
-        event LineDrawnGameMessageReceivedDelegate OnLineDrawnGameMessageReceived;
+        event LineGameMessageReceivedDelegate OnLineGameMessageReceived;
 
         /// <summary>
-        /// Fill drawn game message received event
+        /// "fill" game message received event
         /// </summary>
-        event FillDrawnGameMessageReceivedDelegate OnFillDrawnGameMessageReceived;
+        event FillGameMessageReceivedDelegate OnFillGameMessageReceived;
 
         /// <summary>
-        /// Clear drawing board game message received event
+        /// "clear-drawing-board" game message received event
         /// </summary>
         event ClearDrawingBoardGameMessageReceivedDelegate OnClearDrawingBoardGameMessageReceived;
 
         /// <summary>
-        /// Your turn game message received event
+        /// "your-turn" game message received event
         /// </summary>
         event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
-        /// Correct guess game message received event
+        /// "correct-guess" game message received event
         /// </summary>
         event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
 

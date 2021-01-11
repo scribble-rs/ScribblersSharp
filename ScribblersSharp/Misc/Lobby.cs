@@ -57,62 +57,62 @@ namespace ScribblersSharp
         private ArraySegment<byte> receiveBuffer = new ArraySegment<byte>(new byte[2048]);
 
         /// <summary>
-        /// Ready game message received event
+        /// "ready" game message received event
         /// </summary>
         public event ReadyGameMessageReceivedDelegate OnReadyGameMessageReceived;
 
         /// <summary>
-        /// Next turn game message received event
+        /// "next-turn" game message received event
         /// </summary>
         public event NextTurnGameMessageReceivedDelegate OnNextTurnGameMessageReceived;
 
         /// <summary>
-        /// Update players game message received event
+        /// "update-players" game message received event
         /// </summary>
         public event UpdatePlayersGameMessageReceivedDelegate OnUpdatePlayersGameMessageReceived;
 
         /// <summary>
-        /// Update word hints game message received event
+        /// "update-wordhint" game message received event
         /// </summary>
-        public event UpdateWordHintsGameMessageReceivedDelegate OnUpdateWordHintsGameMessageReceived;
+        public event UpdateWordhintGameMessageReceivedDelegate OnUpdateWordhintGameMessageReceived;
 
         /// <summary>
-        /// Guessing chat message game message received event
+        /// "message" game message received event
         /// </summary>
-        public event GuessingChatMessageGameMessageReceivedDelegate OnGuessingChatMessageGameMessageReceived;
+        public event MessageGameMessageReceivedDelegate OnMessageGameMessageReceived;
 
         /// <summary>
-        /// Non-guessing chat message game message received event
+        /// "non-guessing-player-message" game message received event
         /// </summary>
-        public event NonGuessingChatMessageGameMessageReceivedDelegate OnNonGuessingChatMessageGameMessageReceived;
+        public event NonGuessingPlayerMessageGameMessageReceivedDelegate OnNonGuessingPlayerMessageGameMessageReceived;
 
         /// <summary>
-        /// System message game message received event
+        /// "system-message" game message received event
         /// </summary>
         public event SystemMessageGameMessageReceivedDelegate OnSystemMessageGameMessageReceived;
 
         /// <summary>
-        /// Line drawn game message received event
+        /// "line" game message received event
         /// </summary>
-        public event LineDrawnGameMessageReceivedDelegate OnLineDrawnGameMessageReceived;
+        public event LineGameMessageReceivedDelegate OnLineGameMessageReceived;
 
         /// <summary>
-        /// Fill drawn game message received event
+        /// "fill" game message received event
         /// </summary>
-        public event FillDrawnGameMessageReceivedDelegate OnFillDrawnGameMessageReceived;
+        public event FillGameMessageReceivedDelegate OnFillGameMessageReceived;
 
         /// <summary>
-        /// Clear drawing board game message received event
+        /// "clear-drawing-board" game message received event
         /// </summary>
         public event ClearDrawingBoardGameMessageReceivedDelegate OnClearDrawingBoardGameMessageReceived;
 
         /// <summary>
-        /// Your turn game message received event
+        /// "your-turn" game message received event
         /// </summary>
         public event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
-        /// Correct guess game message received event
+        /// "correct-guess" game message received event
         /// </summary>
         public event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
 
@@ -600,47 +600,47 @@ namespace ScribblersSharp
                             OnUpdatePlayersGameMessageReceived(players);
                         }
                         break;
-                    case UpdateWordhintReceiveGameMessageData update_word_hints_receive_game_message:
-                        if (OnUpdateWordHintsGameMessageReceived != null)
+                    case UpdateWordhintReceiveGameMessageData update_wordhint_receive_game_message:
+                        if (OnUpdateWordhintGameMessageReceived != null)
                         {
-                            word_hints = new IWordHint[update_word_hints_receive_game_message.Data.Length];
+                            word_hints = new IWordHint[update_wordhint_receive_game_message.Data.Length];
                             Parallel.For(0, word_hints.Length, (index) =>
                             {
-                                WordHintData word_hint_data = update_word_hints_receive_game_message.Data[index];
+                                WordHintData word_hint_data = update_wordhint_receive_game_message.Data[index];
                                 word_hints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                             });
-                            OnUpdateWordHintsGameMessageReceived(word_hints);
+                            OnUpdateWordhintGameMessageReceived(word_hints);
                         }
                         break;
                     case MessageReceiveGameMessageData message_receive_game_message:
-                        if (OnGuessingChatMessageGameMessageReceived != null)
+                        if (OnMessageGameMessageReceived != null)
                         {
                             chat_message_data = message_receive_game_message.Data;
-                            OnGuessingChatMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
+                            OnMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
                         }
                         break;
                     case NonGuessingPlayerMessageReceiveGameMessageData non_guessing_player_message_receive_game_message:
-                        if (OnNonGuessingChatMessageGameMessageReceived != null)
+                        if (OnNonGuessingPlayerMessageGameMessageReceived != null)
                         {
                             chat_message_data = non_guessing_player_message_receive_game_message.Data;
-                            OnNonGuessingChatMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
+                            OnNonGuessingPlayerMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
                         }
                         break;
                     case SystemMessageReceiveGameMessageData system_message_receive_game_message:
                         OnSystemMessageGameMessageReceived?.Invoke(system_message_receive_game_message.Data);
                         break;
                     case LineReceiveGameMessageData line_receive_game_message:
-                        if (OnLineDrawnGameMessageReceived != null)
+                        if (OnLineGameMessageReceived != null)
                         {
                             LineData line_data = line_receive_game_message.Data;
-                            OnLineDrawnGameMessageReceived(line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth);
+                            OnLineGameMessageReceived(line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth);
                         }
                         break;
                     case FillReceiveGameMessageData fill_receive_game_message:
-                        if (OnFillDrawnGameMessageReceived != null)
+                        if (OnFillGameMessageReceived != null)
                         {
                             FillData fill_data = fill_receive_game_message.Data;
-                            OnFillDrawnGameMessageReceived(fill_data.X, fill_data.Y, fill_data.Color);
+                            OnFillGameMessageReceived(fill_data.X, fill_data.Y, fill_data.Color);
                         }
                         break;
                     case ClearDrawingBoardReceiveGameMessageData _:

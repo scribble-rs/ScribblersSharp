@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Clear drawing board send game message data class
+    /// "clear-drawing-board" send game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class ClearDrawingBoardSendGameMessageData : BaseGameMessageData, ISendGameMessageData

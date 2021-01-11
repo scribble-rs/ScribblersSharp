@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Correct guess receive game message data class
+    /// "correct-guess" receive game message data class
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class CorrectGuessReceiveGameMessageData : GameMessageData<string>, IReceiveGameMessageData

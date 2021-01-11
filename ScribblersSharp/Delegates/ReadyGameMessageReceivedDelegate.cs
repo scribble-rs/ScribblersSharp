@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Ready game message received delegate
+    /// "ready" game message received delegate
     /// </summary>
     /// <param name="playerID">Player ID</param>
     /// <param name="isDrawing">Is player drawing</param>

@@ -4,9 +4,9 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Non-guessing chat message game message received delegate
+    /// "non-guessing-player-message" game message received delegate
     /// </summary>
     /// <param name="author">Author</param>
     /// <param name="content">Content</param>
-    public delegate void NonGuessingChatMessageGameMessageReceivedDelegate(string author, string content);
+    public delegate void NonGuessingPlayerMessageGameMessageReceivedDelegate(string author, string content);
 }

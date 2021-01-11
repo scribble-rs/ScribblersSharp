@@ -89,22 +89,7 @@ namespace ScribblersSharpTest
                     lobby = clients[index].EnterLobbyAsync(lobbies[0].LobbyID, "TestClient_" + index).GetAwaiter().GetResult();
                 }
                 Assert.IsNotNull(lobby);
-                lobby.OnClearDrawingBoardGameMessageReceived += () =>
-                {
-                    // TODO
-                    Debug.WriteLine(Environment.StackTrace);
-                };
-                lobby.OnFillDrawnGameMessageReceived += (positionX, positionY, color) =>
-                {
-                    // TODO
-                    Debug.WriteLine(Environment.StackTrace);
-                };
-                lobby.OnGuessingChatMessageGameMessageReceived += (author, content) =>
-                {
-                    // TODO
-                    Debug.WriteLine(Environment.StackTrace);
-                };
-                lobby.OnLineDrawnGameMessageReceived += (fromX, fromY, toX, toY, color, lineWidth) =>
+                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, ownerID, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing, gameState) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
@@ -114,12 +99,22 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnNonGuessingChatMessageGameMessageReceived += (author, content) =>
+                lobby.OnUpdatePlayersGameMessageReceived += (players) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnReadyGameMessageReceived += (playerID, isDrawing, ownerID, round, maximalRounds, roundEndTime, wordHints, players, currentDrawing, gameState) =>
+                lobby.OnUpdateWordhintGameMessageReceived += (wordHints) =>
+                {
+                    // TODO
+                    Debug.WriteLine(Environment.StackTrace);
+                };
+                lobby.OnMessageGameMessageReceived += (author, content) =>
+                {
+                    // TODO
+                    Debug.WriteLine(Environment.StackTrace);
+                };
+                lobby.OnNonGuessingPlayerMessageGameMessageReceived += (author, content) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
@@ -129,17 +124,27 @@ namespace ScribblersSharpTest
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnUpdatePlayersGameMessageReceived += (players) =>
+                lobby.OnLineGameMessageReceived += (fromX, fromY, toX, toY, color, lineWidth) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
-                lobby.OnUpdateWordHintsGameMessageReceived += (wordHints) =>
+                lobby.OnFillGameMessageReceived += (positionX, positionY, color) =>
+                {
+                    // TODO
+                    Debug.WriteLine(Environment.StackTrace);
+                };
+                lobby.OnClearDrawingBoardGameMessageReceived += () =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);
                 };
                 lobby.OnYourTurnGameMessageReceived += (words) =>
+                {
+                    // TODO
+                    Debug.WriteLine(Environment.StackTrace);
+                };
+                lobby.OnCorrectGuessGameMessageReceived += (words) =>
                 {
                     // TODO
                     Debug.WriteLine(Environment.StackTrace);

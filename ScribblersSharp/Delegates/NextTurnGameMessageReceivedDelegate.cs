@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Next turn game message received delegate
+    /// "next-turn" game message received delegate
     /// </summary>
     /// <param name="players">Players</param>
     /// <param name="round">Round</param>

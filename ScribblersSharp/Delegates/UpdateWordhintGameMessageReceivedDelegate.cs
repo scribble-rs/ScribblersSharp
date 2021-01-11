@@ -6,8 +6,8 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Update word hints game message received delegate
+    /// "update-wordhint" game message received delegate
     /// </summary>
     /// <param name="wordHints">Word hints</param>
-    public delegate void UpdateWordHintsGameMessageReceivedDelegate(IReadOnlyList<IWordHint> wordHints);
+    public delegate void UpdateWordhintGameMessageReceivedDelegate(IReadOnlyList<IWordHint> wordHints);
 }
