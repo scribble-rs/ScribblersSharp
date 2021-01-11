@@ -575,10 +575,10 @@ namespace ScribblersSharp
                             OnReadyGameMessageReceived(ready_data.PlayerID, ready_data.IsDrawing, ready_data.OwnerID, ready_data.Round, ready_data.MaximalRounds, ready_data.RoundEndTime, word_hints, players, draw_commands, ready_data.GameState);
                         }
                         break;
-                    case NextTurnReceiveGameMessageData next_turn_game_message:
+                    case NextTurnReceiveGameMessageData next_turn_receive_game_message:
                         if (OnNextTurnGameMessageReceived != null)
                         {
-                            NextTurnData next_turn_data = next_turn_game_message.Data;
+                            NextTurnData next_turn_data = next_turn_receive_game_message.Data;
                             players = new IPlayer[next_turn_data.Players.Length];
                             Parallel.For(0, players.Length, (index) =>
                             {
@@ -588,69 +588,69 @@ namespace ScribblersSharp
                             OnNextTurnGameMessageReceived(players, next_turn_data.Round, next_turn_data.RoundEndTime);
                         }
                         break;
-                    case UpdatePlayersReceiveGameMessageData update_players_game_message:
+                    case UpdatePlayersReceiveGameMessageData update_players_receive_game_message:
                         if (OnUpdatePlayersGameMessageReceived != null)
                         {
-                            players = new IPlayer[update_players_game_message.Data.Length];
+                            players = new IPlayer[update_players_receive_game_message.Data.Length];
                             Parallel.For(0, players.Length, (index) =>
                             {
-                                PlayerData player_data = update_players_game_message.Data[index];
+                                PlayerData player_data = update_players_receive_game_message.Data[index];
                                 players[index] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
                             });
                             OnUpdatePlayersGameMessageReceived(players);
                         }
                         break;
-                    case UpdateWordhintReceiveGameMessageData update_word_hints_game_message:
+                    case UpdateWordhintReceiveGameMessageData update_word_hints_receive_game_message:
                         if (OnUpdateWordHintsGameMessageReceived != null)
                         {
-                            word_hints = new IWordHint[update_word_hints_game_message.Data.Length];
+                            word_hints = new IWordHint[update_word_hints_receive_game_message.Data.Length];
                             Parallel.For(0, word_hints.Length, (index) =>
                             {
-                                WordHintData word_hint_data = update_word_hints_game_message.Data[index];
+                                WordHintData word_hint_data = update_word_hints_receive_game_message.Data[index];
                                 word_hints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                             });
                             OnUpdateWordHintsGameMessageReceived(word_hints);
                         }
                         break;
-                    case MessageReceiveGameMessageData guessing_chat_message_game_message:
+                    case MessageReceiveGameMessageData message_receive_game_message:
                         if (OnGuessingChatMessageGameMessageReceived != null)
                         {
-                            chat_message_data = guessing_chat_message_game_message.Data;
+                            chat_message_data = message_receive_game_message.Data;
                             OnGuessingChatMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
                         }
                         break;
-                    case NonGuessingPlayerMessageReceiveGameMessageData non_guessing_chat_message_game_message:
+                    case NonGuessingPlayerMessageReceiveGameMessageData non_guessing_player_message_receive_game_message:
                         if (OnNonGuessingChatMessageGameMessageReceived != null)
                         {
-                            chat_message_data = non_guessing_chat_message_game_message.Data;
+                            chat_message_data = non_guessing_player_message_receive_game_message.Data;
                             OnNonGuessingChatMessageGameMessageReceived(chat_message_data.Author, chat_message_data.Content);
                         }
                         break;
-                    case SystemMessageReceiveGameMessageData system_message_game_message:
-                        OnSystemMessageGameMessageReceived?.Invoke(system_message_game_message.Data);
+                    case SystemMessageReceiveGameMessageData system_message_receive_game_message:
+                        OnSystemMessageGameMessageReceived?.Invoke(system_message_receive_game_message.Data);
                         break;
-                    case LineReceiveGameMessageData line_draw_game_message:
+                    case LineReceiveGameMessageData line_receive_game_message:
                         if (OnLineDrawnGameMessageReceived != null)
                         {
-                            LineData line_data = line_draw_game_message.Data;
+                            LineData line_data = line_receive_game_message.Data;
                             OnLineDrawnGameMessageReceived(line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth);
                         }
                         break;
-                    case FillReceiveGameMessageData fill_draw_game_message:
+                    case FillReceiveGameMessageData fill_receive_game_message:
                         if (OnFillDrawnGameMessageReceived != null)
                         {
-                            FillData fill_data = fill_draw_game_message.Data;
+                            FillData fill_data = fill_receive_game_message.Data;
                             OnFillDrawnGameMessageReceived(fill_data.X, fill_data.Y, fill_data.Color);
                         }
                         break;
                     case ClearDrawingBoardReceiveGameMessageData _:
                         OnClearDrawingBoardGameMessageReceived?.Invoke();
                         break;
-                    case YourTurnReceiveGameMessageData your_turn_game_message:
-                        OnYourTurnGameMessageReceived?.Invoke((string[])your_turn_game_message.Data.Clone());
+                    case YourTurnReceiveGameMessageData your_turn_receive_game_message:
+                        OnYourTurnGameMessageReceived?.Invoke((string[])your_turn_receive_game_message.Data.Clone());
                         break;
-                    case CorrectGuessReceiveGameMessageData correct_guess_game_message:
-                        OnCorrectGuessGameMessageReceived?.Invoke(correct_guess_game_message.Data);
+                    case CorrectGuessReceiveGameMessageData correct_guess_receive_game_message:
+                        OnCorrectGuessGameMessageReceived?.Invoke(correct_guess_receive_game_message.Data);
                         break;
                 }
             }

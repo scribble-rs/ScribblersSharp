@@ -70,6 +70,11 @@ namespace ScribblersSharp
         event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
+        /// Correct guess game message received event
+        /// </summary>
+        event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
+
+        /// <summary>
         /// WebSocket state
         /// </summary>
         WebSocketState WebSocketState { get; }
