@@ -328,8 +328,8 @@ namespace ScribblersSharp
                 });
                 OnUpdateWordhintGameMessageReceived?.Invoke(wordHints);
             }, MessageParseFailedEvent);
-            AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => OnMessageGameMessageReceived?.Invoke(gameMessage.Data.Author, gameMessage.Data.Content), MessageParseFailedEvent);
-            AddMessageParser<NonGuessingPlayerMessageReceiveGameMessageData>((gameMessage, json) => OnNonGuessingPlayerMessageGameMessageReceived?.Invoke(gameMessage.Data.Author, gameMessage.Data.Content), MessageParseFailedEvent);
+            AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => OnMessageGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data.AuthorID) ? players[gameMessage.Data.AuthorID] : null, gameMessage.Data.Content), MessageParseFailedEvent);
+            AddMessageParser<NonGuessingPlayerMessageReceiveGameMessageData>((gameMessage, json) => OnNonGuessingPlayerMessageGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data.AuthorID) ? players[gameMessage.Data.AuthorID] : null, gameMessage.Data.Content), MessageParseFailedEvent);
             AddMessageParser<SystemMessageReceiveGameMessageData>((gameMessage, json) => OnSystemMessageGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);
             AddMessageParser<LineReceiveGameMessageData>((gameMessage, json) =>
             {

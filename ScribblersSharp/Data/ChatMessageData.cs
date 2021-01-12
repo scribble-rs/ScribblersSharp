@@ -18,6 +18,12 @@ namespace ScribblersSharp.Data
         public string Author { get; set; }
 
         /// <summary>
+        /// Author ID
+        /// </summary>
+        [JsonProperty("authorID")]
+        public string AuthorID { get; set; }
+
+        /// <summary>
         /// Content
         /// </summary>
         [JsonProperty("content")]
@@ -28,6 +34,7 @@ namespace ScribblersSharp.Data
         /// </summary>
         public bool IsValid =>
             (Author != null) &&
+            (AuthorID != null) &&
             (Content != null);
     }
 }

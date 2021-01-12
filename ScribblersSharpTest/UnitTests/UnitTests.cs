@@ -125,8 +125,8 @@ namespace ScribblersSharpTest
                     }
                 };
                 lobby.OnUpdateWordhintGameMessageReceived += (wordHints) => Console.WriteLine($"Word hints for client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has been updated.");
-                lobby.OnMessageGameMessageReceived += (author, content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a player message from \"{ author }\": \"{ content }\"");
-                lobby.OnNonGuessingPlayerMessageGameMessageReceived += (author, content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a non-guessing player message from \"{ author }\": \"{ content }\"");
+                lobby.OnMessageGameMessageReceived += (author, content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a player message from \"{ author.Name }\" with ID \"{ author.ID }\": \"{ content }\"");
+                lobby.OnNonGuessingPlayerMessageGameMessageReceived += (author, content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a non-guessing player message from \"{ author.Name }\" with ID \"{ author.ID }\": \"{ content }\"");
                 lobby.OnSystemMessageGameMessageReceived += (content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a system message: \"{ content }\"");
                 lobby.OnLineGameMessageReceived += (fromX, fromY, toX, toY, color, lineWidth) =>
                 {

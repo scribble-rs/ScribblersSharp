@@ -8,5 +8,5 @@ namespace ScribblersSharp
     /// </summary>
     /// <param name="author">Author</param>
     /// <param name="content">Content</param>
-    public delegate void NonGuessingPlayerMessageGameMessageReceivedDelegate(string author, string content);
+    public delegate void NonGuessingPlayerMessageGameMessageReceivedDelegate(IPlayer author, string content);
 }
