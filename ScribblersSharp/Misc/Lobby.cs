@@ -62,6 +62,96 @@ namespace ScribblersSharp
         private ArraySegment<byte> receiveBuffer = new ArraySegment<byte>(new byte[2048]);
 
         /// <summary>
+        /// WebSocket state
+        /// </summary>
+        public WebSocketState WebSocketState => clientWebSocket.State;
+
+        /// <summary>
+        /// Lobby ID
+        /// </summary>
+        public string LobbyID { get; private set; }
+
+        /// <summary>
+        /// Drawing board base width
+        /// </summary>
+        public uint DrawingBoardBaseWidth { get; private set; }
+
+        /// <summary>
+        /// Drawing board base height
+        /// </summary>
+        public uint DrawingBoardBaseHeight { get; private set; }
+
+        /// <summary>
+        /// Minimal brush size
+        /// </summary>
+        public uint MinimalBrushSize { get; }
+
+        /// <summary>
+        /// Maximal brush size
+        /// </summary>
+        public uint MaximalBrushSize { get; }
+
+        /// <summary>
+        /// Suggested brush sizes
+        /// </summary>
+        public IEnumerable<uint> SuggestedBrushSizes { get; }
+
+        /// <summary>
+        /// Canvas color
+        /// </summary>
+        public Color CanvasColor { get; }
+
+        /// <summary>
+        /// My player
+        /// </summary>
+        public IPlayer MyPlayer { get; private set; }
+
+        /// <summary>
+        /// Is player allowed to draw
+        /// </summary>
+        public bool IsPlayerAllowedToDraw { get; private set; }
+
+        /// <summary>
+        /// Lobby owner
+        /// </summary>
+        public IPlayer Owner { get; private set; }
+
+        /// <summary>
+        /// Round
+        /// </summary>
+        public uint Round { get; private set; }
+
+        /// <summary>
+        /// Maximal rounds
+        /// </summary>
+        public uint MaximalRounds { get; private set; }
+
+        /// <summary>
+        /// Round end time
+        /// </summary>
+        public long RoundEndTime { get; private set; }
+
+        /// <summary>
+        /// Word hints
+        /// </summary>
+        public IReadOnlyList<IWordHint> WordHints => wordHints;
+
+        /// <summary>
+        /// Players
+        /// </summary>
+        public IReadOnlyDictionary<string, IPlayer> Players => players;
+
+        /// <summary>
+        /// Current drawing
+        /// </summary>
+        public IReadOnlyList<IDrawCommand> CurrentDrawing => currentDrawing;
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        public EGameState GameState { get; private set; }
+
+        /// <summary>
         /// "ready" game message received event
         /// </summary>
         public event ReadyGameMessageReceivedDelegate OnReadyGameMessageReceived;
@@ -132,86 +222,34 @@ namespace ScribblersSharp
         public event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
 
         /// <summary>
-        /// WebSocket state
+        /// Constructs a lobby
         /// </summary>
-        public WebSocketState WebSocketState => clientWebSocket.State;
-
-        /// <summary>
-        /// Lobby ID
-        /// </summary>
-        public string LobbyID { get; private set; }
-
-        /// <summary>
-        /// Drawing board base width
-        /// </summary>
-        public uint DrawingBoardBaseWidth { get; private set; }
-
-        /// <summary>
-        /// Drawing board base height
-        /// </summary>
-        public uint DrawingBoardBaseHeight { get; private set; }
-
-        /// <summary>
-        /// My player
-        /// </summary>
-        public IPlayer MyPlayer { get; private set; }
-
-        /// <summary>
-        /// Is player allowed to draw
-        /// </summary>
-        public bool IsPlayerAllowedToDraw { get; private set; }
-
-        /// <summary>
-        /// Lobby owner
-        /// </summary>
-        public IPlayer Owner { get; private set; }
-
-        /// <summary>
-        /// Round
-        /// </summary>
-        public uint Round { get; private set; }
-
-        /// <summary>
-        /// Maximal rounds
-        /// </summary>
-        public uint MaximalRounds { get; private set; }
-
-        /// <summary>
-        /// Round end time
-        /// </summary>
-        public long RoundEndTime { get; private set; }
-
-        /// <summary>
-        /// Word hints
-        /// </summary>
-        public IReadOnlyList<IWordHint> WordHints => wordHints;
-
-        /// <summary>
-        /// Players
-        /// </summary>
-        public IReadOnlyDictionary<string, IPlayer> Players => players;
-
-        /// <summary>
-        /// Current drawing
-        /// </summary>
-        public IReadOnlyList<IDrawCommand> CurrentDrawing => currentDrawing;
-
-        /// <summary>
-        /// Game state
-        /// </summary>
-        public EGameState GameState { get; private set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="clientWebSocket">Client WebSocket</param>
-        /// <param name="lobbyID">LobbyID</param>
-        public Lobby(ClientWebSocket clientWebSocket, string lobbyID, uint drawingBoardBaseWidth, uint drawingBoardBaseHeight)
+        /// <param name="clientWebSocket">Client web socket</param>
+        /// <param name="lobbyID">Lobby ID</param>
+        /// <param name="drawingBoardBaseWidth">Drawing board base width</param>
+        /// <param name="drawingBoardBaseHeight">Drawing board base height</param>
+        /// <param name="minimalBrushSize">Minimal brush size</param>
+        /// <param name="maximalBrushSize">Maximal brush size</param>
+        /// <param name="suggestedBrushSizes">Suggested brush sizes</param>
+        /// <param name="canvasColor">Canvas color</param>
+        public Lobby(ClientWebSocket clientWebSocket, string lobbyID, uint drawingBoardBaseWidth, uint drawingBoardBaseHeight, uint minimalBrushSize, uint maximalBrushSize, IEnumerable<uint> suggestedBrushSizes, Color canvasColor)
         {
+            if (minimalBrushSize < 1U)
+            {
+                throw new ArgumentException("Minimal brush size can't be smaller than one.", nameof(minimalBrushSize));
+            }
+            if (minimalBrushSize > maximalBrushSize)
+            {
+                throw new ArgumentException("Maximal brush size can't be smaller than maximal brush size.", nameof(maximalBrushSize));
+            }
             this.clientWebSocket = clientWebSocket ?? throw new ArgumentNullException(nameof(clientWebSocket));
             LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
             DrawingBoardBaseWidth = drawingBoardBaseWidth;
             DrawingBoardBaseHeight = drawingBoardBaseHeight;
+            MinimalBrushSize = minimalBrushSize;
+            MaximalBrushSize = maximalBrushSize;
+            SuggestedBrushSizes = suggestedBrushSizes ?? throw new ArgumentNullException(nameof(clientWebSocket));
+            CanvasColor = canvasColor;
             AddMessageParser<ReadyReceiveGameMessageData>((gameMessage, json) =>
             {
                 ReadyData ready = gameMessage.Data;
@@ -256,20 +294,24 @@ namespace ScribblersSharp
                                 {
                                     if (json_token is JObject json_draw_command)
                                     {
-                                        if (json_draw_command.ContainsKey("lineWidth"))
+                                        if (json_draw_command.ContainsKey("type") && json_draw_command.ContainsKey("data") && json_draw_command["data"] is JObject json_draw_command_data)
                                         {
-                                            LineData line_data = json_draw_command.ToObject<LineData>();
-                                            if (line_data != null)
+                                            switch (json_draw_command["type"].ToObject<string>())
                                             {
-                                                currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
-                                            }
-                                        }
-                                        else
-                                        {
-                                            FillData fill_data = json_draw_command.ToObject<FillData>();
-                                            if (fill_data != null)
-                                            {
-                                                currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                                case "line":
+                                                    LineData line_data = json_draw_command_data.ToObject<LineData>();
+                                                    if (line_data != null)
+                                                    {
+                                                        currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                                    }
+                                                    break;
+                                                case "fill":
+                                                    FillData fill_data = json_draw_command_data.ToObject<FillData>();
+                                                    if (fill_data != null)
+                                                    {
+                                                        currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                                    }
+                                                    break;
                                             }
                                         }
                                     }

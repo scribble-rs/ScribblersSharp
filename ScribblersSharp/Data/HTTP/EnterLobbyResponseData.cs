@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
+using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -30,8 +32,40 @@ namespace ScribblersSharp.Data
         public uint DrawingBoardBaseHeight { get; set; }
 
         /// <summary>
+        /// Minimal brush size
+        /// </summary>
+        [JsonProperty("minBrushSize")]
+        public uint MinimalBrushSize { get; set; }
+
+        /// <summary>
+        /// Maximal brush size
+        /// </summary>
+        [JsonProperty("maxBrushSize")]
+        public uint MaximalBrushSize { get; set; }
+
+        /// <summary>
+        /// Suggested brush size
+        /// </summary>
+        [JsonProperty("suggestedBrushSizes")]
+        public uint[] SuggestedBrushSizes { get; set; }
+
+        /// <summary>
+        /// Canvas color
+        /// </summary>
+        [JsonProperty("canvasColor")]
+        public byte[] CanvasColor { get; set; }
+
+        /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public bool IsValid => LobbyID != null;
+        public bool IsValid =>
+            (LobbyID != null) &&
+            (DrawingBoardBaseWidth > 0U) &&
+            (DrawingBoardBaseHeight > 0U) &&
+            (MinimalBrushSize > 0U) &&
+            (MaximalBrushSize >= MinimalBrushSize) &&
+            (SuggestedBrushSizes != null) &&
+            (CanvasColor != null) &&
+            (CanvasColor.Length == 3);
     }
 }

@@ -2,6 +2,7 @@
 using ScribblersSharp.Data;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
@@ -118,14 +119,14 @@ namespace ScribblersSharp
                 { "username", username }
             });
             EnterLobbyResponseData response = response_with_user_session_cookie.Response;
-            if (response != null)
+            if ((response != null) && response.IsValid)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
                 client_web_socket.Options.Cookies = cookieContainer;
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
+                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight, response.MinimalBrushSize, response.MaximalBrushSize, response.SuggestedBrushSizes, Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2]));
                 }
                 else
                 {
@@ -221,14 +222,14 @@ namespace ScribblersSharp
             });
             custom_words_builder.Clear();
             CreateLobbyResponseData response = response_with_user_session_cookie.Response;
-            if (response != null)
+            if ((response != null) && response.IsValid)
             {
                 ClientWebSocket client_web_socket = new ClientWebSocket();
                 client_web_socket.Options.Cookies = cookieContainer;
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight);
+                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight, response.MinimalBrushSize, response.MaximalBrushSize, response.SuggestedBrushSizes, Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2]));
                 }
                 else
                 {

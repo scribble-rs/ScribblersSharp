@@ -15,6 +15,96 @@ namespace ScribblersSharp
     public interface ILobby : IDisposable
     {
         /// <summary>
+        /// WebSocket state
+        /// </summary>
+        WebSocketState WebSocketState { get; }
+
+        /// <summary>
+        /// Lobby ID
+        /// </summary>
+        string LobbyID { get; }
+
+        /// <summary>
+        /// Drawing board base width
+        /// </summary>
+        uint DrawingBoardBaseWidth { get; }
+
+        /// <summary>
+        /// Drawing board base height
+        /// </summary>
+        uint DrawingBoardBaseHeight { get; }
+
+        /// <summary>
+        /// Minimal brush size
+        /// </summary>
+        uint MinimalBrushSize { get; }
+
+        /// <summary>
+        /// Maximal brush size
+        /// </summary>
+        uint MaximalBrushSize { get; }
+
+        /// <summary>
+        /// Suggested brush sizes
+        /// </summary>
+        IEnumerable<uint> SuggestedBrushSizes { get; }
+
+        /// <summary>
+        /// Canvas color
+        /// </summary>
+        Color CanvasColor { get; }
+
+        /// <summary>
+        /// My player
+        /// </summary>
+        IPlayer MyPlayer { get; }
+
+        /// <summary>
+        /// Is player allowed to draw
+        /// </summary>
+        bool IsPlayerAllowedToDraw { get; }
+
+        /// <summary>
+        /// Lobby owner
+        /// </summary>
+        IPlayer Owner { get; }
+
+        /// <summary>
+        /// Round
+        /// </summary>
+        uint Round { get; }
+
+        /// <summary>
+        /// Maximal rounds
+        /// </summary>
+        uint MaximalRounds { get; }
+
+        /// <summary>
+        /// Round end time
+        /// </summary>
+        long RoundEndTime { get; }
+
+        /// <summary>
+        /// Word hints
+        /// </summary>
+        IReadOnlyList<IWordHint> WordHints { get; }
+
+        /// <summary>
+        /// Players
+        /// </summary>
+        IReadOnlyDictionary<string, IPlayer> Players { get; }
+
+        /// <summary>
+        /// Current drawing
+        /// </summary>
+        IReadOnlyList<IDrawCommand> CurrentDrawing { get; }
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        EGameState GameState { get; }
+
+        /// <summary>
         /// "ready" game message received event
         /// </summary>
         event ReadyGameMessageReceivedDelegate OnReadyGameMessageReceived;
@@ -83,76 +173,6 @@ namespace ScribblersSharp
         /// This event will be invoked when a non-meaningful game message has been received.
         /// </summary>
         event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
-
-        /// <summary>
-        /// WebSocket state
-        /// </summary>
-        WebSocketState WebSocketState { get; }
-
-        /// <summary>
-        /// Lobby ID
-        /// </summary>
-        string LobbyID { get; }
-
-        /// <summary>
-        /// Drawing board base width
-        /// </summary>
-        uint DrawingBoardBaseWidth { get; }
-
-        /// <summary>
-        /// Drawing board base height
-        /// </summary>
-        uint DrawingBoardBaseHeight { get; }
-
-        /// <summary>
-        /// My player
-        /// </summary>
-        IPlayer MyPlayer { get; }
-
-        /// <summary>
-        /// Is player allowed to draw
-        /// </summary>
-        bool IsPlayerAllowedToDraw { get; }
-
-        /// <summary>
-        /// Lobby owner
-        /// </summary>
-        IPlayer Owner { get; }
-
-        /// <summary>
-        /// Round
-        /// </summary>
-        uint Round { get; }
-
-        /// <summary>
-        /// Maximal rounds
-        /// </summary>
-        uint MaximalRounds { get; }
-
-        /// <summary>
-        /// Round end time
-        /// </summary>
-        long RoundEndTime { get; }
-
-        /// <summary>
-        /// Word hints
-        /// </summary>
-        IReadOnlyList<IWordHint> WordHints { get; }
-
-        /// <summary>
-        /// Players
-        /// </summary>
-        IReadOnlyDictionary<string, IPlayer> Players { get; }
-
-        /// <summary>
-        /// Current drawing
-        /// </summary>
-        IReadOnlyList<IDrawCommand> CurrentDrawing { get; }
-
-        /// <summary>
-        /// Game state
-        /// </summary>
-        EGameState GameState { get; }
 
         /// <summary>
         /// Adds a game message parser

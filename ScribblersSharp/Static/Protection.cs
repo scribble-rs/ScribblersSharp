@@ -43,6 +43,13 @@ namespace ScribblersSharp
             return ret;
         }
 
+        /// <summary>
+        /// Is contained in collection
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="collection">Collection</param>
+        /// <param name="onContains">Gets invoked for each element</param>
+        /// <returns>"true" if element is contained, otherwise "false"</returns>
         public static bool IsContained<T>(IEnumerable<T> collection, ContainsDelegate<T> onContains)
         {
             if (collection == null)
@@ -65,6 +72,13 @@ namespace ScribblersSharp
             return ret;
         }
 
+        /// <summary>
+        /// Are elements in collection unique
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="collection">Collection</param>
+        /// <param name="onAreUnique">Gets invoked for each element each element except self</param>
+        /// <returns>"true" if elements in collection are unique, otherwise "false"</returns>
         public static bool AreUnique<T>(IReadOnlyList<T> collection, AreUniqueDelegate<T> onAreUnique)
         {
             if (collection == null)
