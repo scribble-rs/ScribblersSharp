@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
 using System.Threading.Tasks;
+#endif
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -61,14 +63,25 @@ namespace ScribblersSharp
                 throw new ArgumentNullException(nameof(onContains));
             }
             bool ret = false;
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            foreach (T element in collection)
+#else
             Parallel.ForEach(collection, (element, parallelLoopState) =>
+#endif
             {
                 if (onContains(element))
                 {
                     ret = true;
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                    break;
+#else
                     parallelLoopState.Break();
+#endif
                 }
-            });
+            }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            );
+#endif
             return ret;
         }
 
@@ -90,17 +103,28 @@ namespace ScribblersSharp
                 throw new ArgumentNullException(nameof(onAreUnique));
             }
             bool ret = true;
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            for (int leftIndex = 0; leftIndex < collection.Count; leftIndex++)
+#else
             Parallel.For(0, collection.Count, (leftIndex, parallelLoopState) =>
+#endif
             {
                 for (int right_index = 0; right_index < collection.Count; right_index++)
                 {
                     if ((leftIndex != right_index) && !onAreUnique(collection[leftIndex], collection[right_index]))
                     {
                         ret = false;
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                        break;
+#else
                         parallelLoopState.Break();
+#endif
                     }
                 }
-            });
+            }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            );
+#endif
             return ret;
         }
     }

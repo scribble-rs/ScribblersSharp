@@ -156,9 +156,9 @@ namespace ScribblersSharp
             {
                 throw new ArgumentNullException(nameof(username));
             }
-            if ((username.Length < Rules.minimalUsernameLength) || (username.Length > Rules.maximalUsernameLength))
+            if (username.Length > Rules.maximalUsernameLength)
             {
-                throw new ArgumentException($"Username must be between { Rules.minimalUsernameLength } and { Rules.maximalUsernameLength } characters.");
+                throw new ArgumentException($"Username must be atleast { Rules.maximalUsernameLength } characters long.");
             }
             if ((maximalPlayers < Rules.minimalPlayers) || (maximalPlayers > Rules.maximalPlayers))
             {
@@ -188,11 +188,18 @@ namespace ScribblersSharp
             Uri http_host_uri = new Uri($"{ httpProtocol }://{ Host }");
             Uri web_socket_host_uri = new Uri($"{ webSocketProtocol }://{ Host }");
             string[] custom_words = new string[customWords.Count];
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            for (int index = 0; index < custom_words.Length; index++)
+#else
             Parallel.For(0, custom_words.Length, (index) =>
+#endif
             {
                 string custom_word = customWords[index];
                 custom_words[index] = custom_word ?? throw new ArgumentNullException(nameof(custom_word));
-            });
+            }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+            );
+#endif
             StringBuilder custom_words_builder = new StringBuilder();
             bool first = true;
             foreach (string custom_word in customWords)

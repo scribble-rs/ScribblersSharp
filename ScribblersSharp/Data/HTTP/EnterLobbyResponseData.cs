@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using ScribblersSharp.JSONConverters;
-using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace

@@ -267,11 +267,18 @@ namespace ScribblersSharp
                     {
                         wordHints = new IWordHint[ready.WordHints.Count];
                     }
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                    for (int index = 0; index < wordHints.Length; index++)
+#else
                     Parallel.For(0, wordHints.Length, (index) =>
+#endif
                     {
                         WordHintData word_hint_data = ready.WordHints[index];
                         wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                    });
+                    }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                    );
+#endif
                 }
                 players.Clear();
                 foreach (PlayerData player in ready.Players)
@@ -363,11 +370,18 @@ namespace ScribblersSharp
                 {
                     wordHints = new IWordHint[word_hints.Length];
                 }
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                for (int index = 0; index < wordHints.Length; index++)
+#else
                 Parallel.For(0, wordHints.Length, (index) =>
+#endif
                 {
                     WordHintData word_hint_data = word_hints[index];
                     wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                });
+                }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                );
+#endif
                 OnUpdateWordhintGameMessageReceived?.Invoke(wordHints);
             }, MessageParseFailedEvent);
             AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => OnMessageGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data.AuthorID) ? players[gameMessage.Data.AuthorID] : null, gameMessage.Data.Content), MessageParseFailedEvent);
