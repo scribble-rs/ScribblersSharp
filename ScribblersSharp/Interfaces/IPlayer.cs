@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// AN interface that represents a player
+    /// An interface that represents a player
     /// </summary>
     public interface IPlayer : IValidable
     {

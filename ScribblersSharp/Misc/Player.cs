@@ -6,44 +6,44 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Player structure
+    /// A class that describes a player
     /// </summary>
-    internal readonly struct Player : IPlayer
+    internal class Player : IInternalPlayer
     {
         /// <summary>
         /// Player ID
         /// </summary>
-        public string ID { get; }
+        public string ID { get; private set; }
 
         /// <summary>
         /// Player name
         /// </summary>
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Player score
         /// </summary>
-        public uint Score { get; }
+        public uint Score { get; private set; }
 
         /// <summary>
         /// Is player connected
         /// </summary>
-        public bool IsConnected { get; }
+        public bool IsConnected { get; private set; }
 
         /// <summary>
         /// Player last score
         /// </summary>
-        public uint LastScore { get; }
+        public uint LastScore { get; private set; }
 
         /// <summary>
         /// Player rank
         /// </summary>
-        public uint Rank { get; }
+        public uint Rank { get; private set; }
 
         /// <summary>
         /// Player state
         /// </summary>
-        public EPlayerState State { get; }
+        public EPlayerState State { get; private set; }
 
         /// <summary>
         /// Is object in a valid state
@@ -65,17 +65,31 @@ namespace ScribblersSharp
         /// <param name="state">Player state</param>
         public Player(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
-            if (state == EPlayerState.Unknown)
-            {
-                throw new ArgumentException("Player state is unknown.", nameof(state));
-            }
             ID = id ?? throw new ArgumentNullException(nameof(id));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Score = score;
-            IsConnected = isConnected;
-            LastScore = lastScore;
-            Rank = rank;
-            State = state;
+            UpdateInternally(name, score, isConnected, lastScore, rank, state);
+        }
+
+        /// <summary>
+        /// Updates player state internally
+        /// </summary>
+        /// <param name="newName">New player name</param>
+        /// <param name="newScore">New score</param>
+        /// <param name="newIsConnectedState">New is connected state</param>
+        /// <param name="newLastScore">New last score</param>
+        /// <param name="newRank">New rank</param>
+        /// <param name="newState">New state</param>
+        public void UpdateInternally(string newName, uint newScore, bool newIsConnectedState, uint newLastScore, uint newRank, EPlayerState newState)
+        {
+            if (newState == EPlayerState.Unknown)
+            {
+                throw new ArgumentException("Player state is unknown.", nameof(newState));
+            }
+            Name = newName ?? throw new ArgumentNullException(nameof(newName));
+            Score = newScore;
+            IsConnected = newIsConnectedState;
+            LastScore = newLastScore;
+            Rank = newRank;
+            State = newState;
         }
     }
 }

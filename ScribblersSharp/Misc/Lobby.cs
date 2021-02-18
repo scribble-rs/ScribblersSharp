@@ -280,13 +280,9 @@ namespace ScribblersSharp
                     );
 #endif
                 }
-                players.Clear();
-                foreach (PlayerData player in ready.Players)
-                {
-                    players.Add(player.ID, new Player(player.ID, player.Name, player.Score, player.IsConnected, player.LastScore, player.Rank, player.State));
-                }
-                MyPlayer = players[ready.PlayerID];
-                Owner = players[ready.OwnerID];
+                UpdateAllPlayers(ready.Players);
+                MyPlayer = players.ContainsKey(ready.PlayerID) ? players[ready.PlayerID] : null;
+                Owner = players.ContainsKey(ready.OwnerID) ? players[ready.OwnerID] : null;
                 currentDrawing.Clear();
                 JObject json_object = JObject.Parse(json);
                 if (json_object.ContainsKey("data"))
@@ -337,29 +333,13 @@ namespace ScribblersSharp
                 GameState = EGameState.Ongoing;
                 Round = next_turn.Round;
                 RoundEndTime = next_turn.RoundEndTime;
-                players.Clear();
-                foreach (PlayerData player_data in next_turn.Players)
-                {
-                    players.Add(player_data.ID, new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State));
-                }
-                if (Owner != null)
-                {
-                    Owner = players.ContainsKey(Owner.ID) ? players[Owner.ID] : null;
-                }
+                UpdateAllPlayers(next_turn.Players);
                 currentDrawing.Clear();
                 OnNextTurnGameMessageReceived?.Invoke(this);
             }, MessageParseFailedEvent);
             AddMessageParser<UpdatePlayersReceiveGameMessageData>((gameMessage, json) =>
             {
-                players.Clear();
-                foreach (PlayerData player in gameMessage.Data)
-                {
-                    players.Add(player.ID, new Player(player.ID, player.Name, player.Score, player.IsConnected, player.LastScore, player.Rank, player.State));
-                }
-                if (Owner != null)
-                {
-                    Owner = players.ContainsKey(Owner.ID) ? players[Owner.ID] : null;
-                }
+                UpdateAllPlayers(gameMessage.Data);
                 OnUpdatePlayersGameMessageReceived?.Invoke(players);
             }, MessageParseFailedEvent);
             AddMessageParser<UpdateWordhintReceiveGameMessageData>((gameMessage, json) =>
@@ -478,6 +458,42 @@ namespace ScribblersSharp
                 }
             });
             webSocketReceiveThread.Start();
+        }
+
+        private readonly HashSet<string> removePlayerKeys = new HashSet<string>();
+
+        /// <summary>
+        /// Updates all players
+        /// </summary>
+        private void UpdateAllPlayers(IEnumerable<PlayerData> players)
+        {
+            removePlayerKeys.UnionWith(this.players.Keys);
+            foreach (PlayerData player_data in players)
+            {
+                if (this.players.ContainsKey(player_data.ID))
+                {
+                    if (this.players[player_data.ID] is IInternalPlayer internal_player)
+                    {
+                        internal_player.UpdateInternally(player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
+                    }
+                    else
+                    {
+                        this.players[player_data.ID] = new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State);
+                    }
+                }
+                else
+                {
+                    this.players.Add(player_data.ID, new Player(player_data.ID, player_data.Name, player_data.Score, player_data.IsConnected, player_data.LastScore, player_data.Rank, player_data.State));
+                }
+                removePlayerKeys.Remove(player_data.ID);
+            }
+            foreach (string remove_player_key in removePlayerKeys)
+            {
+                this.players.Remove(remove_player_key);
+            }
+            removePlayerKeys.Clear();
+            MyPlayer = ((MyPlayer != null) && this.players.ContainsKey(MyPlayer.ID)) ? this.players[MyPlayer.ID] : null;
+            Owner = ((Owner != null) && this.players.ContainsKey(Owner.ID)) ? this.players[Owner.ID] : null;
         }
 
         /// <summary>
