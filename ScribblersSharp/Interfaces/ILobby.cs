@@ -150,6 +150,11 @@ namespace ScribblersSharp
         long RoundEndTime { get; }
 
         /// <summary>
+        /// Previous word
+        /// </summary>
+        string PreviousWord { get; }
+
+        /// <summary>
         /// Word hints
         /// </summary>
         IReadOnlyList<IWordHint> WordHints { get; }
