@@ -74,6 +74,13 @@ namespace ScribblersSharp
         }
 
         /// <summary>
+        /// Gets language as string
+        /// </summary>
+        /// <param name="language">Language</param>
+        /// <returns>Language as string</returns>
+        private static string GetLanguageString(ELanguage language) => (language == ELanguage.EnglishGB) ? "english_gb" : Naming.LowerFirstCharacter(language.ToString());
+
+        /// <summary>
         /// Sends a HTTP GET request asynchronously
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
@@ -304,7 +311,7 @@ namespace ScribblersSharp
             ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<CreateLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby"), new Dictionary<string, string>
             {
                 { "username", username },
-                { "language", language.ToString().ToLower() },
+                { "language", GetLanguageString(language) },
                 { "public", isPublic.ToString().ToLower() },
                 { "max_players", maximalPlayerCount.ToString() },
                 { "drawing_time", drawingTime.ToString() },
@@ -357,9 +364,20 @@ namespace ScribblersSharp
         }
 
         /// <summary>
+        /// Gets server statistics asynchronously
+        /// </summary>
+        /// <returns>Server statistics task</returns>
+        public async Task<IServerStatistics> GetServerStatisticsAsync()
+        {
+            Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
+            ServerStatisticsData server_statistics = await SendHTTPGETRequestAsync<ServerStatisticsData>(new Uri(http_host_uri, "/v1/stats"));
+            return (server_statistics == null) ? default : new ServerStatistics(server_statistics.ActiveLobbyCount, server_statistics.PlayerCount, server_statistics.OccupiedPlayerSlotCount, server_statistics.ConnectedPlayerCount);
+        }
+
+        /// <summary>
         /// Lists all public lobbies asynchronously
         /// </summary>
-        /// <returns>Lobbies</returns>
+        /// <returns>Lobby views task</returns>
         public async Task<IEnumerable<ILobbyView>> ListLobbies()
         {
             ILobbyView[] ret = Array.Empty<ILobbyView>();
@@ -425,7 +443,7 @@ namespace ScribblersSharp
             if ((language != null) && (language != ELanguage.Invalid))
             {
                 are_changes_specified = true;
-                parameters_string_builder.Append($"language={ Uri.EscapeUriString(language.Value.ToString()) }");
+                parameters_string_builder.Append($"language={ Uri.EscapeUriString(GetLanguageString(language.Value)) }");
             }
             if (isPublic != null)
             {

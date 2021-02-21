@@ -47,9 +47,15 @@ namespace ScribblersSharp
         Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit);
 
         /// <summary>
+        /// Gets server statistics asynchronously
+        /// </summary>
+        /// <returns>Server statistics task</returns>
+        Task<IServerStatistics> GetServerStatisticsAsync();
+
+        /// <summary>
         /// Lists all public lobbies asynchronously
         /// </summary>
-        /// <returns>Lobbies</returns>
+        /// <returns>Lobby views task</returns>
         Task<IEnumerable<ILobbyView>> ListLobbies();
 
         /// <summary>

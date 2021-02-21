@@ -25,7 +25,11 @@ namespace ScribblersSharp.JSONConverters
             ELanguage ret = existingValue;
             if (reader.Value is string value)
             {
-                if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
+                if (value == "english_gb")
+                {
+                    ret = ELanguage.EnglishGB;
+                }
+                else if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
                 {
                     ret = ELanguage.Invalid;
                 }
@@ -39,6 +43,6 @@ namespace ScribblersSharp.JSONConverters
         /// <param name="writer">JSON writer</param>
         /// <param name="value">Language value</param>
         /// <param name="serializer">JSON serializer</param>
-        public override void WriteJson(JsonWriter writer, ELanguage value, JsonSerializer serializer) => writer.WriteValue(Naming.LowerFirstCharacter(value.ToString()));
+        public override void WriteJson(JsonWriter writer, ELanguage value, JsonSerializer serializer) => writer.WriteValue((value == ELanguage.EnglishGB) ? "english_gb" : Naming.LowerFirstCharacter(value.ToString()));
     }
 }
