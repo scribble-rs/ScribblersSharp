@@ -86,7 +86,7 @@ namespace ScribblersSharp.Data
         public bool IsValid =>
             (PlayerID != null) &&
             !string.IsNullOrWhiteSpace(PlayerName) &&
-            (GameState != EGameState.Unknown) &&
+            (GameState != EGameState.Invalid) &&
             (OwnerID != null) &&
             Protection.IsValid(Players) &&
             Protection.IsContained(Players, (player) => (player.ID == PlayerID) && (player.Name == PlayerName)) &&

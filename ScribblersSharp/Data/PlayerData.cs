@@ -62,7 +62,7 @@ namespace ScribblersSharp.Data
         public bool IsValid =>
             (ID != null) &&
             (Name != null) &&
-            (State != EPlayerState.Unknown);
+            (State != EPlayerState.Invalid);
 
         /// <summary>
         /// Default constructor
@@ -84,7 +84,7 @@ namespace ScribblersSharp.Data
         /// <param name="state">Player state</param>
         public PlayerData(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
         {
-            if (state == EPlayerState.Unknown)
+            if (state == EPlayerState.Invalid)
             {
                 throw new ArgumentException("Player state is unknown.", nameof(state));
             }

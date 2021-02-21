@@ -9,9 +9,9 @@ namespace ScribblersSharp
     public enum EGameState
     {
         /// <summary>
-        /// Unknown game state
+        /// Invalid game state
         /// </summary>
-        Unknown,
+        Invalid,
 
         /// <summary>
         /// Game has not started yet

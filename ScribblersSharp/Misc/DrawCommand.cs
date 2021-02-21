@@ -50,7 +50,7 @@ namespace ScribblersSharp
         /// Is object in a valid state
         /// </summary>
         public bool IsValid =>
-            (Type != EDrawCommandType.Unknown) &&
+            (Type != EDrawCommandType.Invalid) &&
             ((Type != EDrawCommandType.Line) || (LineWidth > float.Epsilon));
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace ScribblersSharp
         /// <param name="lineWidth">Line width (used for lines)</param>
         public DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
         {
-            if (type == EDrawCommandType.Unknown)
+            if (type == EDrawCommandType.Invalid)
             {
                 throw new ArgumentException("Draw command type is unknown.", nameof(type));
             }

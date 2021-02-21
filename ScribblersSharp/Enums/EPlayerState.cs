@@ -9,9 +9,9 @@ namespace ScribblersSharp
     public enum EPlayerState
     {
         /// <summary>
-        /// Unknown player state
+        /// Invalid player state
         /// </summary>
-        Unknown,
+        Invalid,
 
         /// <summary>
         /// Standby

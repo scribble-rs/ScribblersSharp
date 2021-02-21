@@ -23,7 +23,7 @@ namespace ScribblersSharp
         bool IsUsingSecureProtocols { get; }
 
         /// <summary>
-        /// Enters a lobby (asynchronous)
+        /// Enters a lobby asynchronously
         /// </summary>
         /// <param name="lobbyID">Lobby ID</param>
         /// <param name="username">Username</param>
@@ -31,25 +31,40 @@ namespace ScribblersSharp
         Task<ILobby> EnterLobbyAsync(string lobbyID, string username);
 
         /// <summary>
-        /// Creates a new lobby (asynchronous)
+        /// Creates a new lobby asynchronously
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
         /// <param name="isPublic">Is lobby public</param>
-        /// <param name="maximalPlayers">Maximal players</param>
+        /// <param name="maximalPlayerCount">Maximal player count</param>
         /// <param name="drawingTime">Drawing time</param>
-        /// <param name="rounds">Rounds</param>
+        /// <param name="roundCount">Round count</param>
         /// <param name="customWords">Custom words</param>
         /// <param name="customWordsChance">Custom words chance</param>
-        /// <param name="enableVotekick">Enable vote kick</param>
+        /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayers, ulong drawingTime, uint rounds, IReadOnlyList<string> customWords, uint customWordsChance, bool enableVotekick, uint clientsPerIPLimit);
+        Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit);
 
         /// <summary>
         /// Lists all public lobbies asynchronously
         /// </summary>
         /// <returns>Lobbies</returns>
         Task<IEnumerable<ILobbyView>> ListLobbies();
+
+        /// <summary>
+        /// Changes lobby rules asynchronously
+        /// </summary>
+        /// <param name="language">Language</param>
+        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="maximalPlayerCount">Maximal player count</param>
+        /// <param name="drawingTime">Drawing time</param>
+        /// <param name="roundCount">Round count</param>
+        /// <param name="customWords">Custom words</param>
+        /// <param name="customWordsChance">Custom words chance</param>
+        /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
+        /// <param name="clientsPerIPLimit">Clients per IP limit</param>
+        /// <returns></returns>
+        Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null);
     }
 }

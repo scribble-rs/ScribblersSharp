@@ -9,14 +9,19 @@ namespace ScribblersSharp
     public enum ELanguage
     {
         /// <summary>
-        /// Unknown language
+        /// Invalid language
         /// </summary>
-        Unknown,
+        Invalid,
 
         /// <summary>
-        /// English
+        /// English (US)
         /// </summary>
         English,
+
+        /// <summary>
+        /// English (GB)
+        /// </summary>
+        EnglishGB,
 
         /// <summary>
         /// Italian

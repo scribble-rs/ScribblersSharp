@@ -9,8 +9,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
-// TODO: Add change lobby rules request
-
 /// <summary>
 /// Scribble.rs ♯ namespace
 /// </summary>
@@ -76,12 +74,12 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Sends a HTTP GET request
+        /// Sends a HTTP GET request asynchronously
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="requestURI">Request URI</param>
         /// <returns>Response if successful, otherwise "default"</returns>
-        private async Task<T> GetHTTPAsync<T>(Uri requestURI)
+        private async Task<T> SendHTTPGETRequestAsync<T>(Uri requestURI)
         {
             T ret = default;
             try
@@ -106,12 +104,12 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Posts a HTTP request (asynchronous)
+        /// Sends a HTTP POST request asynchronously
         /// </summary>
         /// <param name="requestURI">Request URI</param>
         /// <param name="parameters">Parameters</param>
         /// <returns>Response if successful, otherwise "default"</returns>
-        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IReadOnlyDictionary<string, string> parameters) where T : IResponseData
+        private async Task<ResponseWithUserSessionCookie<T>> SendHTTPPostRequestAsync<T>(Uri requestURI, IReadOnlyDictionary<string, string> parameters) where T : IResponseData
         {
             ResponseWithUserSessionCookie<T> ret = default;
             string user_session_cookie = string.Empty;
@@ -137,6 +135,26 @@ namespace ScribblersSharp
         }
 
         /// <summary>
+        /// Sends a HTTP patch request asynchronously
+        /// </summary>
+        /// <param name="requestURI">Request URI</param>
+        /// <returns>Task</returns>
+        public async Task SendHTTPPATCHAsync(Uri requestURI)
+        {
+            try
+            {
+                using (_ = await httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), requestURI)))
+                {
+                    // ...
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
+        }
+
+        /// <summary>
         /// Enters a lobby asynchronously
         /// </summary>
         /// <param name="lobbyID">Lobby ID</param>
@@ -159,7 +177,7 @@ namespace ScribblersSharp
             ILobby ret = null;
             Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
             Uri web_socket_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureWebSocketProtocol : webSocketProtocol) }://{ Host }");
-            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<EnterLobbyResponseData>(new Uri(http_host_uri, $"/v1/lobby/player?lobby_id={ Uri.EscapeUriString(lobbyID) }"), new Dictionary<string, string>
+            ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<EnterLobbyResponseData>(new Uri(http_host_uri, $"/v1/lobby/player?lobby_id={ Uri.EscapeUriString(lobbyID) }"), new Dictionary<string, string>
             {
                 { "lobby_id", lobbyID },
                 { "username", username }
@@ -211,15 +229,15 @@ namespace ScribblersSharp
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
         /// <param name="isPublic">Is lobby public</param>
-        /// <param name="maximalPlayers">Maximal players</param>
+        /// <param name="maximalPlayerCount">Maximal player count</param>
         /// <param name="drawingTime">Drawing time</param>
-        /// <param name="rounds">Rounds</param>
+        /// <param name="roundCount">Round count</param>
         /// <param name="customWords">Custom words</param>
         /// <param name="customWordsChance">Custom words chance</param>
-        /// <param name="enableVotekick">Enable vote kick</param>
+        /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        public async Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayers, ulong drawingTime, uint rounds, IReadOnlyList<string> customWords, uint customWordsChance, bool enableVotekick, uint clientsPerIPLimit)
+        public async Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit)
         {
             if (username == null)
             {
@@ -229,7 +247,7 @@ namespace ScribblersSharp
             {
                 throw new ArgumentException($"Username must be atleast { Rules.maximalUsernameLength } characters long.");
             }
-            if ((maximalPlayers < Rules.minimalPlayers) || (maximalPlayers > Rules.maximalPlayers))
+            if ((maximalPlayerCount < Rules.minimalPlayers) || (maximalPlayerCount > Rules.maximalPlayers))
             {
                 throw new ArgumentException($"There can be only { Rules.minimalPlayers } to { Rules.maximalPlayers } players in one lobby.");
             }
@@ -237,7 +255,7 @@ namespace ScribblersSharp
             {
                 throw new ArgumentException($"Drawing time can only be between { Rules.minimalDrawingTime } and { Rules.maximalDrawingTime } seconds.");
             }
-            if ((rounds < Rules.minimalRounds) || (rounds > Rules.maximalRounds))
+            if ((roundCount < Rules.minimalRounds) || (roundCount > Rules.maximalRounds))
             {
                 throw new ArgumentException($"Only { Rules.minimalRounds } to { Rules.maximalRounds } rounds can be set in a lobby.");
             }
@@ -283,17 +301,17 @@ namespace ScribblersSharp
                 }
                 custom_words_builder.Append(custom_word);
             }
-            ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<CreateLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby"), new Dictionary<string, string>
+            ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<CreateLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby"), new Dictionary<string, string>
             {
                 { "username", username },
                 { "language", language.ToString().ToLower() },
                 { "public", isPublic.ToString().ToLower() },
-                { "max_players", maximalPlayers.ToString() },
+                { "max_players", maximalPlayerCount.ToString() },
                 { "drawing_time", drawingTime.ToString() },
-                { "rounds", rounds.ToString() },
+                { "rounds", roundCount.ToString() },
                 { "custom_words", custom_words_builder.ToString() },
                 { "custom_words_chance", customWordsChance.ToString() },
-                { "enable_votekick", enableVotekick.ToString().ToLower() },
+                { "enable_votekick", isVotekickingEnabled.ToString().ToLower() },
                 { "clients_per_ip_limit", clientsPerIPLimit.ToString() }
             });
             custom_words_builder.Clear();
@@ -346,7 +364,7 @@ namespace ScribblersSharp
         {
             ILobbyView[] ret = Array.Empty<ILobbyView>();
             Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
-            LobbyViewData[] lobby_views = await GetHTTPAsync<LobbyViewData[]>(new Uri(http_host_uri, "/v1/lobby"));
+            LobbyViewData[] lobby_views = await SendHTTPGETRequestAsync<LobbyViewData[]>(new Uri(http_host_uri, "/v1/lobby"));
             if ((lobby_views != null) && Protection.IsValid(lobby_views))
             {
                 ret = new ILobbyView[lobby_views.Length];
@@ -364,6 +382,165 @@ namespace ScribblersSharp
 #endif
             }
             return ret;
+        }
+
+        /// <summary>
+        /// Changes lobby rules asynchronously
+        /// </summary>
+        /// <param name="language">Language</param>
+        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="maximalPlayerCount">Maximal player count</param>
+        /// <param name="drawingTime">Drawing time</param>
+        /// <param name="roundCount">Round count</param>
+        /// <param name="customWords">Custom words</param>
+        /// <param name="customWordsChance">Custom words chance</param>
+        /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
+        /// <param name="clientsPerIPLimit">Clients per IP limit</param>
+        /// <returns></returns>
+        public async Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null)
+        {
+            if ((language != null) && (language == ELanguage.Invalid))
+            {
+                throw new ArgumentException("Language can't be invalid.", nameof(language));
+            }
+            if ((maximalPlayerCount != null) && (maximalPlayerCount < 1U))
+            {
+                throw new ArgumentException("Maximal player count can't be smaller than one.", nameof(maximalPlayerCount));
+            }
+            if ((drawingTime != null) && (drawingTime < 1U))
+            {
+                throw new ArgumentException("Drawing time can't be smaller than one.", nameof(drawingTime));
+            }
+            if ((customWords != null) && !Protection.IsValid(customWords))
+            {
+                throw new ArgumentException("Custom words can't contain null.", nameof(customWords));
+            }
+            if ((clientsPerIPLimit != null) && (clientsPerIPLimit < 1U))
+            {
+                throw new ArgumentException("Clients per IP limit can't be smaller than one.", nameof(clientsPerIPLimit));
+            }
+            Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
+            bool are_changes_specified = false;
+            StringBuilder parameters_string_builder = new StringBuilder();
+            if ((language != null) && (language != ELanguage.Invalid))
+            {
+                are_changes_specified = true;
+                parameters_string_builder.Append($"language={ Uri.EscapeUriString(language.Value.ToString()) }");
+            }
+            if (isPublic != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"public={ Uri.EscapeUriString(isPublic.Value.ToString().ToLower()) }");
+            }
+            if (maximalPlayerCount != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"max_players={ Uri.EscapeUriString(maximalPlayerCount.Value.ToString()) }");
+            }
+            if (drawingTime != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"drawing_time={ Uri.EscapeUriString(drawingTime.Value.ToString()) }");
+            }
+            if (roundCount != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"rounds={ Uri.EscapeUriString(roundCount.Value.ToString()) }");
+            }
+            if (customWords != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"custom_words=");
+                bool is_first = true;
+                foreach (string custom_word in customWords)
+                {
+                    if (is_first)
+                    {
+                        is_first = false;
+                    }
+                    else
+                    {
+                        parameters_string_builder.Append(',');
+                    }
+                    parameters_string_builder.Append(Uri.EscapeUriString(roundCount.Value.ToString()));
+                }
+            }
+            if (customWordsChance != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"custom_words_chance={ Uri.EscapeUriString(customWordsChance.Value.ToString()) }");
+            }
+            if (isVotekickingEnabled != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"enable_votekick={ Uri.EscapeUriString(isVotekickingEnabled.Value.ToString().ToLower()) }");
+            }
+            if (clientsPerIPLimit != null)
+            {
+                if (are_changes_specified)
+                {
+                    parameters_string_builder.Append("&");
+                }
+                else
+                {
+                    are_changes_specified = true;
+                }
+                parameters_string_builder.Append($"clients_per_ip_limit={ Uri.EscapeUriString(clientsPerIPLimit.Value.ToString()) }");
+            }
+            if (are_changes_specified)
+            {
+                await SendHTTPPATCHAsync(new Uri(http_host_uri, $"/v1/lobby?{ parameters_string_builder }"));
+            }
+            parameters_string_builder.Clear();
         }
 
         /// <summary>

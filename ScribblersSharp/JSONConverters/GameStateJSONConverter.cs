@@ -27,7 +27,7 @@ namespace ScribblersSharp.JSONConverters
             {
                 if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
                 {
-                    ret = EGameState.Unknown;
+                    ret = EGameState.Invalid;
                 }
             }
             return ret;
