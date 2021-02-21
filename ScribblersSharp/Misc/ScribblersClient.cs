@@ -405,16 +405,16 @@ namespace ScribblersSharp
         /// <summary>
         /// Changes lobby rules asynchronously
         /// </summary>
-        /// <param name="language">Language</param>
-        /// <param name="isPublic">Is lobby public</param>
-        /// <param name="maximalPlayerCount">Maximal player count</param>
-        /// <param name="drawingTime">Drawing time</param>
-        /// <param name="roundCount">Round count</param>
-        /// <param name="customWords">Custom words</param>
-        /// <param name="customWordsChance">Custom words chance</param>
-        /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
-        /// <param name="clientsPerIPLimit">Clients per IP limit</param>
-        /// <returns></returns>
+        /// <param name="language">Language (optional)</param>
+        /// <param name="isPublic">Is lobby public (optional)</param>
+        /// <param name="maximalPlayerCount">Maximal player count (optional)</param>
+        /// <param name="drawingTime">Drawing time (optional)</param>
+        /// <param name="roundCount">Round count (optional)</param>
+        /// <param name="customWords">Custom words (optional)</param>
+        /// <param name="customWordsChance">Custom words chance (optional)</param>
+        /// <param name="isVotekickingEnabled">Is votekicking enabled (optional)</param>
+        /// <param name="clientsPerIPLimit">Clients per IP limit (optional)</param>
+        /// <returns>Task</returns>
         public async Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null)
         {
             if ((language != null) && (language == ELanguage.Invalid))
