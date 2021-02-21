@@ -56,7 +56,7 @@ namespace ScribblersSharp
         /// Lists all public lobbies asynchronously
         /// </summary>
         /// <returns>Lobby views task</returns>
-        Task<IEnumerable<ILobbyView>> ListLobbies();
+        Task<IEnumerable<ILobbyView>> ListLobbiesAsync();
 
         /// <summary>
         /// Changes lobby rules asynchronously

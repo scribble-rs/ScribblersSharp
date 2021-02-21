@@ -378,7 +378,7 @@ namespace ScribblersSharp
         /// Lists all public lobbies asynchronously
         /// </summary>
         /// <returns>Lobby views task</returns>
-        public async Task<IEnumerable<ILobbyView>> ListLobbies()
+        public async Task<IEnumerable<ILobbyView>> ListLobbiesAsync()
         {
             ILobbyView[] ret = Array.Empty<ILobbyView>();
             Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
