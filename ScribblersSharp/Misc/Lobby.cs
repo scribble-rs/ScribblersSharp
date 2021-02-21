@@ -239,7 +239,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Gets invoked when a "name-change" game message has been received.
         /// </summary>
-        public event NameChangeMessageReceivedDelegate OnNameChangeMessageReceived;
+        public event NameChangeGameMessageReceivedDelegate OnNameChangeGameMessageReceived;
 
         /// <summary>
         /// Gets invoked when a "update-players" game message has been received.
@@ -517,7 +517,7 @@ namespace ScribblersSharp
                 if (players.ContainsKey(name_change.PlayerID) && players[name_change.PlayerID] is IInternalPlayer internal_player)
                 {
                     internal_player.UpdateNameInternally(name_change.PlayerName);
-                    OnNameChangeMessageReceived?.Invoke(internal_player);
+                    OnNameChangeGameMessageReceived?.Invoke(internal_player);
                 }
             }, MessageParseFailedEvent);
             AddMessageParser<UpdatePlayersReceiveGameMessageData>((gameMessage, json) =>

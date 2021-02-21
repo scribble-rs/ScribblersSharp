@@ -182,7 +182,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Gets invoked when a "name-change" game message has been received.
         /// </summary>
-        event NameChangeMessageReceivedDelegate OnNameChangeMessageReceived;
+        event NameChangeGameMessageReceivedDelegate OnNameChangeGameMessageReceived;
 
         /// <summary>
         /// Gets invoked when a "update-players" game message has been received.
