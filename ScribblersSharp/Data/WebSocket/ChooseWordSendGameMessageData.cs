@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// "choose-word" send game message data class
+    /// A class that describes a sendable "choose-word" game message.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class ChooseWordSendGameMessageData : GameMessageData<uint>, ISendGameMessageData

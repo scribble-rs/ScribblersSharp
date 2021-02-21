@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -21,13 +22,19 @@ namespace ScribblersSharp.Data
         /// Players
         /// </summary>
         [JsonProperty("players")]
-        public PlayerData[] Players { get; set; }
+        public List<PlayerData> Players { get; set; }
 
         /// <summary>
         /// Round
         /// </summary>
         [JsonProperty("round")]
         public uint Round { get; set; }
+
+        /// <summary>
+        /// Previous word
+        /// </summary>
+        [JsonProperty("previousWord")]
+        public string PreviousWord { get; set; }
 
         /// <summary>
         /// Is object in a valid state

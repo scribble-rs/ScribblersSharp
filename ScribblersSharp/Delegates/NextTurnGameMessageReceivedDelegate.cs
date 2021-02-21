@@ -4,8 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "next-turn" game message received delegate
+    /// Used to signal when a "next-turn" game message has been received.
     /// </summary>
-    /// <param name="lobby">Lobby</param>
-    public delegate void NextTurnGameMessageReceivedDelegate(ILobby lobby);
+    public delegate void NextTurnGameMessageReceivedDelegate();
 }

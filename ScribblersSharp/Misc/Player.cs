@@ -91,5 +91,11 @@ namespace ScribblersSharp
             Rank = newRank;
             State = newState;
         }
+
+        /// <summary>
+        /// Updates player name internally
+        /// </summary>
+        /// <param name="newName">New player name</param>
+        public void UpdateNameInternally(string newName) => Name = newName ?? throw new ArgumentNullException(nameof(newName));
     }
 }

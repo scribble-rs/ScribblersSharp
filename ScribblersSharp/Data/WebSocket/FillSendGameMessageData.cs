@@ -7,7 +7,7 @@ using System.Drawing;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// "fill" send game message data class
+    /// A class that describes a sendable "fill" game message.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class FillSendGameMessageData : GameMessageData<FillData>, ISendGameMessageData

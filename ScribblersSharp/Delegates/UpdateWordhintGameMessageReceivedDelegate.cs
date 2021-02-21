@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "update-wordhint" game message received delegate
+    /// Used to signal when a "update-wordhint" game message has been received.
     /// </summary>
     /// <param name="wordHints">Word hints</param>
     public delegate void UpdateWordhintGameMessageReceivedDelegate(IReadOnlyList<IWordHint> wordHints);

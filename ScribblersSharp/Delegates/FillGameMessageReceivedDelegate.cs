@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "fill" game message received delegate
+    /// Used to signal when a "fill" game message has been received.
     /// </summary>
     /// <param name="positionX">Fill position X</param>
     /// <param name="positionY">Fill position Y</param>

@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "line" game message received delegate
+    /// Used to signal when a "line" game message has been received.
     /// </summary>
     /// <param name="fromX">Line from X</param>
     /// <param name="fromY">Line from Y</param>

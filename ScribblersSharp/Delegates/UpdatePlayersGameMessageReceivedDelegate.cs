@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "update-players" game message received delegate
+    /// Used to signal when a "update-players" game message has been received.
     /// </summary>
     /// <param name="players">Players</param>
     public delegate void UpdatePlayersGameMessageReceivedDelegate(IReadOnlyDictionary<string, IPlayer> players);

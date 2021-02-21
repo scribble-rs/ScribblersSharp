@@ -93,7 +93,7 @@ namespace ScribblersSharpTest
                     lobby = clients[index].EnterLobbyAsync(lobbies[0].LobbyID, "TestClient_" + index).GetAwaiter().GetResult();
                 }
                 Assert.IsNotNull(lobby);
-                lobby.OnReadyGameMessageReceived += (lobby) =>
+                lobby.OnReadyGameMessageReceived += () =>
                 {
                     Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" is ready.");
                     if ((lobby.Players.Count >= clients.Length) && (lobby.MyPlayer.ID == lobby.Owner.ID))
@@ -101,7 +101,7 @@ namespace ScribblersSharpTest
                         lobby.SendStartGameMessageAsync();
                     }
                 };
-                lobby.OnNextTurnGameMessageReceived += (lobby) =>
+                lobby.OnNextTurnGameMessageReceived += () =>
                 {
                     Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" is in round \"{ lobby.Round }\".");
                     if (lobby.MyPlayer.ID == lobby.Owner.ID)

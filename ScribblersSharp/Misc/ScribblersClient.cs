@@ -9,6 +9,8 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
+// TODO: Add change lobby rules request
+
 /// <summary>
 /// Scribble.rs ♯ namespace
 /// </summary>
@@ -25,9 +27,19 @@ namespace ScribblersSharp
         private static readonly string httpProtocol = "http";
 
         /// <summary>
+        /// Secure HTTP protocol
+        /// </summary>
+        private static readonly string secureHTTPProtocol = "https";
+
+        /// <summary>
         /// WebSocket protocol
         /// </summary>
         private static readonly string webSocketProtocol = "ws";
+
+        /// <summary>
+        /// Secure WebSocket protocol
+        /// </summary>
+        private static readonly string secureWebSocketProtocol = "wss";
 
         /// <summary>
         /// Cookie container
@@ -45,12 +57,18 @@ namespace ScribblersSharp
         public string Host { get; }
 
         /// <summary>
+        /// Is using secure protocols
+        /// </summary>
+        public bool IsUsingSecureProtocols { get; }
+
+        /// <summary>
         /// Constructs a Scribble.rs client
         /// </summary>
         /// <param name="host">Scribble.rs host</param>
-        public ScribblersClient(string host)
+        public ScribblersClient(string host, bool isUsingSecureProtocols)
         {
             Host = host ?? throw new ArgumentNullException(nameof(host));
+            IsUsingSecureProtocols = isUsingSecureProtocols;
             httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer })
             {
                 Timeout = TimeSpan.FromSeconds(3000.0)
@@ -58,28 +76,25 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Posts a HTTP request (asynchronous)
+        /// Sends a HTTP GET request
         /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
         /// <param name="requestURI">Request URI</param>
-        /// <param name="parameters">Parameters</param>
-        /// <returns>Response if successful, otherwise "null"</returns>
-        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IReadOnlyDictionary<string, string> parameters) where T : IResponseData
+        /// <returns>Response if successful, otherwise "default"</returns>
+        private async Task<T> GetHTTPAsync<T>(Uri requestURI)
         {
-            ResponseWithUserSessionCookie<T> ret = default;
-            string user_session_cookie = string.Empty;
+            T ret = default;
             try
             {
-                using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, new FormUrlEncodedContent(parameters)))
+                using (HttpResponseMessage response = await httpClient.GetAsync(requestURI))
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        string json = await response.Content.ReadAsStringAsync();
-                        ret = new ResponseWithUserSessionCookie<T>(JsonConvert.DeserializeObject<T>(json), user_session_cookie);
+                        ret = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
                     }
                     else
                     {
-                        string error = await response.Content.ReadAsStringAsync();
-                        Console.Error.WriteLine(error);
+                        Console.Error.WriteLine(await response.Content.ReadAsStringAsync());
                     }
                 }
             }
@@ -91,7 +106,38 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Enters a lobby (asynchronous)
+        /// Posts a HTTP request (asynchronous)
+        /// </summary>
+        /// <param name="requestURI">Request URI</param>
+        /// <param name="parameters">Parameters</param>
+        /// <returns>Response if successful, otherwise "default"</returns>
+        private async Task<ResponseWithUserSessionCookie<T>> PostHTTPAsync<T>(Uri requestURI, IReadOnlyDictionary<string, string> parameters) where T : IResponseData
+        {
+            ResponseWithUserSessionCookie<T> ret = default;
+            string user_session_cookie = string.Empty;
+            try
+            {
+                using (HttpResponseMessage response = await httpClient.PostAsync(requestURI, new FormUrlEncodedContent(parameters)))
+                {
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        ret = new ResponseWithUserSessionCookie<T>(JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync()), user_session_cookie);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(await response.Content.ReadAsStringAsync());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Enters a lobby asynchronously
         /// </summary>
         /// <param name="lobbyID">Lobby ID</param>
         /// <param name="username">Username</param>
@@ -111,8 +157,8 @@ namespace ScribblersSharp
                 throw new ArgumentException($"Username must be between { Rules.minimalUsernameLength } and { Rules.maximalUsernameLength } characters.");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri($"{ httpProtocol }://{ Host }");
-            Uri web_socket_host_uri = new Uri($"{ webSocketProtocol }://{ Host }");
+            Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
+            Uri web_socket_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureWebSocketProtocol : webSocketProtocol) }://{ Host }");
             ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await PostHTTPAsync<EnterLobbyResponseData>(new Uri(http_host_uri, $"/v1/lobby/player?lobby_id={ Uri.EscapeUriString(lobbyID) }"), new Dictionary<string, string>
             {
                 { "lobby_id", lobbyID },
@@ -126,7 +172,30 @@ namespace ScribblersSharp
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight, response.MinimalBrushSize, response.MaximalBrushSize, response.SuggestedBrushSizes, Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2]));
+                    ret = new Lobby
+                    (
+                        client_web_socket,
+                        response.LobbyID,
+                        response.MinimalDrawingTime,
+                        response.MaximalDrawingTime,
+                        response.MinimalRoundCount,
+                        response.MaximalRoundCount,
+                        response.MinimalMaximalPlayerCount,
+                        response.MaximalMaximalPlayerCount,
+                        response.MinimalClientsPerIPLimit,
+                        response.MaximalClientsPerIPLimit,
+                        response.MaximalPlayerCount,
+                        response.IsPublic,
+                        response.IsVotekickingEnabled,
+                        response.CustomWordsChance,
+                        response.ClientsPerIPLimit,
+                        response.DrawingBoardBaseWidth,
+                        response.DrawingBoardBaseHeight,
+                        response.MinimalBrushSize,
+                        response.MaximalBrushSize,
+                        response.SuggestedBrushSizes,
+                        Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2])
+                    );
                 }
                 else
                 {
@@ -137,7 +206,7 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Creates a new lobby (asynchronous)
+        /// Creates a new lobby asynchronously
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
@@ -185,8 +254,8 @@ namespace ScribblersSharp
                 throw new ArgumentException($"Clients per IP limit must be between { Rules.minimalClientsPerIPLimit } and { Rules.maximalClientsPerIPLimit }.");
             }
             ILobby ret = null;
-            Uri http_host_uri = new Uri($"{ httpProtocol }://{ Host }");
-            Uri web_socket_host_uri = new Uri($"{ webSocketProtocol }://{ Host }");
+            Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
+            Uri web_socket_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureWebSocketProtocol : webSocketProtocol) }://{ Host }");
             string[] custom_words = new string[customWords.Count];
 #if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
             for (int index = 0; index < custom_words.Length; index++)
@@ -236,12 +305,63 @@ namespace ScribblersSharp
                 await client_web_socket.ConnectAsync(new Uri(web_socket_host_uri, $"/v1/ws?lobby_id={ Uri.EscapeUriString(response.LobbyID) }"), default);
                 if (client_web_socket.State == WebSocketState.Open)
                 {
-                    ret = new Lobby(client_web_socket, response.LobbyID, response.DrawingBoardBaseWidth, response.DrawingBoardBaseHeight, response.MinimalBrushSize, response.MaximalBrushSize, response.SuggestedBrushSizes, Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2]));
+                    ret = new Lobby
+                    (
+                        client_web_socket,
+                        response.LobbyID,
+                        response.MinimalDrawingTime,
+                        response.MaximalDrawingTime,
+                        response.MinimalRoundCount,
+                        response.MaximalRoundCount,
+                        response.MinimalMaximalPlayerCount,
+                        response.MaximalMaximalPlayerCount,
+                        response.MinimalClientsPerIPLimit,
+                        response.MaximalClientsPerIPLimit,
+                        response.MaximalPlayerCount,
+                        response.IsPublic,
+                        response.IsVotekickingEnabled,
+                        response.CustomWordsChance,
+                        response.ClientsPerIPLimit,
+                        response.DrawingBoardBaseWidth,
+                        response.DrawingBoardBaseHeight,
+                        response.MinimalBrushSize,
+                        response.MaximalBrushSize,
+                        response.SuggestedBrushSizes,
+                        Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2])
+                    );
                 }
                 else
                 {
                     client_web_socket.Dispose();
                 }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Lists all public lobbies asynchronously
+        /// </summary>
+        /// <returns>Lobbies</returns>
+        public async Task<IEnumerable<ILobbyView>> ListLobbies()
+        {
+            ILobbyView[] ret = Array.Empty<ILobbyView>();
+            Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
+            LobbyViewData[] lobby_views = await GetHTTPAsync<LobbyViewData[]>(new Uri(http_host_uri, "/v1/lobby"));
+            if ((lobby_views != null) && Protection.IsValid(lobby_views))
+            {
+                ret = new ILobbyView[lobby_views.Length];
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                for (int lobby_view_index = 0; lobby_view_index < lobby_views.Length; lobby_view_index++)
+#else
+                Parallel.For(0, lobby_views.Length, (lobby_view_index) =>
+#endif
+                {
+                    LobbyViewData lobby_view = lobby_views[lobby_view_index];
+                    ret[lobby_view_index] = new LobbyView(lobby_view.LobbyID, lobby_view.PlayerCount, lobby_view.MaximalPlayerCount, lobby_view.RoundCount, lobby_view.MaximalRoundCount, lobby_view.DrawingTime, lobby_view.IsUsingCustomWords, lobby_view.IsVotekickingEnabled, lobby_view.MaximalClientsPerIPCount, lobby_view.Language);
+                }
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                );
+#endif
             }
             return ret;
         }

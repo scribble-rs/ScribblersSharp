@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal recieving a non-meaningful game message
+    /// Used to signal when a non-meaningful game message has been received.
     /// </summary>
     /// <param name="message">Game message</param>
     /// <param name="json">Game message JSON</param>

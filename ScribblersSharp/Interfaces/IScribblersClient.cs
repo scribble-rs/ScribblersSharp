@@ -18,6 +18,11 @@ namespace ScribblersSharp
         string Host { get; }
 
         /// <summary>
+        /// Is using secure protocols
+        /// </summary>
+        bool IsUsingSecureProtocols { get; }
+
+        /// <summary>
         /// Enters a lobby (asynchronous)
         /// </summary>
         /// <param name="lobbyID">Lobby ID</param>
@@ -40,5 +45,11 @@ namespace ScribblersSharp
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
         Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayers, ulong drawingTime, uint rounds, IReadOnlyList<string> customWords, uint customWordsChance, bool enableVotekick, uint clientsPerIPLimit);
+
+        /// <summary>
+        /// Lists all public lobbies asynchronously
+        /// </summary>
+        /// <returns>Lobbies</returns>
+        Task<IEnumerable<ILobbyView>> ListLobbies();
     }
 }

@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// "system-message" receive game message data class
+    /// A class that describes a received "system-message" game message.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class SystemMessageReceiveGameMessageData : GameMessageData<string>, IReceiveGameMessageData

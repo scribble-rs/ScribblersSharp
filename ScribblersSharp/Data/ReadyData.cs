@@ -20,10 +20,29 @@ namespace ScribblersSharp.Data
         public string PlayerID { get; set; }
 
         /// <summary>
+        /// Player name
+        /// </summary>
+        [JsonProperty("playerName")]
+        public string PlayerName { get; set; }
+
+        /// <summary>
         /// Is player allowed to draw
         /// </summary>
         [JsonProperty("allowDrawing")]
         public bool IsPlayerAllowedToDraw { get; set; }
+
+        /// <summary>
+        /// Is votekicking enabled
+        /// </summary>
+        [JsonProperty("votekickEnabled")]
+        public bool IsVotekickingEnabled { get; set; }
+
+        /// <summary>
+        /// Game state
+        /// </summary>
+        [JsonProperty("gameState")]
+        [JsonConverter(typeof(GameStateJSONConverter))]
+        public EGameState GameState { get; set; }
 
         /// <summary>
         /// Owner ID
@@ -62,21 +81,15 @@ namespace ScribblersSharp.Data
         public List<PlayerData> Players { get; set; }
 
         /// <summary>
-        /// Game state
-        /// </summary>
-        [JsonProperty("gameState")]
-        [JsonConverter(typeof(GameStateJSONConverter))]
-        public EGameState GameState { get; set; }
-
-        /// <summary>
         /// Is object in a valid state
         /// </summary>
         public bool IsValid =>
             (PlayerID != null) &&
-            (OwnerID != null) &&
+            !string.IsNullOrWhiteSpace(PlayerName) &&
             (GameState != EGameState.Unknown) &&
+            (OwnerID != null) &&
             Protection.IsValid(Players) &&
-            Protection.IsContained(Players, (player) => player.ID == PlayerID) &&
+            Protection.IsContained(Players, (player) => (player.ID == PlayerID) && (player.Name == PlayerName)) &&
             Protection.IsContained(Players, (player) => player.ID == OwnerID) &&
             Protection.AreUnique(Players, (left, right) => left.ID != right.ID);
     }

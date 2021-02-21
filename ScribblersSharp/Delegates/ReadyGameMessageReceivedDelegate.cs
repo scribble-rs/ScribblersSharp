@@ -4,8 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// "ready" game message received delegate
+    /// Used to signal when a "ready" game message has been received.
     /// </summary>
-    /// <param name="lobby">Lobby</param>
-    public delegate void ReadyGameMessageReceivedDelegate(ILobby lobby);
+    public delegate void ReadyGameMessageReceivedDelegate();
 }
