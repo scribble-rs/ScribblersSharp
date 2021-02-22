@@ -447,24 +447,108 @@ namespace ScribblersSharp
             MaximalBrushSize = maximalBrushSize;
             SuggestedBrushSizes = suggestedBrushSizes ?? throw new ArgumentNullException(nameof(suggestedBrushSizes));
             CanvasColor = canvasColor;
-            AddMessageParser<ReadyReceiveGameMessageData>((gameMessage, json) =>
-            {
-                ReadyData ready = gameMessage.Data;
-                IsPlayerAllowedToDraw = ready.IsPlayerAllowedToDraw;
-                IsVotekickingEnabled = ready.IsVotekickingEnabled;
-                GameState = ready.GameState;
-                Round = ready.Round;
-                MaximalRounds = ready.MaximalRounds;
-                CurrentDrawingTime = ready.CurrentDrawingTime;
-                if (ready.WordHints == null)
+            AddMessageParser<ReadyReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
                 {
-                    wordHints = Array.Empty<IWordHint>();
-                }
-                else
-                {
-                    if (wordHints.Length != ready.WordHints.Count)
+                    ReadyData ready = gameMessage.Data;
+                    IsPlayerAllowedToDraw = ready.IsPlayerAllowedToDraw;
+                    IsVotekickingEnabled = ready.IsVotekickingEnabled;
+                    GameState = ready.GameState;
+                    Round = ready.Round;
+                    MaximalRounds = ready.MaximalRounds;
+                    CurrentDrawingTime = ready.CurrentDrawingTime;
+                    if (ready.WordHints == null)
                     {
-                        wordHints = new IWordHint[ready.WordHints.Count];
+                        wordHints = Array.Empty<IWordHint>();
+                    }
+                    else
+                    {
+                        if (wordHints.Length != ready.WordHints.Count)
+                        {
+                            wordHints = new IWordHint[ready.WordHints.Count];
+                        }
+    #if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                        for (int index = 0; index < wordHints.Length; index++)
+    #else
+                        Parallel.For(0, wordHints.Length, (index) =>
+    #endif
+                        {
+                            WordHintData word_hint_data = ready.WordHints[index];
+                            wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
+                        }
+    #if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+                        );
+    #endif
+                    }
+                    UpdateAllPlayers(ready.Players);
+                    MyPlayer = players.ContainsKey(ready.PlayerID) ? players[ready.PlayerID] : null;
+                    Owner = players.ContainsKey(ready.OwnerID) ? players[ready.OwnerID] : null;
+                    currentDrawing.Clear();
+                    JObject json_object = JObject.Parse(json);
+                    if (json_object.ContainsKey("data"))
+                    {
+                        if (json_object["data"] is JObject json_data_object)
+                        {
+                            if (json_data_object.ContainsKey("currentDrawing"))
+                            {
+                                if (json_data_object["currentDrawing"] is JArray json_draw_commands)
+                                {
+                                    ParseCurrentDrawingFromJSON(json_draw_commands);
+                                }
+                            }
+                        }
+                    }
+                    OnReadyGameMessageReceived?.Invoke();
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<NextTurnReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    NextTurnData next_turn = gameMessage.Data;
+                    IsPlayerAllowedToDraw = false;
+                    GameState = EGameState.Ongoing;
+                    Round = next_turn.Round;
+                    CurrentDrawingTime = next_turn.RoundEndTime;
+                    UpdateAllPlayers(next_turn.Players);
+                    PreviousWord = next_turn.PreviousWord ?? PreviousWord;
+                    currentDrawing.Clear();
+                    OnNextTurnGameMessageReceived?.Invoke();
+                }, MessageParseFailedEvent
+            );
+            AddMessageParser<NameChangeReceiveMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    NameChangeData name_change = gameMessage.Data;
+                    if (players.ContainsKey(name_change.PlayerID) && players[name_change.PlayerID] is IInternalPlayer internal_player)
+                    {
+                        internal_player.UpdateNameInternally(name_change.PlayerName);
+                        OnNameChangeGameMessageReceived?.Invoke(internal_player);
+                    }
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<UpdatePlayersReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    UpdateAllPlayers(gameMessage.Data);
+                    OnUpdatePlayersGameMessageReceived?.Invoke(players);
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<UpdateWordhintReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    GameState = EGameState.Ongoing;
+                    WordHintData[] word_hints = gameMessage.Data;
+                    if (wordHints.Length != word_hints.Length)
+                    {
+                        wordHints = new IWordHint[word_hints.Length];
                     }
 #if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
                     for (int index = 0; index < wordHints.Length; index++)
@@ -472,108 +556,59 @@ namespace ScribblersSharp
                     Parallel.For(0, wordHints.Length, (index) =>
 #endif
                     {
-                        WordHintData word_hint_data = ready.WordHints[index];
+                        WordHintData word_hint_data = word_hints[index];
                         wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                     }
 #if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
                     );
 #endif
-                }
-                UpdateAllPlayers(ready.Players);
-                MyPlayer = players.ContainsKey(ready.PlayerID) ? players[ready.PlayerID] : null;
-                Owner = players.ContainsKey(ready.OwnerID) ? players[ready.OwnerID] : null;
-                currentDrawing.Clear();
-                JObject json_object = JObject.Parse(json);
-                if (json_object.ContainsKey("data"))
-                {
-                    if (json_object["data"] is JObject json_data_object)
-                    {
-                        if (json_data_object.ContainsKey("currentDrawing"))
-                        {
-                            if (json_data_object["currentDrawing"] is JArray json_draw_commands)
-                            {
-                                ParseCurrentDrawingFromJSON(json_draw_commands);
-                            }
-                        }
-                    }
-                }
-                OnReadyGameMessageReceived?.Invoke();
-            }, MessageParseFailedEvent);
-            AddMessageParser<NextTurnReceiveGameMessageData>((gameMessage, json) =>
-            {
-                NextTurnData next_turn = gameMessage.Data;
-                IsPlayerAllowedToDraw = false;
-                GameState = EGameState.Ongoing;
-                Round = next_turn.Round;
-                CurrentDrawingTime = next_turn.RoundEndTime;
-                UpdateAllPlayers(next_turn.Players);
-                PreviousWord = next_turn.PreviousWord ?? PreviousWord;
-                currentDrawing.Clear();
-                OnNextTurnGameMessageReceived?.Invoke();
-            }, MessageParseFailedEvent);
-            AddMessageParser<NameChangeReceiveMessageData>((gameMessage, json) =>
-            {
-                NameChangeData name_change = gameMessage.Data;
-                if (players.ContainsKey(name_change.PlayerID) && players[name_change.PlayerID] is IInternalPlayer internal_player)
-                {
-                    internal_player.UpdateNameInternally(name_change.PlayerName);
-                    OnNameChangeGameMessageReceived?.Invoke(internal_player);
-                }
-            }, MessageParseFailedEvent);
-            AddMessageParser<UpdatePlayersReceiveGameMessageData>((gameMessage, json) =>
-            {
-                UpdateAllPlayers(gameMessage.Data);
-                OnUpdatePlayersGameMessageReceived?.Invoke(players);
-            }, MessageParseFailedEvent);
-            AddMessageParser<UpdateWordhintReceiveGameMessageData>((gameMessage, json) =>
-            {
-                GameState = EGameState.Ongoing;
-                WordHintData[] word_hints = gameMessage.Data;
-                if (wordHints.Length != word_hints.Length)
-                {
-                    wordHints = new IWordHint[word_hints.Length];
-                }
-#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
-                for (int index = 0; index < wordHints.Length; index++)
-#else
-                Parallel.For(0, wordHints.Length, (index) =>
-#endif
-                {
-                    WordHintData word_hint_data = word_hints[index];
-                    wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
-                }
-#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
-                );
-#endif
-                OnUpdateWordhintGameMessageReceived?.Invoke(wordHints);
-            }, MessageParseFailedEvent);
+                    OnUpdateWordhintGameMessageReceived?.Invoke(wordHints);
+                },
+                MessageParseFailedEvent
+            );
             AddMessageParser<MessageReceiveGameMessageData>((gameMessage, json) => OnMessageGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data.AuthorID) ? players[gameMessage.Data.AuthorID] : null, gameMessage.Data.Content), MessageParseFailedEvent);
             AddMessageParser<NonGuessingPlayerMessageReceiveGameMessageData>((gameMessage, json) => OnNonGuessingPlayerMessageGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data.AuthorID) ? players[gameMessage.Data.AuthorID] : null, gameMessage.Data.Content), MessageParseFailedEvent);
             AddMessageParser<SystemMessageReceiveGameMessageData>((gameMessage, json) => OnSystemMessageGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);
-            AddMessageParser<LineReceiveGameMessageData>((gameMessage, json) =>
-            {
-                LineData line = gameMessage.Data;
-                GameState = EGameState.Ongoing;
-                currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth));
-                OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth);
-            }, MessageParseFailedEvent);
-            AddMessageParser<FillReceiveGameMessageData>((gameMessage, json) =>
-            {
-                FillData fill = gameMessage.Data;
-                currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, fill.Color, 0.0f));
-                OnFillGameMessageReceived(fill.X, fill.Y, fill.Color);
-            }, MessageParseFailedEvent);
-            AddMessageParser<ClearDrawingBoardReceiveGameMessageData>((gameMessage, json) =>
-            {
-                currentDrawing.Clear();
-                OnClearDrawingBoardGameMessageReceived?.Invoke();
-            }, MessageParseFailedEvent);
-            AddMessageParser<YourTurnReceiveGameMessageData>((gameMessage, json) =>
-            {
-                IsPlayerAllowedToDraw = true;
-                currentDrawing.Clear();
-                OnYourTurnGameMessageReceived?.Invoke((string[])gameMessage.Data.Clone());
-            }, MessageParseFailedEvent);
+            AddMessageParser<LineReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    LineData line = gameMessage.Data;
+                    GameState = EGameState.Ongoing;
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth));
+                    OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth);
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<FillReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    FillData fill = gameMessage.Data;
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, fill.Color, 0.0f));
+                    OnFillGameMessageReceived(fill.X, fill.Y, fill.Color);
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<ClearDrawingBoardReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    currentDrawing.Clear();
+                    OnClearDrawingBoardGameMessageReceived?.Invoke();
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<YourTurnReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    IsPlayerAllowedToDraw = true;
+                    currentDrawing.Clear();
+                    OnYourTurnGameMessageReceived?.Invoke((string[])gameMessage.Data.Clone());
+                },
+                MessageParseFailedEvent
+            );
             AddMessageParser<CloseGuessReceiveGameMessageData>((gameMessage, json) => OnCloseGuessGameMessageReceived?.Invoke(gameMessage.Data), MessageParseFailedEvent);
             AddMessageParser<CorrectGuessReceiveGameMessageData>((gameMessage, json) => OnCorrectGuessGameMessageReceived?.Invoke(players.ContainsKey(gameMessage.Data) ? players[gameMessage.Data] : null), MessageParseFailedEvent);
             AddMessageParser<KickVoteReceiveGameMessageData>
@@ -603,19 +638,23 @@ namespace ScribblersSharp
                 },
                 MessageParseFailedEvent
             );
-            AddMessageParser<DrawingReceiveGameMessageData>((gameMessage, json) =>
-            {
-                currentDrawing.Clear();
-                JObject json_object = JObject.Parse(json);
-                if (json_object.ContainsKey("data"))
+            AddMessageParser<DrawingReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
                 {
-                    if (json_object["data"] is JArray json_draw_commands)
+                    currentDrawing.Clear();
+                    JObject json_object = JObject.Parse(json);
+                    if (json_object.ContainsKey("data"))
                     {
-                        ParseCurrentDrawingFromJSON(json_draw_commands);
+                        if (json_object["data"] is JArray json_draw_commands)
+                        {
+                            ParseCurrentDrawingFromJSON(json_draw_commands);
+                        }
                     }
-                }
-                OnDrawingGameMessageReceived?.Invoke(currentDrawing);
-            }, MessageParseFailedEvent);
+                    OnDrawingGameMessageReceived?.Invoke(currentDrawing);
+                },
+                MessageParseFailedEvent
+            );
             webSocketReceiveThread = new Thread(async () =>
             {
                 using (MemoryStream memory_stream = new MemoryStream())
