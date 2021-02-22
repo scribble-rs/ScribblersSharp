@@ -197,9 +197,9 @@ namespace ScribblersSharp
         public uint MaximalRounds { get; private set; }
 
         /// <summary>
-        /// Round end time
+        /// Current drawing time in milliseconds
         /// </summary>
-        public long RoundEndTime { get; private set; }
+        public long CurrentDrawingTime { get; private set; }
 
         /// <summary>
         /// Previous word
@@ -455,7 +455,7 @@ namespace ScribblersSharp
                 GameState = ready.GameState;
                 Round = ready.Round;
                 MaximalRounds = ready.MaximalRounds;
-                RoundEndTime = ready.RoundEndTime;
+                CurrentDrawingTime = ready.CurrentDrawingTime;
                 if (ready.WordHints == null)
                 {
                     wordHints = Array.Empty<IWordHint>();
@@ -505,7 +505,7 @@ namespace ScribblersSharp
                 IsPlayerAllowedToDraw = false;
                 GameState = EGameState.Ongoing;
                 Round = next_turn.Round;
-                RoundEndTime = next_turn.RoundEndTime;
+                CurrentDrawingTime = next_turn.RoundEndTime;
                 UpdateAllPlayers(next_turn.Players);
                 PreviousWord = next_turn.PreviousWord ?? PreviousWord;
                 currentDrawing.Clear();

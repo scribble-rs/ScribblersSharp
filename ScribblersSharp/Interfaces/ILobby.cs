@@ -145,9 +145,9 @@ namespace ScribblersSharp
         uint MaximalRounds { get; }
 
         /// <summary>
-        /// Round end time
+        /// Current drawing time in milliseconds
         /// </summary>
-        long RoundEndTime { get; }
+        long CurrentDrawingTime { get; }
 
         /// <summary>
         /// Previous word

@@ -63,10 +63,10 @@ namespace ScribblersSharp.Data
         public uint MaximalRounds { get; set; }
 
         /// <summary>
-        /// Round end time
+        /// Current drawing time
         /// </summary>
         [JsonProperty("roundEndTime")]
-        public long RoundEndTime { get; set; }
+        public long CurrentDrawingTime { get; set; }
 
         /// <summary>
         /// Word hints
