@@ -364,7 +364,7 @@ namespace ScribblersSharp
         {
             Uri http_host_uri = new Uri($"{ (IsUsingSecureProtocols ? secureHTTPProtocol : httpProtocol) }://{ Host }");
             ServerStatisticsData server_statistics = await SendHTTPGETRequestAsync<ServerStatisticsData>(new Uri(http_host_uri, "/v1/stats"));
-            return (server_statistics == null) ? default : new ServerStatistics(server_statistics.ActiveLobbyCount, server_statistics.PlayerCount, server_statistics.OccupiedPlayerSlotCount, server_statistics.ConnectedPlayerCount);
+            return (server_statistics == null) ? (IServerStatistics)null : new ServerStatistics(server_statistics.ActiveLobbyCount, server_statistics.PlayerCount, server_statistics.OccupiedPlayerSlotCount, server_statistics.ConnectedPlayerCount);
         }
 
         /// <summary>
