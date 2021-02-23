@@ -74,13 +74,6 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Gets language as string
-        /// </summary>
-        /// <param name="language">Language</param>
-        /// <returns>Language as string</returns>
-        private static string GetLanguageString(ELanguage language) => (language == ELanguage.EnglishGB) ? "english_gb" : Naming.LowerFirstCharacter(language.ToString());
-
-        /// <summary>
         /// Sends a HTTP GET request asynchronously
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
@@ -311,7 +304,7 @@ namespace ScribblersSharp
             ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<CreateLobbyResponseData>(new Uri(http_host_uri, "/v1/lobby"), new Dictionary<string, string>
             {
                 { "username", username },
-                { "language", GetLanguageString(language) },
+                { "language", Naming.GetLanguageString(language) },
                 { "public", isPublic.ToString().ToLower() },
                 { "max_players", maximalPlayerCount.ToString() },
                 { "drawing_time", drawingTime.ToString() },
@@ -443,7 +436,7 @@ namespace ScribblersSharp
             if ((language != null) && (language != ELanguage.Invalid))
             {
                 are_changes_specified = true;
-                parameters_string_builder.Append($"language={ Uri.EscapeUriString(GetLanguageString(language.Value)) }");
+                parameters_string_builder.Append($"language={ Uri.EscapeUriString(Naming.GetLanguageString(language.Value)) }");
             }
             if (isPublic != null)
             {

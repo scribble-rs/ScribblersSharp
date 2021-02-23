@@ -14,9 +14,9 @@ namespace ScribblersSharp
         Invalid,
 
         /// <summary>
-        /// English (US)
+        /// Dutch
         /// </summary>
-        English,
+        Dutch,
 
         /// <summary>
         /// English (GB)
@@ -24,14 +24,9 @@ namespace ScribblersSharp
         EnglishGB,
 
         /// <summary>
-        /// Italian
+        /// English (US)
         /// </summary>
-        Italian,
-
-        /// <summary>
-        /// German
-        /// </summary>
-        German,
+        EnglishUS,
 
         /// <summary>
         /// French
@@ -39,8 +34,13 @@ namespace ScribblersSharp
         French,
 
         /// <summary>
-        /// Dutch
+        /// German
         /// </summary>
-        Dutch
+        German,
+
+        /// <summary>
+        /// Italian
+        /// </summary>
+        Italian
     }
 }

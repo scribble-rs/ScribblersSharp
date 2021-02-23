@@ -116,5 +116,28 @@ namespace ScribblersSharp
             string type_name = typeof(T).Name;
             return ConvertToKebabCase(type_name.EndsWith(suffix) ? type_name.Substring(0, type_name.Length - suffix.Length) : type_name);
         }
+
+        /// <summary>
+        /// Gets language as string
+        /// </summary>
+        /// <param name="language">Language</param>
+        /// <returns>Language as string</returns>
+        public static string GetLanguageString(ELanguage language)
+        {
+            string ret;
+            switch (language)
+            {
+                case ELanguage.EnglishGB:
+                    ret = "english_gb";
+                    break;
+                case ELanguage.EnglishUS:
+                    ret = "english";
+                    break;
+                default:
+                    ret = LowerFirstCharacter(language.ToString());
+                    break;
+            }
+            return ret;
+        }
     }
 }

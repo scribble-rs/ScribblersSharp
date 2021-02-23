@@ -86,7 +86,7 @@ namespace ScribblersSharpTest
                 ILobby lobby;
                 if (index == 0)
                 {
-                    lobby = clients[0].CreateLobbyAsync("TestClient_0", ELanguage.English, true, Rules.maximalPlayers, Rules.maximalDrawingTime, Rules.maximalRounds, Array.Empty<string>(), Rules.minimalCustomWordsChance, false, Rules.maximalClientsPerIPLimit).GetAwaiter().GetResult();
+                    lobby = clients[0].CreateLobbyAsync("TestClient_0", ELanguage.EnglishUS, true, Rules.maximalPlayers, Rules.maximalDrawingTime, Rules.maximalRounds, Array.Empty<string>(), Rules.minimalCustomWordsChance, false, Rules.maximalClientsPerIPLimit).GetAwaiter().GetResult();
                 }
                 else
                 {
