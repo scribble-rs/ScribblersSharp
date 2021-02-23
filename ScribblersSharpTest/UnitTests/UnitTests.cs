@@ -74,7 +74,7 @@ namespace ScribblersSharpTest
             string host_and_port = $"{ host }:{ port }";
             for (int index = 0; index < clients.Length; index++)
             {
-                clients[index] = Clients.Create(host_and_port);
+                clients[index] = Clients.Create(host_and_port, string.Empty, false);
             }
             ILobby[] lobbies = new ILobby[clients.Length];
             Random random = new Random();

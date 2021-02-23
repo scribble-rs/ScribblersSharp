@@ -18,9 +18,24 @@ namespace ScribblersSharp
         string Host { get; }
 
         /// <summary>
+        /// User session ID
+        /// </summary>
+        string UserSessionID { get; }
+
+        /// <summary>
         /// Is using secure protocols
         /// </summary>
         bool IsUsingSecureProtocols { get; }
+
+        /// <summary>
+        /// HTTP host URI
+        /// </summary>
+        Uri HTTPHostURI { get; }
+
+        /// <summary>
+        /// WebSocket host URI
+        /// </summary>
+        Uri WebSocketHostURI { get; }
 
         /// <summary>
         /// Enters a lobby asynchronously
