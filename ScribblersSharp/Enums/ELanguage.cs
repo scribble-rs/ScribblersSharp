@@ -1,4 +1,7 @@
-﻿/// <summary>
+﻿using Newtonsoft.Json;
+using ScribblersSharp.JSONConverters;
+
+/// <summary>
 /// Scribble.rs ♯ namespace
 /// </summary>
 namespace ScribblersSharp
@@ -6,6 +9,7 @@ namespace ScribblersSharp
     /// <summary>
     /// Language enumerator
     /// </summary>
+    [JsonConverter(typeof(LanguageJSONConverter))]
     public enum ELanguage
     {
         /// <summary>

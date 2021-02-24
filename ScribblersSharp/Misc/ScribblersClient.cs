@@ -116,7 +116,7 @@ namespace ScribblersSharp
             WebSocketHostURI = new Uri($"{ (isUsingSecureProtocols ? secureWebSocketProtocol : webSocketProtocol) }://{ host }");
             if (!string.IsNullOrWhiteSpace(userSessionID))
             {
-                cookieContainer.Add(new Cookie(userSessionIDKey, userSessionID));
+                cookieContainer.Add(new Cookie(userSessionIDKey, userSessionID, HTTPHostURI.AbsolutePath, HTTPHostURI.Host));
             }
             httpClient = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookieContainer })
             {
@@ -419,7 +419,7 @@ namespace ScribblersSharp
         /// <returns>Lobby views task</returns>
         public async Task<IEnumerable<ILobbyView>> ListLobbiesAsync()
         {
-            ILobbyView[] ret = Array.Empty<ILobbyView>();
+            ILobbyView[] ret = null;
             LobbyViewData[] lobby_views = await SendHTTPGETRequestAsync<LobbyViewData[]>(new Uri(HTTPHostURI, "/v1/lobby"));
             if ((lobby_views != null) && Protection.IsValid(lobby_views))
             {

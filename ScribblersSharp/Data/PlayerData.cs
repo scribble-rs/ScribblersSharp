@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using ScribblersSharp.JSONConverters;
 using System;
 
 /// <summary>
@@ -53,7 +52,6 @@ namespace ScribblersSharp.Data
         /// Player state
         /// </summary>
         [JsonProperty("state")]
-        [JsonConverter(typeof(PlayerStateJSONConverter))]
         public EPlayerState State { get; set; }
 
         /// <summary>
