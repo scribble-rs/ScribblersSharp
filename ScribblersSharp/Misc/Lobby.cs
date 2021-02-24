@@ -518,7 +518,7 @@ namespace ScribblersSharp
                     OnNextTurnGameMessageReceived?.Invoke();
                 }, MessageParseFailedEvent
             );
-            AddMessageParser<NameChangeReceiveMessageData>
+            AddMessageParser<NameChangeReceiveGameMessageData>
             (
                 (gameMessage, json) =>
                 {
