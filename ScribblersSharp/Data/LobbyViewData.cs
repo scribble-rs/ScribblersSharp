@@ -38,7 +38,7 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Maximal round count
         /// </summary>
-        [JsonProperty("maxRounds")]
+        [JsonProperty("rounds")]
         public uint MaximalRoundCount { get; set; }
 
         /// <summary>
