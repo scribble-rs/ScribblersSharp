@@ -32,11 +32,6 @@ namespace ScribblersSharp
         private readonly ConcurrentQueue<string> receivedGameMessages = new ConcurrentQueue<string>();
 
         /// <summary>
-        /// Client web socket
-        /// </summary>
-        private readonly ClientWebSocket clientWebSocket = new ClientWebSocket();
-
-        /// <summary>
         /// Players
         /// </summary>
         private readonly Dictionary<string, IPlayer> players = new Dictionary<string, IPlayer>();
@@ -50,6 +45,11 @@ namespace ScribblersSharp
         /// Remove player keys
         /// </summary>
         private readonly HashSet<string> removePlayerKeys = new HashSet<string>();
+
+        /// <summary>
+        /// Client web socket
+        /// </summary>
+        private ClientWebSocket clientWebSocket = new ClientWebSocket();
 
         /// <summary>
         /// WebSocket receive thread
@@ -69,7 +69,7 @@ namespace ScribblersSharp
         /// <summary>
         /// WebSocket state
         /// </summary>
-        public WebSocketState WebSocketState => clientWebSocket.State;
+        public WebSocketState WebSocketState => (clientWebSocket == null) ? WebSocketState.Closed : clientWebSocket.State;
 
         /// <summary>
         /// Lobby ID
@@ -468,18 +468,18 @@ namespace ScribblersSharp
                         {
                             wordHints = new IWordHint[ready.WordHints.Count];
                         }
-    #if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+#if SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
                         for (int index = 0; index < wordHints.Length; index++)
-    #else
+#else
                         Parallel.For(0, wordHints.Length, (index) =>
-    #endif
+#endif
                         {
                             WordHintData word_hint_data = ready.WordHints[index];
                             wordHints[index] = new WordHint(word_hint_data.Character, word_hint_data.Underline);
                         }
-    #if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
+#if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
                         );
-    #endif
+#endif
                     }
                     UpdateAllPlayers(ready.Players);
                     MyPlayer = players.ContainsKey(ready.PlayerID) ? players[ready.PlayerID] : null;
@@ -661,7 +661,7 @@ namespace ScribblersSharp
                 {
                     using (StreamReader reader = new StreamReader(memory_stream))
                     {
-                        while (this.clientWebSocket.State == WebSocketState.Open)
+                        while ((this.clientWebSocket != null) && (this.clientWebSocket.State == WebSocketState.Open))
                         {
                             try
                             {
@@ -681,6 +681,8 @@ namespace ScribblersSharp
                             catch (Exception e)
                             {
                                 Console.Error.WriteLine(e);
+                                this.clientWebSocket.Dispose();
+                                this.clientWebSocket = null;
                             }
                         }
                     }
@@ -784,7 +786,7 @@ namespace ScribblersSharp
         private Task SendWebSocketMessageAsync<T>(T message)
         {
             Task ret = Task.CompletedTask;
-            if (clientWebSocket.State == WebSocketState.Open)
+            if ((clientWebSocket != null) && (clientWebSocket.State == WebSocketState.Open))
             {
                 ret = clientWebSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message))), WebSocketMessageType.Text, true, default);
             }
@@ -979,7 +981,7 @@ namespace ScribblersSharp
         {
             try
             {
-                if (clientWebSocket.State == WebSocketState.Open)
+                if ((clientWebSocket != null) && (clientWebSocket.State == WebSocketState.Open))
                 {
                     await clientWebSocket.CloseAsync(WebSocketCloseStatus.Empty, null, default);
                 }
@@ -990,7 +992,7 @@ namespace ScribblersSharp
             }
             webSocketReceiveThread?.Join();
             webSocketReceiveThread = null;
-            clientWebSocket.Dispose();
+            clientWebSocket?.Dispose();
         }
 
         /// <summary>
