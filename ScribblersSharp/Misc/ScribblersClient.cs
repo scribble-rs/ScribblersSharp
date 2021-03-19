@@ -221,9 +221,9 @@ namespace ScribblersSharp
             {
                 throw new ArgumentNullException(nameof(username));
             }
-            if ((username.Length < Rules.minimalUsernameLength) || (username.Length > Rules.maximalUsernameLength))
+            if (username.Length > Rules.maximalUsernameLength)
             {
-                throw new ArgumentException($"Username must be between { Rules.minimalUsernameLength } and { Rules.maximalUsernameLength } characters.");
+                throw new ArgumentException($"Username must be atleast { Rules.maximalUsernameLength } characters long.");
             }
             ILobby ret = null;
             ResponseWithUserSessionCookie<EnterLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<EnterLobbyResponseData>(new Uri(HTTPHostURI, $"/v1/lobby/player?lobby_id={ Uri.EscapeUriString(lobbyID) }"), new Dictionary<string, string>
