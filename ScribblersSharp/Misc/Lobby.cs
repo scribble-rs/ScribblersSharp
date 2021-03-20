@@ -27,6 +27,11 @@ namespace ScribblersSharp
         private readonly Dictionary<string, List<IBaseGameMessageParser>> gameMessageParsers = new Dictionary<string, List<IBaseGameMessageParser>>();
 
         /// <summary>
+        /// Send game message queue
+        /// </summary>
+        private readonly ConcurrentQueue<string> sendGameMessageQueue = new ConcurrentQueue<string>();
+
+        /// <summary>
         /// Received game messages
         /// </summary>
         private readonly ConcurrentQueue<string> receivedGameMessages = new ConcurrentQueue<string>();
@@ -50,6 +55,11 @@ namespace ScribblersSharp
         /// Client web socket
         /// </summary>
         private ClientWebSocket clientWebSocket = new ClientWebSocket();
+
+        /// <summary>
+        /// WebSocket send thread
+        /// </summary>
+        private Thread webSocketSendThread;
 
         /// <summary>
         /// WebSocket receive thread
@@ -655,6 +665,16 @@ namespace ScribblersSharp
                 },
                 MessageParseFailedEvent
             );
+            webSocketSendThread = new Thread(async () =>
+            {
+                while ((this.clientWebSocket != null) && (this.clientWebSocket.State == WebSocketState.Open))
+                {
+                    while (sendGameMessageQueue.TryDequeue(out string send_game_message))
+                    {
+                        await clientWebSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(send_game_message)), WebSocketMessageType.Text, true, default);
+                    }
+                }
+            });
             webSocketReceiveThread = new Thread(async () =>
             {
                 using (MemoryStream memory_stream = new MemoryStream())
@@ -688,6 +708,7 @@ namespace ScribblersSharp
                     }
                 }
             });
+            webSocketSendThread.Start();
             webSocketReceiveThread.Start();
         }
 
@@ -778,19 +799,16 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Send WebSocket message (asynchronous)
+        /// Send WebSocket message
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="message">Message</param>
-        /// <returns>Task</returns>
-        private Task SendWebSocketMessageAsync<T>(T message)
+        private void SendWebSocketMessage<T>(T message)
         {
-            Task ret = Task.CompletedTask;
             if ((clientWebSocket != null) && (clientWebSocket.State == WebSocketState.Open))
             {
-                ret = clientWebSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message))), WebSocketMessageType.Text, true, default);
+                sendGameMessageQueue.Enqueue(JsonConvert.SerializeObject(message));
             }
-            return ret;
         }
 
         /// <summary>
@@ -870,13 +888,12 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Sends a "start" game message asynchronously
+        /// Sends a "start" game message
         /// </summary>
-        /// <returns>Task</returns>
-        public Task SendStartGameMessageAsync() => SendWebSocketMessageAsync(new StartSendGameMessageData());
+        public void SendStartGameMessage() => SendWebSocketMessage(new StartSendGameMessageData());
 
         /// <summary>
-        /// Sends a "line" game message asynchronously
+        /// Sends a "line" game message
         /// </summary>
         /// <param name="fromX">Draw from X</param>
         /// <param name="fromY">Draw from Y</param>
@@ -884,77 +901,68 @@ namespace ScribblersSharp
         /// <param name="toY">Draw to Y</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
-        /// <returns>Task</returns>
-        public Task SendLineGameMessageAsync(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) => SendWebSocketMessageAsync(new LineSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
+        public void SendLineGameMessage(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) => SendWebSocketMessage(new LineSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
 
         /// <summary>
-        /// Sends a "fill" game message asynchronously
+        /// Sends a "fill" game message
         /// </summary>
         /// <param name="positionX"></param>
         /// <param name="positionY"></param>
         /// <param name="color"></param>
-        /// <returns>Task</returns>
-        public Task SendFillGameMessageAsync(float positionX, float positionY, Color color) => SendWebSocketMessageAsync(new FillSendGameMessageData(positionX, positionY, color));
+        public void SendFillGameMessage(float positionX, float positionY, Color color) => SendWebSocketMessage(new FillSendGameMessageData(positionX, positionY, color));
 
         /// <summary>
-        /// Sends a "clear-drawing-board" game message asynchronously
+        /// Sends a "clear-drawing-board" game message
         /// </summary>
-        /// <returns>Task</returns>
-        public Task SendClearDrawingBoardGameMessageAsync() => SendWebSocketMessageAsync(new ClearDrawingBoardSendGameMessageData());
+        public void SendClearDrawingBoardGameMessage() => SendWebSocketMessage(new ClearDrawingBoardSendGameMessageData());
 
         /// <summary>
-        /// Sends a "message" game message asynchronously
+        /// Sends a "message" game message
         /// </summary>
         /// <param name="content">Content</param>
-        /// <returns>Task</returns>
-        public Task SendMessageGameMessageAsync(string content)
+        public void SendMessageGameMessage(string content)
         {
             if (content == null)
             {
                 throw new ArgumentNullException();
             }
-            return SendWebSocketMessageAsync(new MessageSendGameMessageData(content));
+            SendWebSocketMessage(new MessageSendGameMessageData(content));
         }
 
         /// <summary>
-        /// Sends a "choose-word" game message asynchronously
+        /// Sends a "choose-word" game message
         /// </summary>
         /// <param name="index">Choose word index</param>
-        /// <returns>Task</returns>
-        public Task SendChooseWordGameMessageAsync(uint index) => SendWebSocketMessageAsync(new ChooseWordSendGameMessageData(index));
+        public void SendChooseWordGameMessage(uint index) => SendWebSocketMessage(new ChooseWordSendGameMessageData(index));
 
         /// <summary>
-        /// Sends a "name-change" game message asynchronously
+        /// Sends a "name-change" game message
         /// </summary>
         /// <param name="newUsername">New username</param>
-        /// <returns>Task</returns>
-        public Task SendNameChangeGameMessageAsync(string newUsername) => SendWebSocketMessageAsync(new NameChangeSendGameMessageData(newUsername));
+        public void SendNameChangeGameMessage(string newUsername) => SendWebSocketMessage(new NameChangeSendGameMessageData(newUsername));
 
         /// <summary>
-        /// Sends a "request-drawing" game message asynchronously
+        /// Sends a "request-drawing" game message
         /// </summary>
-        /// <returns>Task</returns>
-        public Task SendRequestDrawingGameMessageAsync() => SendWebSocketMessageAsync(new RequestDrawingSendGameMessageData());
+        public void SendRequestDrawingGameMessage() => SendWebSocketMessage(new RequestDrawingSendGameMessageData());
 
         /// <summary>
-        /// Sends a "kick-vote" game message asynchronously
+        /// Sends a "kick-vote" game message
         /// </summary>
         /// <param name="toKickPlayer">To kick player</param>
-        /// <returns>Task</returns>
-        public Task SendKickVoteGameMessageAsync(IPlayer toKickPlayer)
+        public void SendKickVoteGameMessage(IPlayer toKickPlayer)
         {
             if (toKickPlayer == null)
             {
                 throw new ArgumentNullException(nameof(toKickPlayer));
             }
-            return SendWebSocketMessageAsync(new KickVoteSendGameMessageData(toKickPlayer.ID));
+            SendWebSocketMessage(new KickVoteSendGameMessageData(toKickPlayer.ID));
         }
 
         /// <summary>
-        /// Sends a "keep-alive" game message asynchronously
+        /// Sends a "keep-alive" game message
         /// </summary>
-        /// <returns>Task</returns>
-        public Task SendKeepAliveGameMessageAsync() => SendWebSocketMessageAsync(new KeepAliveSendGameMessageData());
+        public void SendKeepAliveGameMessage() => SendWebSocketMessage(new KeepAliveSendGameMessageData());
 
         /// <summary>
         /// Processes events synchronously
@@ -977,19 +985,21 @@ namespace ScribblersSharp
         /// <summary>
         /// Closes lobby
         /// </summary>
-        public async void Close()
+        public void Close()
         {
             try
             {
                 if ((clientWebSocket != null) && (clientWebSocket.State == WebSocketState.Open))
                 {
-                    await clientWebSocket.CloseAsync(WebSocketCloseStatus.Empty, null, default);
+                    clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, default);
                 }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
             }
+            webSocketSendThread?.Join();
+            webSocketSendThread = null;
             webSocketReceiveThread?.Join();
             webSocketReceiveThread = null;
             clientWebSocket?.Dispose();
