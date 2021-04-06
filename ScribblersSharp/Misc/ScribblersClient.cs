@@ -74,7 +74,7 @@ namespace ScribblersSharp
                     {
                         if (cookie.Name == userSessionIDKey)
                         {
-                            ret = cookie.Value;
+                            ret = cookie.Value ?? string.Empty;
                             break;
                         }
                     }
