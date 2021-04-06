@@ -25,13 +25,20 @@ namespace ScribblersSharp.JSONConverters
             ELanguage ret = existingValue;
             if (reader.Value is string value)
             {
-                if (value == "english_gb")
+                switch (value)
                 {
-                    ret = ELanguage.EnglishGB;
-                }
-                else if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
-                {
-                    ret = ELanguage.Invalid;
+                    case "english_gb":
+                        ret = ELanguage.EnglishGB;
+                        break;
+                    case "english":
+                        ret = ELanguage.EnglishUS;
+                        break;
+                    default:
+                        if (!Enum.TryParse(Naming.UpperFirstCharacter(value), out ret))
+                        {
+                            ret = ELanguage.Invalid;
+                        }
+                        break;
                 }
             }
             return ret;
