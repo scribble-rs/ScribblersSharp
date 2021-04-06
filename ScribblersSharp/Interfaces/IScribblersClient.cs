@@ -28,14 +28,29 @@ namespace ScribblersSharp
         bool IsUsingSecureProtocols { get; }
 
         /// <summary>
+        /// Is allowed to use insecure connections
+        /// </summary>
+        bool IsAllowedToUseInsecureConnections { get; }
+
+        /// <summary>
         /// HTTP host URI
         /// </summary>
         Uri HTTPHostURI { get; }
 
         /// <summary>
+        /// Insecure HTTP host URI
+        /// </summary>
+        Uri InsecureHTTPHostURI { get; }
+
+        /// <summary>
         /// WebSocket host URI
         /// </summary>
         Uri WebSocketHostURI { get; }
+
+        /// <summary>
+        /// Insecure WebSocket host URI
+        /// </summary>
+        Uri InsecureWebSocketHostURI { get; }
 
         /// <summary>
         /// Enters a lobby asynchronously
@@ -71,7 +86,7 @@ namespace ScribblersSharp
         /// Lists all public lobbies asynchronously
         /// </summary>
         /// <returns>Lobby views task</returns>
-        Task<IEnumerable<ILobbyView>> ListLobbiesAsync();
+        Task<ILobbyViews> ListLobbiesAsync();
 
         /// <summary>
         /// Changes lobby rules asynchronously

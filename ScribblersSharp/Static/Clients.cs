@@ -14,7 +14,7 @@ namespace ScribblersSharp
         /// <param name="host">Scribble.rs host</param>
         /// <param name="userSessionID">User session ID</param>
         /// <returns>Scribble.rs client</returns>
-        public static IScribblersClient Create(string host, string userSessionID) => Create(host, userSessionID, true);
+        public static IScribblersClient Create(string host, string userSessionID) => Create(host, userSessionID, true, false);
 
         /// <summary>
         /// Creates a new Scribble.rs client
@@ -22,7 +22,8 @@ namespace ScribblersSharp
         /// <param name="host">Scribble.rs host</param>
         /// <param name="userSessionID">User session ID</param>
         /// <param name="isUsingSecureProtocols">Is using secure protocols</param>
+        /// <param name="isAllowedToUseInsecureConnections">Is allowed to use insecure connections</param>
         /// <returns>Scribble.rs client</returns>
-        public static IScribblersClient Create(string host, string userSessionID, bool isUsingSecureProtocols) => new ScribblersClient(host, userSessionID, isUsingSecureProtocols);
+        public static IScribblersClient Create(string host, string userSessionID, bool isUsingSecureProtocols, bool isAllowedToUseInsecureConnections) => new ScribblersClient(host, userSessionID, isUsingSecureProtocols, isAllowedToUseInsecureConnections);
     }
 }

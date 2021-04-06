@@ -48,7 +48,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public bool IsValid => 
+        public bool IsValid =>
             (ID != null) &&
             (Name != null) &&
             (State != EPlayerState.Invalid);

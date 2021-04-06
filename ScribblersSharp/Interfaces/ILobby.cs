@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.WebSockets;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -18,6 +17,11 @@ namespace ScribblersSharp
         /// WebSocket state
         /// </summary>
         WebSocketState WebSocketState { get; }
+
+        /// <summary>
+        /// Is connection secure
+        /// </summary>
+        bool IsConnectionSecure { get; }
 
         /// <summary>
         /// Lobby ID

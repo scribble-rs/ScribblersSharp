@@ -9,6 +9,11 @@ namespace ScribblersSharp
     public interface IServerStatistics
     {
         /// <summary>
+        /// Is connection secure
+        /// </summary>
+        bool IsConnectionSecure { get; }
+
+        /// <summary>
         /// Active lobby count
         /// </summary>
         uint ActiveLobbyCount { get; }

@@ -82,6 +82,11 @@ namespace ScribblersSharp
         public WebSocketState WebSocketState => (clientWebSocket == null) ? WebSocketState.Closed : clientWebSocket.State;
 
         /// <summary>
+        /// Is connection secure
+        /// </summary>
+        public bool IsConnectionSecure { get; }
+
+        /// <summary>
         /// Lobby ID
         /// </summary>
         public string LobbyID { get; private set; }
@@ -335,6 +340,7 @@ namespace ScribblersSharp
         /// Constructs a lobby
         /// </summary>
         /// <param name="clientWebSocket">Client web socket</param>
+        /// <param name="isConnectionSecure">Is connection secure</param>
         /// <param name="lobbyID">Lobby ID</param>
         /// <param name="minimalDrawingTime">Minimal drawing time in seconds</param>
         /// <param name="maximalDrawingTime">Maximal drawing time in seconds</param>
@@ -358,6 +364,7 @@ namespace ScribblersSharp
         public Lobby
         (
             ClientWebSocket clientWebSocket,
+            bool isConnectionSecure,
             string lobbyID,
             uint minimalDrawingTime,
             uint maximalDrawingTime,
@@ -437,6 +444,7 @@ namespace ScribblersSharp
                 throw new ArgumentException("Maximal brush size can't be smaller than maximal brush size.", nameof(maximalBrushSize));
             }
             this.clientWebSocket = clientWebSocket ?? throw new ArgumentNullException(nameof(clientWebSocket));
+            IsConnectionSecure = isConnectionSecure;
             LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
             MinimalDrawingTime = minimalDrawingTime;
             MaximalDrawingTime = maximalDrawingTime;
