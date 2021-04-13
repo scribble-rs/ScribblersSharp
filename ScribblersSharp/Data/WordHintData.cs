@@ -7,10 +7,10 @@ using ScribblersSharp.JSONConverters;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Word hint data class
+    /// A class that describes word hint data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class WordHintData
+    internal class WordHintData : IValidable
     {
         /// <summary>
         /// Character
@@ -26,22 +26,8 @@ namespace ScribblersSharp.Data
         public bool Underline { get; set; }
 
         /// <summary>
-        /// Default constructor
+        /// Is object in a valid state
         /// </summary>
-        public WordHintData()
-        {
-            // ...
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="character">Character</param>
-        /// <param name="underline">Underline</param>
-        public WordHintData(char character, bool underline)
-        {
-            Character = character;
-            Underline = underline;
-        }
+        public bool IsValid => true;
     }
 }

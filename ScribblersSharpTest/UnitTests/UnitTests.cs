@@ -2,7 +2,6 @@
 using ScribblersSharp;
 using ScribblersSharpTest.Data;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -74,7 +73,7 @@ namespace ScribblersSharpTest
             string host_and_port = $"{ host }:{ port }";
             for (int index = 0; index < clients.Length; index++)
             {
-                clients[index] = Clients.Create(host_and_port, string.Empty, false);
+                clients[index] = Clients.Create(host_and_port, string.Empty, false, false);
             }
             ILobby[] lobbies = new ILobby[clients.Length];
             Random random = new Random();
@@ -103,7 +102,7 @@ namespace ScribblersSharpTest
                 };
                 lobby.OnNextTurnGameMessageReceived += () =>
                 {
-                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" is in round \"{ lobby.Round }\".");
+                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" is in round \"{ lobby.CurrentRound }\".");
                     if (lobby.MyPlayer.ID == lobby.Owner.ID)
                     {
                         if (is_in_next_round)
@@ -130,7 +129,7 @@ namespace ScribblersSharpTest
                 lobby.OnSystemMessageGameMessageReceived += (content) => Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a system message: \"{ content }\"");
                 lobby.OnLineGameMessageReceived += (fromX, fromY, toX, toY, color, lineWidth) =>
                 {
-                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a line draw command: From: ({ fromX }, { fromY }); To: ({ toX }, { toY }); Color: ({ color.R }, { color.G }, { color.B }); Line width: { lineWidth }");
+                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a line draw command: From: ({ fromX }, { fromY }); To: ({ toX }, { toY }); Color: ({ color.Red }, { color.Green }, { color.Blue }); Line width: { lineWidth }");
                     if (!lobby.IsPlayerAllowedToDraw)
                     {
                         lobby.SendMessageGameMessage(selected_word);
@@ -138,7 +137,7 @@ namespace ScribblersSharpTest
                 };
                 lobby.OnFillGameMessageReceived += (positionX, positionY, color) =>
                 {
-                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a fill draw command: Position: ({ positionX }, { positionY }); Color: ({ color.R }, { color.G }, { color.B })");
+                    Console.WriteLine($"Client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" has received a fill draw command: Position: ({ positionX }, { positionY }); Color: ({ color.Red }, { color.Green }, { color.Blue })");
                     if (!lobby.IsPlayerAllowedToDraw)
                     {
                         lobby.SendMessageGameMessage(selected_word);
@@ -154,11 +153,11 @@ namespace ScribblersSharpTest
                     lobby.SendChooseWordGameMessage((uint)selected_word_index);
                     if (random.Next(2) == 0)
                     {
-                        lobby.SendFillGameMessage(lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), Color.FromArgb(random.Next(0x100), random.Next(0x100), random.Next(0x100)));
+                        lobby.SendFillGameMessage(lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), new Color((byte)random.Next(0x100), (byte)random.Next(0x100), (byte)random.Next(0x100)));
                     }
                     else
                     {
-                        lobby.SendLineGameMessage(lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), Color.FromArgb(random.Next(0x100), random.Next(0x100), random.Next(0x100)), 40.0f * (float)random.NextDouble());
+                        lobby.SendLineGameMessage(lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), lobby.DrawingBoardBaseWidth * (float)random.NextDouble(), lobby.DrawingBoardBaseHeight * (float)random.NextDouble(), new Color((byte)random.Next(0x100), (byte)random.Next(0x100), (byte)random.Next(0x100)), 1.0f + (39.0f * (float)random.NextDouble()));
                     }
                 };
                 lobby.OnCorrectGuessGameMessageReceived += (player) => Console.WriteLine($"For client \"{ lobby.MyPlayer.Name }\" with ID \"{ lobby.MyPlayer.ID }\" player \"{ player.Name }\" with ID \"{ player.ID }\" has guessed right.");

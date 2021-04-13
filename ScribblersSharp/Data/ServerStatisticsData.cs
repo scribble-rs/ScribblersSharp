@@ -9,7 +9,7 @@ namespace ScribblersSharp.Data
     /// A class that describes server statistics data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class ServerStatisticsData
+    internal class ServerStatisticsData : IValidable
     {
         /// <summary>
         /// Active lobby count
@@ -34,5 +34,10 @@ namespace ScribblersSharp.Data
         /// </summary>
         [JsonProperty("connectedPlayersCount")]
         public uint ConnectedPlayerCount { get; set; }
+
+        /// <summary>
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid => true;
     }
 }

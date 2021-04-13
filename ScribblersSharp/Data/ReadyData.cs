@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Ready data class
+    /// A class that describes ready data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class ReadyData : IValidable
@@ -49,16 +49,16 @@ namespace ScribblersSharp.Data
         public string OwnerID { get; set; }
 
         /// <summary>
-        /// Round
+        /// Current round
         /// </summary>
         [JsonProperty("round")]
-        public uint Round { get; set; }
+        public uint CurrentRound { get; set; }
 
         /// <summary>
-        /// Maximal rounds
+        /// Current maximal round count
         /// </summary>
-        [JsonProperty("maxRounds")]
-        public uint MaximalRounds { get; set; }
+        [JsonProperty("rounds")]
+        public uint CurrentMaximalRoundCount { get; set; }
 
         /// <summary>
         /// Current drawing time

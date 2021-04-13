@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Chat message data class
+    /// A class that describes chat message data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class ChatMessageData : IValidable

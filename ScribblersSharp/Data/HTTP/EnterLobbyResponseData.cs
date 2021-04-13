@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Enter lobby response data class
+    /// A class that describes response data for entering a lobby
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class EnterLobbyResponseData : IResponseData
@@ -72,10 +72,16 @@ namespace ScribblersSharp.Data
         public uint MaximalPlayerCount { get; set; }
 
         /// <summary>
+        /// Current maximal round count
+        /// </summary>
+        [JsonProperty("rounds")]
+        public uint CurrentMaximalRoundCount { get; set; }
+
+        /// <summary>
         /// Is lobby public
         /// </summary>
         [JsonProperty("public")]
-        public bool IsPublic { get; set; }
+        public bool IsLobbyPublic { get; set; }
 
         /// <summary>
         /// Is votekicking enabled
@@ -90,10 +96,10 @@ namespace ScribblersSharp.Data
         public uint CustomWordsChance { get; set; }
 
         /// <summary>
-        /// Clients per IP limit
+        /// Allowed clients per IP count
         /// </summary>
         [JsonProperty("clientsPerIpLimit")]
-        public uint ClientsPerIPLimit { get; set; }
+        public uint AllowedClientsPerIPCount { get; set; }
 
         /// <summary>
         /// Drawing board base width
@@ -129,7 +135,7 @@ namespace ScribblersSharp.Data
         /// Canvas color
         /// </summary>
         [JsonProperty("canvasColor")]
-        public byte[] CanvasColor { get; set; }
+        public ColorData CanvasColor { get; set; }
 
         /// <summary>
         /// Is object in a valid state
@@ -140,20 +146,21 @@ namespace ScribblersSharp.Data
             (MaximalDrawingTime >= MinimalDrawingTime) &&
             (MinimalRoundCount > 0U) &&
             (MaximalRoundCount >= MinimalRoundCount) &&
-            (MinimalMaximalPlayerCount >= 0U) &&
+            (MinimalMaximalPlayerCount > 0U) &&
             (MaximalMaximalPlayerCount >= MinimalMaximalPlayerCount) &&
-            (MinimalClientsPerIPLimit >= 0U) &&
+            (MinimalClientsPerIPLimit > 0U) &&
             (MaximalClientsPerIPLimit >= MinimalClientsPerIPLimit) &&
             (MaximalPlayerCount >= MinimalMaximalPlayerCount) &&
             (MaximalPlayerCount <= MaximalMaximalPlayerCount) &&
-            (ClientsPerIPLimit >= MinimalClientsPerIPLimit) &&
-            (ClientsPerIPLimit <= MaximalClientsPerIPLimit) &&
+            (CurrentMaximalRoundCount >= MinimalRoundCount) &&
+            (CurrentMaximalRoundCount <= MaximalRoundCount) &&
+            (AllowedClientsPerIPCount >= MinimalClientsPerIPLimit) &&
+            (AllowedClientsPerIPCount <= MaximalClientsPerIPLimit) &&
             (DrawingBoardBaseWidth > 0U) &&
             (DrawingBoardBaseHeight > 0U) &&
             (MinimalBrushSize > 0U) &&
             (MaximalBrushSize >= MinimalBrushSize) &&
             (SuggestedBrushSizes != null) &&
-            (CanvasColor != null) &&
-            (CanvasColor.Length == 3);
+            (CanvasColor != null);
     }
 }

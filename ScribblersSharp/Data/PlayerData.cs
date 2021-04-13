@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -7,7 +6,7 @@ using System;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Player data class
+    /// A class that describes player data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class PlayerData : IValidable
@@ -61,38 +60,5 @@ namespace ScribblersSharp.Data
             (ID != null) &&
             (Name != null) &&
             (State != EPlayerState.Invalid);
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public PlayerData()
-        {
-            // ...
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="id">Player ID</param>
-        /// <param name="name">Player name</param>
-        /// <param name="score">Player score</param>
-        /// <param name="isConnected">Is player connected</param>
-        /// <param name="lastScore">Last player score</param>
-        /// <param name="rank">Player rank</param>
-        /// <param name="state">Player state</param>
-        public PlayerData(string id, string name, uint score, bool isConnected, uint lastScore, uint rank, EPlayerState state)
-        {
-            if (state == EPlayerState.Invalid)
-            {
-                throw new ArgumentException("Player state is unknown.", nameof(state));
-            }
-            ID = id ?? throw new ArgumentNullException(nameof(id));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Score = score;
-            IsConnected = isConnected;
-            LastScore = lastScore;
-            Rank = rank;
-            State = state;
-        }
     }
 }

@@ -2,7 +2,6 @@
 using ScribblersSharp.Data;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
@@ -265,16 +264,17 @@ namespace ScribblersSharp
                         response.MinimalClientsPerIPLimit,
                         response.MaximalClientsPerIPLimit,
                         response.MaximalPlayerCount,
-                        response.IsPublic,
+                        response.CurrentMaximalRoundCount,
+                        response.IsLobbyPublic,
                         response.IsVotekickingEnabled,
                         response.CustomWordsChance,
-                        response.ClientsPerIPLimit,
+                        response.AllowedClientsPerIPCount,
                         response.DrawingBoardBaseWidth,
                         response.DrawingBoardBaseHeight,
                         response.MinimalBrushSize,
                         response.MaximalBrushSize,
                         response.SuggestedBrushSizes,
-                        Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2])
+                        (Color)response.CanvasColor
                     );
                 }
                 else
@@ -293,7 +293,7 @@ namespace ScribblersSharp
         /// <param name="isConnectionSecure">Is connection secure</param>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
-        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="isLobbyPublic">Is lobby public</param>
         /// <param name="maximalPlayerCount">Maximal player count</param>
         /// <param name="drawingTime">Drawing time</param>
         /// <param name="roundCount">Round count</param>
@@ -302,14 +302,14 @@ namespace ScribblersSharp
         /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        private async Task<ILobby> CreateLobbyWithURIsAsync(Uri httpHostURI, Uri webSocketHostURI, bool isConnectionSecure, string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, string customWordsString, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit)
+        private async Task<ILobby> CreateLobbyWithURIsAsync(Uri httpHostURI, Uri webSocketHostURI, bool isConnectionSecure, string username, ELanguage language, bool isLobbyPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, string customWordsString, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit)
         {
             ILobby ret = null;
             ResponseWithUserSessionCookie<CreateLobbyResponseData> response_with_user_session_cookie = await SendHTTPPostRequestAsync<CreateLobbyResponseData>(new Uri(httpHostURI, "/v1/lobby"), new Dictionary<string, string>
             {
                 { "username", username },
                 { "language", Naming.GetLanguageString(language) },
-                { "public", isPublic.ToString().ToLower() },
+                { "public", isLobbyPublic.ToString().ToLower() },
                 { "max_players", maximalPlayerCount.ToString() },
                 { "drawing_time", drawingTime.ToString() },
                 { "rounds", roundCount.ToString() },
@@ -340,16 +340,17 @@ namespace ScribblersSharp
                         response.MinimalClientsPerIPLimit,
                         response.MaximalClientsPerIPLimit,
                         response.MaximalPlayerCount,
-                        response.IsPublic,
+                        response.CurrentMaximalRoundCount,
+                        response.IsLobbyPublic,
                         response.IsVotekickingEnabled,
                         response.CustomWordsChance,
-                        response.ClientsPerIPLimit,
+                        response.AllowedClientsPerIPCount,
                         response.DrawingBoardBaseWidth,
                         response.DrawingBoardBaseHeight,
                         response.MinimalBrushSize,
                         response.MaximalBrushSize,
                         response.SuggestedBrushSizes,
-                        Color.FromArgb(0xFF, response.CanvasColor[0], response.CanvasColor[1], response.CanvasColor[2])
+                        (Color)response.CanvasColor
                     );
                 }
                 else
@@ -393,7 +394,7 @@ namespace ScribblersSharp
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
-        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="isLobbyPublic">Is lobby public</param>
         /// <param name="maximalPlayerCount">Maximal player count</param>
         /// <param name="drawingTime">Drawing time</param>
         /// <param name="roundCount">Round count</param>
@@ -402,7 +403,7 @@ namespace ScribblersSharp
         /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        public async Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit)
+        public async Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isLobbyPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit)
         {
             if (username == null)
             {
@@ -465,10 +466,10 @@ namespace ScribblersSharp
             }
             string custom_words_builder_string = custom_words_builder.ToString();
             custom_words_builder.Clear();
-            ILobby ret = await CreateLobbyWithURIsAsync(HTTPHostURI, WebSocketHostURI, IsUsingSecureProtocols, username, language, isPublic, maximalPlayerCount, drawingTime, roundCount, custom_words_builder_string, customWordsChance, isVotekickingEnabled, clientsPerIPLimit);
+            ILobby ret = await CreateLobbyWithURIsAsync(HTTPHostURI, WebSocketHostURI, IsUsingSecureProtocols, username, language, isLobbyPublic, maximalPlayerCount, drawingTime, roundCount, custom_words_builder_string, customWordsChance, isVotekickingEnabled, clientsPerIPLimit);
             if ((ret == null) && IsUsingSecureProtocols && IsAllowedToUseInsecureConnections)
             {
-                ret = await CreateLobbyWithURIsAsync(InsecureHTTPHostURI, InsecureWebSocketHostURI, false, username, language, isPublic, maximalPlayerCount, drawingTime, roundCount, custom_words_builder_string, customWordsChance, isVotekickingEnabled, clientsPerIPLimit);
+                ret = await CreateLobbyWithURIsAsync(InsecureHTTPHostURI, InsecureWebSocketHostURI, false, username, language, isLobbyPublic, maximalPlayerCount, drawingTime, roundCount, custom_words_builder_string, customWordsChance, isVotekickingEnabled, clientsPerIPLimit);
             }
             return ret;
         }
@@ -513,7 +514,7 @@ namespace ScribblersSharp
 #endif
                 {
                     LobbyViewData lobby_view = lobby_views_data[lobby_view_index];
-                    lobby_views[lobby_view_index] = new LobbyView(lobby_view.LobbyID, lobby_view.PlayerCount, lobby_view.MaximalPlayerCount, lobby_view.RoundCount, lobby_view.MaximalRoundCount, lobby_view.DrawingTime, lobby_view.IsUsingCustomWords, lobby_view.IsVotekickingEnabled, lobby_view.MaximalClientsPerIPCount, lobby_view.Language);
+                    lobby_views[lobby_view_index] = new LobbyView(lobby_view.LobbyID, lobby_view.PlayerCount, lobby_view.MaximalPlayerCount, lobby_view.CurrentRound, lobby_view.MaximalRoundCount, lobby_view.DrawingTime, lobby_view.IsUsingCustomWords, lobby_view.IsVotekickingEnabled, lobby_view.MaximalClientsPerIPCount, lobby_view.Language);
                 }
 #if !SCRIBBLERS_SHARP_NO_PARALLEL_LOOPS
                 );
@@ -527,7 +528,7 @@ namespace ScribblersSharp
         /// Changes lobby rules asynchronously
         /// </summary>
         /// <param name="language">Language (optional)</param>
-        /// <param name="isPublic">Is lobby public (optional)</param>
+        /// <param name="isLobbyPublic">Is lobby public (optional)</param>
         /// <param name="maximalPlayerCount">Maximal player count (optional)</param>
         /// <param name="drawingTime">Drawing time (optional)</param>
         /// <param name="roundCount">Round count (optional)</param>
@@ -536,7 +537,7 @@ namespace ScribblersSharp
         /// <param name="isVotekickingEnabled">Is votekicking enabled (optional)</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit (optional)</param>
         /// <returns>Task</returns>
-        public async Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null)
+        public async Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isLobbyPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null)
         {
             if ((language != null) && (language == ELanguage.Invalid))
             {
@@ -565,7 +566,7 @@ namespace ScribblersSharp
                 are_changes_specified = true;
                 parameters_string_builder.Append($"language={ Uri.EscapeUriString(Naming.GetLanguageString(language.Value)) }");
             }
-            if (isPublic != null)
+            if (isLobbyPublic != null)
             {
                 if (are_changes_specified)
                 {
@@ -575,7 +576,7 @@ namespace ScribblersSharp
                 {
                     are_changes_specified = true;
                 }
-                parameters_string_builder.Append($"public={ Uri.EscapeUriString(isPublic.Value.ToString().ToLower()) }");
+                parameters_string_builder.Append($"public={ Uri.EscapeUriString(isLobbyPublic.Value.ToString().ToLower()) }");
             }
             if (maximalPlayerCount != null)
             {

@@ -65,7 +65,7 @@ namespace ScribblersSharp
         /// </summary>
         /// <param name="username">Username</param>
         /// <param name="language">Language</param>
-        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="isLobbyPublic">Is lobby public</param>
         /// <param name="maximalPlayerCount">Maximal player count</param>
         /// <param name="drawingTime">Drawing time</param>
         /// <param name="roundCount">Round count</param>
@@ -74,7 +74,7 @@ namespace ScribblersSharp
         /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit</param>
         /// <returns>Lobby task</returns>
-        Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit);
+        Task<ILobby> CreateLobbyAsync(string username, ELanguage language, bool isLobbyPublic, uint maximalPlayerCount, ulong drawingTime, uint roundCount, IReadOnlyList<string> customWords, uint customWordsChance, bool isVotekickingEnabled, uint clientsPerIPLimit);
 
         /// <summary>
         /// Gets server statistics asynchronously
@@ -92,7 +92,7 @@ namespace ScribblersSharp
         /// Changes lobby rules asynchronously
         /// </summary>
         /// <param name="language">Language (optional)</param>
-        /// <param name="isPublic">Is lobby public (optional)</param>
+        /// <param name="isLobbyPublic">Is lobby public (optional)</param>
         /// <param name="maximalPlayerCount">Maximal player count (optional)</param>
         /// <param name="drawingTime">Drawing time (optional)</param>
         /// <param name="roundCount">Round count (optional)</param>
@@ -101,6 +101,6 @@ namespace ScribblersSharp
         /// <param name="isVotekickingEnabled">Is votekicking enabled (optional)</param>
         /// <param name="clientsPerIPLimit">Clients per IP limit (optional)</param>
         /// <returns>Task</returns>
-        Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null);
+        Task ChangeLobbyRulesAsync(ELanguage? language = null, bool? isLobbyPublic = null, uint? maximalPlayerCount = null, ulong? drawingTime = null, uint? roundCount = null, IReadOnlyList<string> customWords = null, uint? customWordsChance = null, bool? isVotekickingEnabled = null, uint? clientsPerIPLimit = null);
     }
 }

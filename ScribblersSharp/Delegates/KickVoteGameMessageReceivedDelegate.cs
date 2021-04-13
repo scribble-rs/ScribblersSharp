@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal when a "kick-vote" game message has been received.
+    /// Used to signal when a "kick-vote" game message has been received
     /// </summary>
     /// <param name="player">Player to be kicked</param>
     /// <param name="voteCount">Vote count</param>

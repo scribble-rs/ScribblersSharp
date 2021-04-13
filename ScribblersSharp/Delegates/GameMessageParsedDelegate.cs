@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal when a game message has been successfully parsed.
+    /// Used to signal when a game message has been successfully parsed
     /// </summary>
     /// <typeparam name="T">Game message type</typeparam>
     /// <param name="gameMessage">Game message</param>

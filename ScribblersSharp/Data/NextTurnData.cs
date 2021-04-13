@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Next turn data class
+    /// A class that describes next turn data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class NextTurnData : IValidable

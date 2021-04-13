@@ -1,12 +1,10 @@
-﻿using System.Drawing;
-
-/// <summary>
+﻿/// <summary>
 /// Scribble.rs ♯ namespace
 /// </summary>
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal when a "line" game message has been received.
+    /// Used to signal when a "line" game message has been received
     /// </summary>
     /// <param name="fromX">Line from X</param>
     /// <param name="fromY">Line from Y</param>

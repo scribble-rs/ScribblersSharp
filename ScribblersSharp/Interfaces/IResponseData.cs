@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Response data interface
+    /// An interface that represents response data
     /// </summary>
     internal interface IResponseData : IValidable
     {

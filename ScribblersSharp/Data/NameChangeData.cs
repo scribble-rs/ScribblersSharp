@@ -29,6 +29,5 @@ namespace ScribblersSharp.Data
         public bool IsValid =>
             !string.IsNullOrWhiteSpace(PlayerID) &&
             !string.IsNullOrWhiteSpace(PlayerName);
-
     }
 }

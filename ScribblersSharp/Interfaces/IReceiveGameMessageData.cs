@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Recieve game message data interface
+    /// An interface that represents recieve game message data
     /// </summary>
     public interface IReceiveGameMessageData : IBaseGameMessageData
     {

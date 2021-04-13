@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -7,13 +6,13 @@ using System.Drawing;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a sendable "fill" game message.
+    /// A class that describes a sendable "fill" game message
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class FillSendGameMessageData : GameMessageData<FillData>, ISendGameMessageData
     {
         /// <summary>
-        /// Constructor
+        /// Constructs a sendable "fill" game message
         /// </summary>
         /// <param name="x">Fill X</param>
         /// <param name="y">Fill Y</param>

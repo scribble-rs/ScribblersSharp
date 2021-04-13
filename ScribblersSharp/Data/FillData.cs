@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using ScribblersSharp.JSONConverters;
-using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -8,10 +6,10 @@ using System.Drawing;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Fill data class
+    /// A class that describes fill data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class FillData
+    internal class FillData : IValidable
     {
         /// <summary>
         /// Fill X
@@ -29,11 +27,15 @@ namespace ScribblersSharp.Data
         /// Fill color
         /// </summary>
         [JsonProperty("color")]
-        [JsonConverter(typeof(ColorJSONConverter))]
-        public Color Color { get; set; }
+        public ColorData Color { get; set; }
 
         /// <summary>
-        /// Default constructor
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid => Color != null;
+
+        /// <summary>
+        /// Constructs fill data for deserializers
         /// </summary>
         public FillData()
         {
@@ -41,7 +43,7 @@ namespace ScribblersSharp.Data
         }
 
         /// <summary>
-        /// Constructor
+        /// Constructs fill data
         /// </summary>
         /// <param name="x">X</param>
         /// <param name="y">Y</param>
@@ -50,7 +52,7 @@ namespace ScribblersSharp.Data
         {
             X = x;
             Y = y;
-            Color = color;
+            Color = (ColorData)color;
         }
     }
 }

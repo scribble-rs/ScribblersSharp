@@ -7,7 +7,7 @@ using System;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a game message.
+    /// A class that describes a game message
     /// </summary>
     /// <typeparam name="T">Game message data type</typeparam>
     [JsonObject(MemberSerialization.OptIn)]
@@ -37,8 +37,8 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Constructs game message data
         /// </summary>
-        /// <param name="type">Message type</param>
-        /// <param name="data">Message data</param>
+        /// <param name="type">Game message type</param>
+        /// <param name="data">Game message data</param>
         public GameMessageData(string type, T data) : base(type)
         {
             if (data == null)

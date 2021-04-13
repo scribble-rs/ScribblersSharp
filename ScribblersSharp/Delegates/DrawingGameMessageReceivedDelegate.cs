@@ -6,7 +6,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal when a "drawing" game message has been received.
+    /// Used to signal when a "drawing" game message has been received
     /// </summary>
     /// <param name="currentDrawing">Current drawing</param>
     public delegate void DrawingGameMessageReceivedDelegate(IReadOnlyList<IDrawCommand> currentDrawing);

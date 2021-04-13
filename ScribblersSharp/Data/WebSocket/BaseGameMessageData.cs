@@ -7,7 +7,7 @@ using System;
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a base game message.
+    /// A class that describes a base game message
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class BaseGameMessageData : IBaseGameMessageData
@@ -34,7 +34,7 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Constructs game message data
         /// </summary>
-        /// <param name="data">Message data</param>
-        public BaseGameMessageData(string type) => MessageType = type ?? throw new ArgumentNullException(nameof(type));
+        /// <param name="messageType">Game message data</param>
+        public BaseGameMessageData(string messageType) => MessageType = messageType ?? throw new ArgumentNullException(nameof(messageType));
     }
 }

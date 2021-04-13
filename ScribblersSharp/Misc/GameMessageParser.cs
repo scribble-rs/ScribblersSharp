@@ -18,20 +18,20 @@ namespace ScribblersSharp
         public string MessageType { get; }
 
         /// <summary>
-        /// On game message parsed
+        /// Gets invoked when parsing game message was successfully
         /// </summary>
         public event GameMessageParsedDelegate<T> OnGameMessageParsed;
 
         /// <summary>
-        /// On game message parse failed
+        /// Gets invoked when parsing game message has failed
         /// </summary>
         public event GameMessageParseFailedDelegate<T> OnGameMessageParseFailed;
 
         /// <summary>
-        /// Constructor
+        /// Constructs a game message parser
         /// </summary>
-        /// <param name="onGameMessageParsed">On message parsed</param>
-        /// <param name="onGameMessageParseFailed">On message parse failed</param>
+        /// <param name="onGameMessageParsed">Gets invoked when parsing game message was successfully</param>
+        /// <param name="onGameMessageParseFailed">Gets invoked when parsing game message has failed</param>
         public GameMessageParser(GameMessageParsedDelegate<T> onGameMessageParsed, GameMessageParseFailedDelegate<T> onGameMessageParseFailed)
         {
             MessageType = Naming.GetReceiveGameMessageDataNameInKebabCase<T>();
@@ -59,7 +59,15 @@ namespace ScribblersSharp
             }
             else
             {
-                OnGameMessageParsed?.Invoke(message, json);
+                try
+                {
+                    OnGameMessageParsed?.Invoke(message, json);
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine(e);
+                    OnGameMessageParseFailed?.Invoke(MessageType, message, json);
+                }
             }
         }
     }

@@ -6,10 +6,10 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a received "fill" game message
+    /// A class that describes a received "lobby-settings-changed" game message
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class FillReceiveGameMessageData : GameMessageData<FillData>, IReceiveGameMessageData
+    internal class LobbySettingsChangedReceiveGameMessageData : GameMessageData<LobbySettingsChangeData>, IReceiveGameMessageData
     {
         // ...
     }

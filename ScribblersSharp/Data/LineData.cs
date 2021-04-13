@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using ScribblersSharp.JSONConverters;
-using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -11,7 +9,7 @@ namespace ScribblersSharp.Data
     /// Line data
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    internal class LineData
+    internal class LineData : IValidable
     {
         /// <summary>
         /// Line from X
@@ -41,8 +39,7 @@ namespace ScribblersSharp.Data
         /// Line color
         /// </summary>
         [JsonProperty("color")]
-        [JsonConverter(typeof(ColorJSONConverter))]
-        public Color Color { get; set; }
+        public ColorData Color { get; set; }
 
         /// <summary>
         /// Line width
@@ -51,7 +48,14 @@ namespace ScribblersSharp.Data
         public float LineWidth { get; set; }
 
         /// <summary>
-        /// Default constructor
+        /// Is object in a valid state
+        /// </summary>
+        public bool IsValid =>
+            (Color != null) &&
+            (LineWidth > float.Epsilon);
+
+        /// <summary>
+        /// Constructs line data for deserializers
         /// </summary>
         public LineData()
         {
@@ -59,7 +63,7 @@ namespace ScribblersSharp.Data
         }
 
         /// <summary>
-        /// Constructor
+        /// Constructs line data
         /// </summary>
         /// <param name="fromX">Line from X</param>
         /// <param name="fromY">Line from Y</param>
@@ -73,7 +77,7 @@ namespace ScribblersSharp.Data
             FromY = fromY;
             ToX = toX;
             ToY = toY;
-            Color = color;
+            Color = (ColorData)color;
             LineWidth = lineWidth;
         }
     }

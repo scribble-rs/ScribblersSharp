@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Base game message data interface
+    /// An interface that represents base game message data
     /// </summary>
     public interface IBaseGameMessageData : IValidable
     {

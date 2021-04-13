@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Send game message data interface
+    /// An interface that represents send game message data
     /// </summary>
     internal interface ISendGameMessageData : IBaseGameMessageData
     {

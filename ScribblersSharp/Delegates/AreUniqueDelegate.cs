@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Are unique delegate
+    /// A delegate to check if both objects are unique
     /// </summary>
     /// <typeparam name="T">Element type</typeparam>
     /// <param name="left">Left hand element</param>

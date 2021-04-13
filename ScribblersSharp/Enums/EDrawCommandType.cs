@@ -9,11 +9,6 @@ namespace ScribblersSharp
     public enum EDrawCommandType
     {
         /// <summary>
-        /// Invalid draw command
-        /// </summary>
-        Invalid,
-
-        /// <summary>
         /// Fill draw conmmand type
         /// </summary>
         Fill,

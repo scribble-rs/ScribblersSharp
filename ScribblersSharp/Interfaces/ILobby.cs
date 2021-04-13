@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Net.WebSockets;
 
 /// <summary>
@@ -29,44 +28,9 @@ namespace ScribblersSharp
         string LobbyID { get; }
 
         /// <summary>
-        /// Minimal drawing time in seconds
+        /// Lobby settings limits
         /// </summary>
-        uint MinimalDrawingTime { get; }
-
-        /// <summary>
-        /// Maximal drawing time in seconds
-        /// </summary>
-        uint MaximalDrawingTime { get; }
-
-        /// <summary>
-        /// Minimal round count
-        /// </summary>
-        uint MinimalRoundCount { get; }
-
-        /// <summary>
-        /// Maximal round count
-        /// </summary>
-        uint MaximalRoundCount { get; }
-
-        /// <summary>
-        /// Minimal of maximal player count
-        /// </summary>
-        uint MinimalMaximalPlayerCount { get; }
-
-        /// <summary>
-        /// Maximal of maximal player count
-        /// </summary>
-        uint MaximalMaximalPlayerCount { get; }
-
-        /// <summary>
-        /// Minimal clients per IP count limit
-        /// </summary>
-        uint MinimalClientsPerIPLimit { get; }
-
-        /// <summary>
-        /// Maximal clients per IP count limit
-        /// </summary>
-        uint MaximalClientsPerIPLimit { get; }
+        ILobbyLimits Limits { get; }
 
         /// <summary>
         /// Maximal player count
@@ -76,7 +40,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Is lobby public
         /// </summary>
-        bool IsPublic { get; }
+        bool IsLobbyPublic { get; }
 
         /// <summary>
         /// Is votekicking enabled
@@ -91,7 +55,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Clients per IP limit
         /// </summary>
-        uint ClientsPerIPLimit { get; }
+        uint AllowedClientsPerIPCount { get; }
 
         /// <summary>
         /// Drawing board base width
@@ -102,16 +66,6 @@ namespace ScribblersSharp
         /// Drawing board base height
         /// </summary>
         uint DrawingBoardBaseHeight { get; }
-
-        /// <summary>
-        /// Minimal brush size
-        /// </summary>
-        uint MinimalBrushSize { get; }
-
-        /// <summary>
-        /// Maximal brush size
-        /// </summary>
-        uint MaximalBrushSize { get; }
 
         /// <summary>
         /// Suggested brush sizes
@@ -139,14 +93,14 @@ namespace ScribblersSharp
         IPlayer Owner { get; }
 
         /// <summary>
-        /// Round
+        /// Current round
         /// </summary>
-        uint Round { get; }
+        uint CurrentRound { get; }
 
         /// <summary>
-        /// Maximal rounds
+        /// Current maximal round count
         /// </summary>
-        uint MaximalRounds { get; }
+        uint CurrentMaximalRoundCount { get; }
 
         /// <summary>
         /// Current drawing time in milliseconds

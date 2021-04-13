@@ -7,12 +7,12 @@ using System;
 namespace ScribblersSharp.JSONConverters
 {
     /// <summary>
-    /// Color JSON converter class
+    /// A class used for convert language to JSON and vice versa
     /// </summary>
     internal class LanguageJSONConverter : JsonConverter<ELanguage>
     {
         /// <summary>
-        /// Read JSON
+        /// Reads JSON
         /// </summary>
         /// <param name="reader">JSON reader</param>
         /// <param name="objectType">Object type</param>
@@ -45,7 +45,7 @@ namespace ScribblersSharp.JSONConverters
         }
 
         /// <summary>
-        /// Write JSON
+        /// Writes JSON
         /// </summary>
         /// <param name="writer">JSON writer</param>
         /// <param name="value">Language value</param>

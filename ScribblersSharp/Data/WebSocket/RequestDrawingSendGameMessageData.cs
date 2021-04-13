@@ -6,13 +6,13 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a sendable "request-drawing" game message.
+    /// A class that describes a sendable "request-drawing" game message
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class RequestDrawingSendGameMessageData : BaseGameMessageData, ISendGameMessageData
     {
         /// <summary>
-        /// Default constructor
+        /// Constructs a sendable "request-drawing" game message
         /// </summary>
         public RequestDrawingSendGameMessageData() : base(Naming.GetSendGameMessageDataNameInKebabCase<RequestDrawingSendGameMessageData>())
         {

@@ -30,10 +30,10 @@ namespace ScribblersSharp.Data
         public uint MaximalPlayerCount { get; set; }
 
         /// <summary>
-        /// Round count
+        /// Current round
         /// </summary>
         [JsonProperty("round")]
-        public uint RoundCount { get; set; }
+        public uint CurrentRound { get; set; }
 
         /// <summary>
         /// Maximal round count
@@ -79,6 +79,5 @@ namespace ScribblersSharp.Data
             (MaximalPlayerCount > 1U) &&
             (MaximalRoundCount > 0U) &&
             (MaximalClientsPerIPCount > 0U);
-
     }
 }

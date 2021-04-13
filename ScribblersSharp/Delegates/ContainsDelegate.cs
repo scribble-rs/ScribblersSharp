@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Contains delegate
+    /// A delegate to check if collection contains an element
     /// </summary>
     /// <typeparam name="T">Element type</typeparam>
     /// <param name="element">Element</param>

@@ -4,7 +4,7 @@
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Used to signal when a "drawer-kicked" game message has been received.
+    /// Used to signal when a "drawer-kicked" game message has been received
     /// </summary>
     public delegate void DrawerKickedGameMessageReceivedDelegate();
 }

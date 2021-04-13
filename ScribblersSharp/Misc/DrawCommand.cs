@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -7,7 +6,7 @@ using System.Drawing;
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Draw command structure
+    /// A structure that describes a draw command
     /// </summary>
     internal readonly struct DrawCommand : IDrawCommand
     {
@@ -50,8 +49,8 @@ namespace ScribblersSharp
         /// Is object in a valid state
         /// </summary>
         public bool IsValid =>
-            (Type != EDrawCommandType.Invalid) &&
-            ((Type != EDrawCommandType.Line) || (LineWidth > float.Epsilon));
+            (Type != EDrawCommandType.Line) ||
+            (LineWidth > float.Epsilon);
 
         /// <summary>
         /// Constructor
@@ -65,10 +64,6 @@ namespace ScribblersSharp
         /// <param name="lineWidth">Line width (used for lines)</param>
         public DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
         {
-            if (type == EDrawCommandType.Invalid)
-            {
-                throw new ArgumentException("Draw command type is unknown.", nameof(type));
-            }
             if ((type == EDrawCommandType.Line) && (lineWidth <= float.Epsilon))
             {
                 throw new ArgumentException("Line width must be a positive non zero value.", nameof(lineWidth));

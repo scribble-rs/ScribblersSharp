@@ -1,12 +1,10 @@
-﻿using System.Drawing;
-
-/// <summary>
+﻿/// <summary>
 /// Scribble.rs ♯ namespace
 /// </summary>
 namespace ScribblersSharp
 {
     /// <summary>
-    /// AN interface that represents a draw command
+    /// An interface that represents a draw command
     /// </summary>
     public interface IDrawCommand : IValidable
     {

@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// A class that describes a received "kick-vote" game message.
+    /// A class that describes a received "kick-vote" game message
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class KickVoteReceiveGameMessageData : GameMessageData<KickVoteData>, IReceiveGameMessageData

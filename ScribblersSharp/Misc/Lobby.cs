@@ -4,7 +4,6 @@ using ScribblersSharp.Data;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
@@ -17,7 +16,7 @@ using System.Threading.Tasks;
 namespace ScribblersSharp
 {
     /// <summary>
-    /// Lobby class
+    /// A class that describes a lobby
     /// </summary>
     internal class Lobby : ILobby
     {
@@ -92,54 +91,19 @@ namespace ScribblersSharp
         public string LobbyID { get; private set; }
 
         /// <summary>
-        /// Minimal drawing time in seconds
+        /// Lobby limits
         /// </summary>
-        public uint MinimalDrawingTime { get; }
-
-        /// <summary>
-        /// Maximal drawing time in seconds
-        /// </summary>
-        public uint MaximalDrawingTime { get; }
-
-        /// <summary>
-        /// Minimal round count
-        /// </summary>
-        public uint MinimalRoundCount { get; }
-
-        /// <summary>
-        /// Maximal round count
-        /// </summary>
-        public uint MaximalRoundCount { get; }
-
-        /// <summary>
-        /// Minimal of maximal player count
-        /// </summary>
-        public uint MinimalMaximalPlayerCount { get; }
-
-        /// <summary>
-        /// Maximal of maximal player count
-        /// </summary>
-        public uint MaximalMaximalPlayerCount { get; }
-
-        /// <summary>
-        /// Minimal clients per IP count limit
-        /// </summary>
-        public uint MinimalClientsPerIPLimit { get; }
-
-        /// <summary>
-        /// Maximal clients per IP count limit
-        /// </summary>
-        public uint MaximalClientsPerIPLimit { get; }
+        public ILobbyLimits Limits { get; }
 
         /// <summary>
         /// Maximal player count
         /// </summary>
-        public uint MaximalPlayerCount { get; }
+        public uint MaximalPlayerCount { get; private set; }
 
         /// <summary>
         /// Is lobby public
         /// </summary>
-        public bool IsPublic { get; }
+        public bool IsLobbyPublic { get; private set; }
 
         /// <summary>
         /// Is votekicking enabled
@@ -149,12 +113,12 @@ namespace ScribblersSharp
         /// <summary>
         /// Custom words chance
         /// </summary>
-        public uint CustomWordsChance { get; }
+        public uint CustomWordsChance { get; private set; }
 
         /// <summary>
-        /// Clients per IP limit
+        /// Allowed clients per IP count
         /// </summary>
-        public uint ClientsPerIPLimit { get; }
+        public uint AllowedClientsPerIPCount { get; }
 
         /// <summary>
         /// Drawing board base width
@@ -165,16 +129,6 @@ namespace ScribblersSharp
         /// Drawing board base height
         /// </summary>
         public uint DrawingBoardBaseHeight { get; }
-
-        /// <summary>
-        /// Minimal brush size
-        /// </summary>
-        public uint MinimalBrushSize { get; }
-
-        /// <summary>
-        /// Maximal brush size
-        /// </summary>
-        public uint MaximalBrushSize { get; }
 
         /// <summary>
         /// Suggested brush sizes
@@ -202,14 +156,14 @@ namespace ScribblersSharp
         public IPlayer Owner { get; private set; }
 
         /// <summary>
-        /// Round
+        /// Current round
         /// </summary>
-        public uint Round { get; private set; }
+        public uint CurrentRound { get; private set; }
 
         /// <summary>
-        /// Maximal rounds
+        /// Current maximal round count
         /// </summary>
-        public uint MaximalRounds { get; private set; }
+        public uint CurrentMaximalRoundCount { get; private set; }
 
         /// <summary>
         /// Current drawing time in milliseconds
@@ -242,97 +196,97 @@ namespace ScribblersSharp
         public EGameState GameState { get; private set; }
 
         /// <summary>
-        /// Gets invoked when a "ready" game message has been received.
+        /// Gets invoked when a "ready" game message has been received
         /// </summary>
         public event ReadyGameMessageReceivedDelegate OnReadyGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "next-turn" game message has been received.
+        /// Gets invoked when a "next-turn" game message has been received
         /// </summary>
         public event NextTurnGameMessageReceivedDelegate OnNextTurnGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "name-change" game message has been received.
+        /// Gets invoked when a "name-change" game message has been received
         /// </summary>
         public event NameChangeGameMessageReceivedDelegate OnNameChangeGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "update-players" game message has been received.
+        /// Gets invoked when a "update-players" game message has been received
         /// </summary>
         public event UpdatePlayersGameMessageReceivedDelegate OnUpdatePlayersGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "update-wordhint" game message has been received.
+        /// Gets invoked when a "update-wordhint" game message has been received
         /// </summary>
         public event UpdateWordhintGameMessageReceivedDelegate OnUpdateWordhintGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "message" game message has been received.
+        /// Gets invoked when a "message" game message has been received
         /// </summary>
         public event MessageGameMessageReceivedDelegate OnMessageGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "non-guessing-player-message" game message has been received.
+        /// Gets invoked when a "non-guessing-player-message" game message has been received
         /// </summary>
         public event NonGuessingPlayerMessageGameMessageReceivedDelegate OnNonGuessingPlayerMessageGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "system-message" game message has been received.
+        /// Gets invoked when a "system-message" game message has been received
         /// </summary>
         public event SystemMessageGameMessageReceivedDelegate OnSystemMessageGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "line" game message has been received.
+        /// Gets invoked when a "line" game message has been received
         /// </summary>
         public event LineGameMessageReceivedDelegate OnLineGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "fill" game message has been received.
+        /// Gets invoked when a "fill" game message has been received
         /// </summary>
         public event FillGameMessageReceivedDelegate OnFillGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "clear-drawing-board" game message has been received.
+        /// Gets invoked when a "clear-drawing-board" game message has been received
         /// </summary>
         public event ClearDrawingBoardGameMessageReceivedDelegate OnClearDrawingBoardGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "your-turn" game message has been received.
+        /// Gets invoked when a "your-turn" game message has been received
         /// </summary>
         public event YourTurnGameMessageReceivedDelegate OnYourTurnGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "close-guess" game message has been received.
+        /// Gets invoked when a "close-guess" game message has been received
         /// </summary>
         public event CloseGuessGameMessageReceivedDelegate OnCloseGuessGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "correct-guess" game message has been received.
+        /// Gets invoked when a "correct-guess" game message has been received
         /// </summary>
         public event CorrectGuessGameMessageReceivedDelegate OnCorrectGuessGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "kick-vote" game message has been received.
+        /// Gets invoked when a "kick-vote" game message has been received
         /// </summary>
         public event KickVoteGameMessageReceivedDelegate OnKickVoteGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "drawer-kicked" game message has been received.
+        /// Gets invoked when a "drawer-kicked" game message has been received
         /// </summary>
         public event DrawerKickedGameMessageReceivedDelegate OnDrawerKickedGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "owner-change" game message has been received.
+        /// Gets invoked when a "owner-change" game message has been received
         /// </summary>
         public event OwnerChangeGameMessageReceivedDelegate OnOwnerChangeGameMessageReceived;
 
         /// <summary>
-        /// Gets invoked when a "drawing" game message has been received.
+        /// Gets invoked when a "drawing" game message has been received
         /// </summary>
         public event DrawingGameMessageReceivedDelegate OnDrawingGameMessageReceived;
 
         /// <summary>
-        /// This event will be invoked when a non-meaningful game message has been received.
+        /// This event will be invoked when a non-meaningful game message has been received
         /// </summary>
         public event UnknownGameMessageReceivedDelegate OnUnknownGameMessageReceived;
 
@@ -351,10 +305,11 @@ namespace ScribblersSharp
         /// <param name="minimalClientsPerIPLimit">Minimal clients per IP limit</param>
         /// <param name="maximalClientsPerIPLimit">Maximal clients per IP limit</param>
         /// <param name="maximalPlayerCount">Maximal player count</param>
-        /// <param name="isPublic">Is lobby public</param>
+        /// <param name="currentMaximalRoundCount">Current maximal round count</param>
+        /// <param name="isLobbyPublic">Is lobby public</param>
         /// <param name="isVotekickingEnabled">Is votekicking enabled</param>
         /// <param name="customWordsChance">Custom words chance</param>
-        /// <param name="clientsPerIPLimit">Clients per IP limit</param>
+        /// <param name="allowedClientsPerIPCount">Allowed clients per IP count</param>
         /// <param name="drawingBoardBaseWidth">Drawing board base width</param>
         /// <param name="drawingBoardBaseHeight">Drawing board base height</param>
         /// <param name="minimalBrushSize">Minimal brush size</param>
@@ -375,10 +330,11 @@ namespace ScribblersSharp
             uint minimalClientsPerIPLimit,
             uint maximalClientsPerIPLimit,
             uint maximalPlayerCount,
-            bool isPublic,
+            uint currentMaximalRoundCount,
+            bool isLobbyPublic,
             bool isVotekickingEnabled,
             uint customWordsChance,
-            uint clientsPerIPLimit,
+            uint allowedClientsPerIPCount,
             uint drawingBoardBaseWidth,
             uint drawingBoardBaseHeight,
             uint minimalBrushSize,
@@ -387,38 +343,19 @@ namespace ScribblersSharp
             Color canvasColor
         )
         {
-            if (minimalDrawingTime < 1U)
-            {
-                throw new ArgumentException("Minimal drawing time can't be smaller than one.", nameof(minimalDrawingTime));
-            }
-            if (maximalDrawingTime < minimalDrawingTime)
-            {
-                throw new ArgumentException("Maximal drawing time can't be smaller than minimal drawing time.", nameof(maximalDrawingTime));
-            }
-            if (minimalRoundCount < 1U)
-            {
-                throw new ArgumentException("Minimal round count can't be smaller than one.", nameof(minimalRoundCount));
-            }
-            if (maximalRoundCount < minimalRoundCount)
-            {
-                throw new ArgumentException("Maximal round count can't be smaller than minimal round count.", nameof(maximalRoundCount));
-            }
-            if (minimalMaximalPlayerCount < 1U)
-            {
-                throw new ArgumentException("Minimal of maximal player count can't be smaller than one.", nameof(minimalMaximalPlayerCount));
-            }
-            if (maximalMaximalPlayerCount < minimalMaximalPlayerCount)
-            {
-                throw new ArgumentException("Maximal of maximal player count can't be smaller than minimal of maximal player count.", nameof(maximalMaximalPlayerCount));
-            }
-            if (minimalClientsPerIPLimit < 1U)
-            {
-                throw new ArgumentException("Minimal clients per IP limit can't be smaller than one.", nameof(minimalClientsPerIPLimit));
-            }
-            if (maximalClientsPerIPLimit < minimalClientsPerIPLimit)
-            {
-                throw new ArgumentException("Maximal clients per IP limit can't be smaller than minimal clients per IP limit.", nameof(maximalClientsPerIPLimit));
-            }
+            Limits = new LobbyLimits
+            (
+                minimalDrawingTime,
+                maximalDrawingTime,
+                minimalRoundCount,
+                maximalRoundCount,
+                minimalMaximalPlayerCount,
+                maximalMaximalPlayerCount,
+                minimalClientsPerIPLimit,
+                maximalClientsPerIPLimit,
+                minimalBrushSize,
+                maximalBrushSize
+            );
             if (maximalPlayerCount < minimalMaximalPlayerCount)
             {
                 throw new ArgumentException("Maximal player count can't be smaller than minimal of maximal player count.", nameof(maximalPlayerCount));
@@ -427,42 +364,45 @@ namespace ScribblersSharp
             {
                 throw new ArgumentException("Maximal player count can't be bigger than maximal of maximal player count.", nameof(maximalPlayerCount));
             }
-            if (clientsPerIPLimit < minimalClientsPerIPLimit)
+            if (currentMaximalRoundCount < minimalRoundCount)
             {
-                throw new ArgumentException("Clients per IP limit can't be smaller than minimal clients per IP limit.", nameof(clientsPerIPLimit));
+                throw new ArgumentException("Current maximal round count can't be smaller than minimal round count.", nameof(currentMaximalRoundCount));
             }
-            if (clientsPerIPLimit > maximalClientsPerIPLimit)
+            if (currentMaximalRoundCount > maximalRoundCount)
             {
-                throw new ArgumentException("Clients per IP limit can't be bigger than maximal clients per IP limit.", nameof(clientsPerIPLimit));
+                throw new ArgumentException("Current maximal round count can't be bigger than maximal round count.", nameof(currentMaximalRoundCount));
             }
-            if (minimalBrushSize < 1U)
+            if (customWordsChance > 100U)
             {
-                throw new ArgumentException("Minimal brush size can't be smaller than one.", nameof(minimalBrushSize));
+                throw new ArgumentException("Custom words chance can't be bigger than 100.", nameof(customWordsChance));
             }
-            if (maximalBrushSize < minimalBrushSize)
+            if (allowedClientsPerIPCount < minimalClientsPerIPLimit)
             {
-                throw new ArgumentException("Maximal brush size can't be smaller than maximal brush size.", nameof(maximalBrushSize));
+                throw new ArgumentException("Clients per IP limit can't be smaller than minimal clients per IP limit.", nameof(allowedClientsPerIPCount));
+            }
+            if (allowedClientsPerIPCount > maximalClientsPerIPLimit)
+            {
+                throw new ArgumentException("Clients per IP limit can't be bigger than maximal clients per IP limit.", nameof(allowedClientsPerIPCount));
+            }
+            if (drawingBoardBaseWidth < 1U)
+            {
+                throw new ArgumentException("Drawing board base width can't be smaller than one.", nameof(drawingBoardBaseWidth));
+            }
+            if (drawingBoardBaseHeight < 1U)
+            {
+                throw new ArgumentException("Drawing board base height can't be smaller than one.", nameof(drawingBoardBaseHeight));
             }
             this.clientWebSocket = clientWebSocket ?? throw new ArgumentNullException(nameof(clientWebSocket));
             IsConnectionSecure = isConnectionSecure;
             LobbyID = lobbyID ?? throw new ArgumentNullException(nameof(lobbyID));
-            MinimalDrawingTime = minimalDrawingTime;
-            MaximalDrawingTime = maximalDrawingTime;
-            MinimalRoundCount = minimalRoundCount;
-            MaximalRoundCount = maximalRoundCount;
-            MinimalMaximalPlayerCount = minimalMaximalPlayerCount;
-            MaximalMaximalPlayerCount = maximalMaximalPlayerCount;
-            MinimalClientsPerIPLimit = minimalClientsPerIPLimit;
-            MaximalClientsPerIPLimit = maximalClientsPerIPLimit;
             MaximalPlayerCount = maximalPlayerCount;
-            IsPublic = isPublic;
+            CurrentMaximalRoundCount = currentMaximalRoundCount;
+            IsLobbyPublic = isLobbyPublic;
             IsVotekickingEnabled = isVotekickingEnabled;
             CustomWordsChance = customWordsChance;
-            ClientsPerIPLimit = clientsPerIPLimit;
+            AllowedClientsPerIPCount = allowedClientsPerIPCount;
             DrawingBoardBaseWidth = drawingBoardBaseWidth;
             DrawingBoardBaseHeight = drawingBoardBaseHeight;
-            MinimalBrushSize = minimalBrushSize;
-            MaximalBrushSize = maximalBrushSize;
             SuggestedBrushSizes = suggestedBrushSizes ?? throw new ArgumentNullException(nameof(suggestedBrushSizes));
             CanvasColor = canvasColor;
             AddMessageParser<ReadyReceiveGameMessageData>
@@ -470,11 +410,26 @@ namespace ScribblersSharp
                 (gameMessage, json) =>
                 {
                     ReadyData ready = gameMessage.Data;
+                    uint current_round = ready.CurrentRound;
+                    uint current_maximal_round_count = ready.CurrentMaximalRoundCount;
+                    long current_drawing_time = ready.CurrentDrawingTime;
+                    if (current_maximal_round_count > Limits.MaximalRoundCount)
+                    {
+                        throw new InvalidDataException($"Current maximal round count can't be bigger than maximal round count, which is { Limits.MaximalRoundCount }.");
+                    }
+                    if (current_round > current_maximal_round_count)
+                    {
+                        throw new InvalidDataException($"Current round can't be bigger than current maximal round count, which is { current_maximal_round_count }.");
+                    }
+                    if (current_drawing_time > (Limits.MaximalDrawingTime * 1000L))
+                    {
+                        throw new InvalidDataException($"Current drawing time can't be bigger than the specified maximal maximal player count, which is { Limits.MaximalMaximalPlayerCount }.");
+                    }
                     IsPlayerAllowedToDraw = ready.IsPlayerAllowedToDraw;
                     IsVotekickingEnabled = ready.IsVotekickingEnabled;
                     GameState = ready.GameState;
-                    Round = ready.Round;
-                    MaximalRounds = ready.MaximalRounds;
+                    CurrentRound = current_round;
+                    CurrentMaximalRoundCount = current_maximal_round_count;
                     CurrentDrawingTime = ready.CurrentDrawingTime;
                     if (ready.WordHints == null)
                     {
@@ -528,7 +483,7 @@ namespace ScribblersSharp
                     NextTurnData next_turn = gameMessage.Data;
                     IsPlayerAllowedToDraw = false;
                     GameState = EGameState.Ongoing;
-                    Round = next_turn.Round;
+                    CurrentRound = next_turn.Round;
                     CurrentDrawingTime = next_turn.RoundEndTime;
                     UpdateAllPlayers(next_turn.Players);
                     PreviousWord = next_turn.PreviousWord ?? PreviousWord;
@@ -593,8 +548,8 @@ namespace ScribblersSharp
                 {
                     LineData line = gameMessage.Data;
                     GameState = EGameState.Ongoing;
-                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth));
-                    OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, line.Color, line.LineWidth);
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, (Color)line.Color, line.LineWidth));
+                    OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, (Color)line.Color, line.LineWidth);
                 },
                 MessageParseFailedEvent
             );
@@ -603,8 +558,8 @@ namespace ScribblersSharp
                 (gameMessage, json) =>
                 {
                     FillData fill = gameMessage.Data;
-                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, fill.Color, 0.0f));
-                    OnFillGameMessageReceived(fill.X, fill.Y, fill.Color);
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, (Color)fill.Color, 0.0f));
+                    OnFillGameMessageReceived(fill.X, fill.Y, (Color)fill.Color);
                 },
                 MessageParseFailedEvent
             );
@@ -670,6 +625,32 @@ namespace ScribblersSharp
                         }
                     }
                     OnDrawingGameMessageReceived?.Invoke(currentDrawing);
+                },
+                MessageParseFailedEvent
+            );
+            AddMessageParser<LobbySettingsChangedReceiveGameMessageData>
+            (
+                (gameMessage, json) =>
+                {
+                    LobbySettingsChangeData lobby_settings_change = gameMessage.Data;
+                    uint maximal_player_count = lobby_settings_change.MaximalPlayerCount;
+                    uint custom_words_chance = lobby_settings_change.CustomWordsChance;
+                    if (maximal_player_count < Limits.MinimalMaximalPlayerCount)
+                    {
+                        throw new InvalidDataException($"Maximal player count can't be smaller than the specified minimal maximal player count, which is { Limits.MinimalMaximalPlayerCount }.");
+                    }
+                    if (maximal_player_count > Limits.MaximalMaximalPlayerCount)
+                    {
+                        throw new InvalidDataException($"Maximal player count can't be bigger than the specified maximal maximal player count, which is { Limits.MaximalMaximalPlayerCount }.");
+                    }
+                    if (custom_words_chance > 100U)
+                    {
+                        throw new InvalidDataException("Custom words chance can't be bigger than one hundred.");
+                    }
+                    MaximalPlayerCount = maximal_player_count;
+                    IsLobbyPublic = lobby_settings_change.IsLobbyPublic;
+                    IsVotekickingEnabled = lobby_settings_change.IsVotekickingEnabled;
+                    CustomWordsChance = custom_words_chance;
                 },
                 MessageParseFailedEvent
             );
@@ -770,16 +751,24 @@ namespace ScribblersSharp
                         {
                             case "line":
                                 LineData line_data = json_draw_command_data.ToObject<LineData>();
-                                if (line_data != null)
+                                if ((line_data != null) && line_data.IsValid)
                                 {
-                                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, line_data.Color, line_data.LineWidth));
+                                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line_data.FromX, line_data.FromY, line_data.ToX, line_data.ToY, (Color)line_data.Color, line_data.LineWidth));
+                                }
+                                else
+                                {
+                                    throw new InvalidDataException("Line draw command data is invalid.");
                                 }
                                 break;
                             case "fill":
                                 FillData fill_data = json_draw_command_data.ToObject<FillData>();
-                                if (fill_data != null)
+                                if ((fill_data != null) && fill_data.IsValid)
                                 {
-                                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, fill_data.Color, 0.0f));
+                                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill_data.X, fill_data.Y, default, default, (Color)fill_data.Color, 0.0f));
+                                }
+                                else
+                                {
+                                    throw new InvalidDataException("Fill draw command data is invalid.");
                                 }
                                 break;
                         }

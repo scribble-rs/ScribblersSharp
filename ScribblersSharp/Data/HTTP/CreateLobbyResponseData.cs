@@ -6,7 +6,7 @@
 namespace ScribblersSharp.Data
 {
     /// <summary>
-    /// Create lobby response data class
+    /// A class that describes response data for creating a lobby
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal class CreateLobbyResponseData : EnterLobbyResponseData
