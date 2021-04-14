@@ -17,7 +17,7 @@ namespace ScribblersSharp.Data
         /// <param name="x">Fill X</param>
         /// <param name="y">Fill Y</param>
         /// <param name="color">Fill color</param>
-        public FillSendGameMessageData(float x, float y, Color color) : base(Naming.GetSendGameMessageDataNameInKebabCase<FillSendGameMessageData>(), new FillData(x, y, color))
+        public FillSendGameMessageData(float x, float y, IColor color) : base(Naming.GetSendGameMessageDataNameInKebabCase<FillSendGameMessageData>(), new FillData(x, y, color))
         {
             // ...
         }

@@ -75,7 +75,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Canvas color
         /// </summary>
-        Color CanvasColor { get; }
+        IColor CanvasColor { get; }
 
         /// <summary>
         /// My player
@@ -258,7 +258,7 @@ namespace ScribblersSharp
         /// <param name="toY">Draw to Y</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
-        void SendLineGameMessage(float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
+        void SendLineGameMessage(float fromX, float fromY, float toX, float toY, IColor color, float lineWidth);
 
         /// <summary>
         /// Sends a "fill" game message
@@ -266,7 +266,7 @@ namespace ScribblersSharp
         /// <param name="positionX"></param>
         /// <param name="positionY"></param>
         /// <param name="color"></param>
-        void SendFillGameMessage(float positionX, float positionY, Color color);
+        void SendFillGameMessage(float positionX, float positionY, IColor color);
 
         /// <summary>
         /// Sends a "clear-drawing-board" game message

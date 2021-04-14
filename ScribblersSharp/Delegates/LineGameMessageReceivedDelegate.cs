@@ -12,5 +12,5 @@ namespace ScribblersSharp
     /// <param name="toY">Line to Y</param>
     /// <param name="color">Line color</param>
     /// <param name="lineWidth">Line width</param>
-    public delegate void LineGameMessageReceivedDelegate(float fromX, float fromY, float toX, float toY, Color color, float lineWidth);
+    public delegate void LineGameMessageReceivedDelegate(float fromX, float fromY, float toX, float toY, IColor color, float lineWidth);
 }

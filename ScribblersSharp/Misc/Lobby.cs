@@ -138,7 +138,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Canvas color
         /// </summary>
-        public Color CanvasColor { get; }
+        public IColor CanvasColor { get; }
 
         /// <summary>
         /// My player
@@ -340,7 +340,7 @@ namespace ScribblersSharp
             uint minimalBrushSize,
             uint maximalBrushSize,
             IEnumerable<uint> suggestedBrushSizes,
-            Color canvasColor
+            IColor canvasColor
         )
         {
             Limits = new LobbyLimits
@@ -547,9 +547,10 @@ namespace ScribblersSharp
                 (gameMessage, json) =>
                 {
                     LineData line = gameMessage.Data;
+                    IColor color = (Color)line.Color;
                     GameState = EGameState.Ongoing;
-                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, (Color)line.Color, line.LineWidth));
-                    OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, (Color)line.Color, line.LineWidth);
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Line, line.FromX, line.FromY, line.ToX, line.ToY, color, line.LineWidth));
+                    OnLineGameMessageReceived?.Invoke(line.FromX, line.FromY, line.ToX, line.ToY, color, line.LineWidth);
                 },
                 MessageParseFailedEvent
             );
@@ -558,8 +559,9 @@ namespace ScribblersSharp
                 (gameMessage, json) =>
                 {
                     FillData fill = gameMessage.Data;
-                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, (Color)fill.Color, 0.0f));
-                    OnFillGameMessageReceived(fill.X, fill.Y, (Color)fill.Color);
+                    IColor color = (Color)fill.Color;
+                    currentDrawing.Add(new DrawCommand(EDrawCommandType.Fill, fill.X, fill.Y, fill.X, fill.Y, color, 0.0f));
+                    OnFillGameMessageReceived(fill.X, fill.Y, color);
                 },
                 MessageParseFailedEvent
             );
@@ -898,7 +900,7 @@ namespace ScribblersSharp
         /// <param name="toY">Draw to Y</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width</param>
-        public void SendLineGameMessage(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) => SendWebSocketMessage(new LineSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
+        public void SendLineGameMessage(float fromX, float fromY, float toX, float toY, IColor color, float lineWidth) => SendWebSocketMessage(new LineSendGameMessageData(fromX, fromY, toX, toY, color, lineWidth));
 
         /// <summary>
         /// Sends a "fill" game message
@@ -906,7 +908,7 @@ namespace ScribblersSharp
         /// <param name="positionX"></param>
         /// <param name="positionY"></param>
         /// <param name="color"></param>
-        public void SendFillGameMessage(float positionX, float positionY, Color color) => SendWebSocketMessage(new FillSendGameMessageData(positionX, positionY, color));
+        public void SendFillGameMessage(float positionX, float positionY, IColor color) => SendWebSocketMessage(new FillSendGameMessageData(positionX, positionY, color));
 
         /// <summary>
         /// Sends a "clear-drawing-board" game message

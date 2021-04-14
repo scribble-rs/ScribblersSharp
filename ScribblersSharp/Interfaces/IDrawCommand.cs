@@ -36,7 +36,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Draw color
         /// </summary>
-        Color Color { get; }
+        IColor Color { get; }
 
         /// <summary>
         /// Line width (used for lines)

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -71,13 +72,17 @@ namespace ScribblersSharp.Data
         /// <param name="toY">Line to Y</param>
         /// <param name="color">Line color</param>
         /// <param name="lineWidth">Line width</param>
-        public LineData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
+        public LineData(float fromX, float fromY, float toX, float toY, IColor color, float lineWidth)
         {
+            if (color == null)
+            {
+                throw new ArgumentNullException(nameof(color));
+            }
             FromX = fromX;
             FromY = fromY;
             ToX = toX;
             ToY = toY;
-            Color = (ColorData)color;
+            Color = new ColorData(color.Red, color.Green, color.Blue);
             LineWidth = lineWidth;
         }
     }

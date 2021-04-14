@@ -38,7 +38,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Draw color
         /// </summary>
-        public Color Color { get; }
+        public IColor Color { get; }
 
         /// <summary>
         /// Line width (used for lines)
@@ -62,7 +62,7 @@ namespace ScribblersSharp
         /// <param name="toY">Draw to Y (used for lines)</param>
         /// <param name="color">Draw color</param>
         /// <param name="lineWidth">Line width (used for lines)</param>
-        public DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, Color color, float lineWidth)
+        public DrawCommand(EDrawCommandType type, float fromX, float fromY, float toX, float toY, IColor color, float lineWidth)
         {
             if ((type == EDrawCommandType.Line) && (lineWidth <= float.Epsilon))
             {
@@ -73,7 +73,7 @@ namespace ScribblersSharp
             FromY = fromY;
             ToX = toX;
             ToY = toY;
-            Color = color;
+            Color = color ?? throw new ArgumentNullException(nameof(color));
             LineWidth = lineWidth;
         }
     }

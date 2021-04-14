@@ -20,7 +20,7 @@ namespace ScribblersSharp.Data
         /// <param name="toY">Line to Y</param>
         /// <param name="color">Line color</param>
         /// <param name="lineWidth">Line width</param>
-        public LineSendGameMessageData(float fromX, float fromY, float toX, float toY, Color color, float lineWidth) : base(Naming.GetSendGameMessageDataNameInKebabCase<LineSendGameMessageData>(), new LineData(fromX, fromY, toX, toY, color, lineWidth))
+        public LineSendGameMessageData(float fromX, float fromY, float toX, float toY, IColor color, float lineWidth) : base(Naming.GetSendGameMessageDataNameInKebabCase<LineSendGameMessageData>(), new LineData(fromX, fromY, toX, toY, color, lineWidth))
         {
             // ...
         }

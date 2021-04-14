@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 /// <summary>
 /// Scribble.rs ♯ data namespace
@@ -48,11 +49,15 @@ namespace ScribblersSharp.Data
         /// <param name="x">X</param>
         /// <param name="y">Y</param>
         /// <param name="color">Color</param>
-        public FillData(float x, float y, Color color)
+        public FillData(float x, float y, IColor color)
         {
+            if (color == null)
+            {
+                throw new ArgumentNullException(nameof(color));
+            }
             X = x;
             Y = y;
-            Color = (ColorData)color;
+            Color = new ColorData(color.Red, color.Green, color.Blue);
         }
     }
 }
