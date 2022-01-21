@@ -81,7 +81,7 @@ namespace ScribblersSharp.Data
         /// <summary>
         /// Is object in a valid state
         /// </summary>
-        public bool IsValid =>
+        public virtual bool IsValid =>
             (PlayerID != null) &&
             !string.IsNullOrWhiteSpace(PlayerName) &&
             (GameState != EGameState.Invalid) &&

@@ -206,6 +206,11 @@ namespace ScribblersSharp
         public event NextTurnGameMessageReceivedDelegate OnNextTurnGameMessageReceived;
 
         /// <summary>
+        /// Gets invoked when a "game-over" game message has been received
+        /// </summary>
+        public event GameOverMessageReceivedDelegate OnGameOverMessageReceived;
+
+        /// <summary>
         /// Gets invoked when a "name-change" game message has been received
         /// </summary>
         public event NameChangeGameMessageReceivedDelegate OnNameChangeGameMessageReceived;
@@ -489,6 +494,21 @@ namespace ScribblersSharp
                     PreviousWord = next_turn.PreviousWord ?? PreviousWord;
                     currentDrawing.Clear();
                     OnNextTurnGameMessageReceived?.Invoke();
+                }, MessageParseFailedEvent
+            );
+            AddMessageParser<GameOverReceiveGameMessage>
+            (
+                (gameMessage, json) =>
+                {
+                    GameOverData game_over = gameMessage.Data;
+                    IsPlayerAllowedToDraw = false;
+                    GameState = EGameState.Ongoing;
+                    CurrentRound = game_over.CurrentRound;
+                    CurrentDrawingTime = game_over.CurrentDrawingTime;
+                    UpdateAllPlayers(game_over.Players);
+                    PreviousWord = game_over.PreviousWord ?? PreviousWord;
+                    currentDrawing.Clear();
+                    OnGameOverMessageReceived?.Invoke();
                 }, MessageParseFailedEvent
             );
             AddMessageParser<NameChangeReceiveGameMessageData>
@@ -982,31 +1002,47 @@ namespace ScribblersSharp
         }
 
         /// <summary>
-        /// Closes lobby
+        /// Closes lobby (asynchronously)
         /// </summary>
-        public void Close()
+        public Task CloseAsync() => CloseAsync(CancellationToken.None);
+
+        /// <summary>
+        /// Closes lobby (asynchronously)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        public async Task CloseAsync(CancellationToken cancellationToken)
         {
             try
             {
                 if ((clientWebSocket != null) && (clientWebSocket.State == WebSocketState.Open))
                 {
-                    clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, default);
+                    await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
                 }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
             }
-            webSocketSendThread?.Join();
-            webSocketSendThread = null;
-            webSocketReceiveThread?.Join();
-            webSocketReceiveThread = null;
-            clientWebSocket?.Dispose();
+            if (webSocketSendThread != null)
+            {
+                webSocketSendThread.Join();
+                webSocketSendThread = null;
+            }
+            if (webSocketReceiveThread != null)
+            {
+                webSocketReceiveThread.Join();
+                webSocketReceiveThread = null;
+            }
+            if (clientWebSocket != null)
+            {
+                clientWebSocket.Dispose();
+                clientWebSocket = null;
+            }
         }
 
         /// <summary>
         /// Disposes lobby
         /// </summary>
-        public void Dispose() => Close();
+        public void Dispose() => CloseAsync().GetAwaiter().GetResult();
     }
 }

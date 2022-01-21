@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Scribble.rs ♯ namespace
@@ -141,6 +143,11 @@ namespace ScribblersSharp
         /// Gets invoked when a "next-turn" game message has been received.
         /// </summary>
         event NextTurnGameMessageReceivedDelegate OnNextTurnGameMessageReceived;
+
+        /// <summary>
+        /// Gets invoked when a "game-over" game message has been received
+        /// </summary>
+        event GameOverMessageReceivedDelegate OnGameOverMessageReceived;
 
         /// <summary>
         /// Gets invoked when a "name-change" game message has been received.
@@ -313,8 +320,14 @@ namespace ScribblersSharp
         void ProcessEvents();
 
         /// <summary>
-        /// Closes lobby
+        /// Closes lobby (asynchronously)
         /// </summary>
-        void Close();
+        Task CloseAsync();
+
+        /// <summary>
+        /// Closes lobby (asynchronously)
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token</param>
+        Task CloseAsync(CancellationToken cancellationToken);
     }
 }
