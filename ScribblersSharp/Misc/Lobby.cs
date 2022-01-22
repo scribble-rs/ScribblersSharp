@@ -1004,7 +1004,7 @@ namespace ScribblersSharp
         /// <summary>
         /// Closes lobby (asynchronously)
         /// </summary>
-        public Task CloseAsync() => CloseAsync(CancellationToken.None);
+        public Task CloseAsync() => CloseAsync(new CancellationTokenSource(1000).Token);
 
         /// <summary>
         /// Closes lobby (asynchronously)
@@ -1043,6 +1043,6 @@ namespace ScribblersSharp
         /// <summary>
         /// Disposes lobby
         /// </summary>
-        public void Dispose() => CloseAsync().GetAwaiter().GetResult();
+        public async void Dispose() => await CloseAsync();
     }
 }
